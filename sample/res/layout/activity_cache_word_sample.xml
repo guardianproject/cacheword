@@ -30,7 +30,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="22dp"
-        android:text="Secret Information:"
+        android:text="Secret Message:"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView

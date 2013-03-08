@@ -1,5 +1,6 @@
 package sample.cacheword;
 
+import sample.cacheword.R.id;
 import info.guardianproject.cacheword.CacheWordService;
 import info.guardianproject.cacheword.CachedSecrets;
 import info.guardianproject.cacheword.Constants;
@@ -17,11 +18,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 public class CacheWordSampleActivity extends Activity {
 
@@ -30,7 +38,9 @@ public class CacheWordSampleActivity extends Activity {
 	private CacheWordService mCacheWordService;
 	private int mLastCacheWordState;
 
-	TextView mStatusLabel;
+	private TextView mStatusLabel;
+	private Button mLockButton;
+	private EditText mSecretEdit;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +48,33 @@ public class CacheWordSampleActivity extends Activity {
 		setContentView(R.layout.activity_cache_word_sample);
 
 		mStatusLabel = (TextView) findViewById(R.id.statusLabel);
+		mLockButton = (Button) findViewById(id.lockButton);
+		mSecretEdit = (EditText) findViewById(R.id.secretEdit);
+
+		mLockButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				buttonClicked();
+			}
+		});
+
+		mSecretEdit.addTextChangedListener(new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				Log.d(TAG, "edit event");
+				saveMessage(mSecretEdit.getText().toString());
+			}
+		});
+
+		mSecretEdit.setEnabled(false);
 
 		LocalBroadcastManager.getInstance(this).registerReceiver(mCacheWordReceiver, new IntentFilter(Constants.INTENT_NEW_SECRETS));
 	}
@@ -101,6 +138,9 @@ public class CacheWordSampleActivity extends Activity {
 	}
 
 	private void handleStateUninitialized() {
+		mStatusLabel.setText("Uninitialized");
+		mSecretEdit.setEnabled(false);
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Create a Passphrase");
 		final EditText input = new EditText(this);
@@ -129,16 +169,74 @@ public class CacheWordSampleActivity extends Activity {
 
 	private void handleStateLocked() {
 		Log.d(TAG, "handleStateLocked()");
+		mSecretEdit.clearComposingText();
+		mSecretEdit.setText("");
+		mSecretEdit.setEnabled(false);
+		mLockButton.setText("Unlock Secrets");
+		mStatusLabel.setText("Locked");
 
 	}
 
 	private void handleStateUnLocked() {
 		Log.d(TAG, "handleStateUnLocked()");
+		mLockButton.setText("Lock Secrets");
+		mSecretEdit.setEnabled(true);
+		mStatusLabel.setText("Unlocked");
 
+		//fetch the password from CacheWordService
+		String passphrase = mCacheWordService.getCachedSecrets().getPassphrase();
+		String message = SecretMessage.retrieveMessage(this, passphrase);
+
+		if( message == null ) {
+			mSecretEdit.setText("");
+		} else {
+			mSecretEdit.setText(message);
+		}
 	}
 
 	private void handleUnknown() {
 		mStatusLabel.setText("Error");
+	}
+
+	private void saveMessage(String contents) {
+		if( !isCacheWordConnected() || mCacheWordService.isLocked() ) return;
+
+		String passphrase = mCacheWordService.getCachedSecrets().getPassphrase();
+		SecretMessage.saveMessage(this, passphrase, contents);
+	}
+
+	private void buttonClicked() {
+		if( !isCacheWordConnected() ) return;
+
+		if( mCacheWordService.isLocked() ) {
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Enter your passphrase");
+			final EditText input = new EditText(this);
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+			builder.setView(input);
+
+			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			    @Override
+			    public void onClick(DialogInterface dialog, int which) {
+			    	String passphrase = input.getText().toString();
+
+			    	Log.d(TAG, "User entered pass:" + passphrase);
+			    	mCacheWordService.setCachedSecrets(new CachedSecrets(passphrase));
+			    }
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			    @Override
+			    public void onClick(DialogInterface dialog, int which) {
+			        dialog.cancel();
+			    }
+			});
+
+			builder.show();
+
+		} else {
+			mCacheWordService.manuallyLock();
+		}
 	}
 
 	private boolean isCacheWordConnected() {
