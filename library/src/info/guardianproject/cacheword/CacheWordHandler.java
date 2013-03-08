@@ -54,12 +54,12 @@ public class CacheWordHandler {
 	}
 
 	public void manuallyLock() {
-		if( !isCacheWordConnected() ) return;
+		if( !isPrepared() ) return;
 		mCacheWordService.manuallyLock();
 	}
 
 	public boolean isLocked() {
-		if( !isCacheWordConnected() ) return true;
+		if( !isPrepared() ) return true;
 		return mCacheWordService.isLocked();
 	}
 
@@ -71,7 +71,7 @@ public class CacheWordHandler {
 		if( !isCacheWordConnected() ) {
 			newState = Constants.STATE_UNKNOWN;
 			Log.d(TAG, "checkCacheWordState: not connected");
-		} else if( !SecretsManager.isInitialized(mContext) ) {
+		} else if( !isCacheWordInitialized() ) {
 			newState = Constants.STATE_UNINITIALIZED;
 			Log.d(TAG, "checkCacheWordState: STATE_UNINITIALIZED");
 		} else if( isCacheWordConnected() && mCacheWordService.isLocked() ) {
@@ -95,6 +95,14 @@ public class CacheWordHandler {
 
 	private boolean isCacheWordConnected() {
 		return mCacheWordService != null;
+	}
+
+	private boolean isCacheWordInitialized() {
+		return SecretsManager.isInitialized(mContext);
+	}
+
+	private boolean isPrepared() {
+		return isCacheWordConnected() && isCacheWordInitialized();
 	}
 
 
