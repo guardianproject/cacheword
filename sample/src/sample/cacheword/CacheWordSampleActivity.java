@@ -12,18 +12,31 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+/**
+ * A sample activity demonstrating how to use CacheWord
+ *
+ * There are three primary items of note:
+ *
+ *    1. The Activity implements the CacheWordSubscriber interface
+ *       and handles the state change methods.
+ *    2. a CacheWordHandler is instantiated in onCreate()
+ *    3. in onResume and onPause the corresponding methods are
+ *       called in the CacheWordHandler
+ *
+ * These three items are required to successfully use CacheWord.
+ */
 public class CacheWordSampleActivity extends Activity implements
 		CacheWordSubscriber {
 
 	private static final String TAG = "CacheWordSampleActivity";
 
+	// our handler does all the work in talking to the CacheWordService
 	private CacheWordHandler mCacheWord;
 
 	private TextView mStatusLabel;
@@ -38,6 +51,7 @@ public class CacheWordSampleActivity extends Activity implements
 		mStatusLabel = (TextView) findViewById(R.id.statusLabel);
 		mLockButton = (Button) findViewById(id.lockButton);
 		mSecretEdit = (EditText) findViewById(R.id.secretEdit);
+		mSecretEdit.setEnabled(false);
 
 		mLockButton.setOnClickListener(new OnClickListener() {
 
@@ -66,42 +80,39 @@ public class CacheWordSampleActivity extends Activity implements
 			}
 		});
 
-		mSecretEdit.setEnabled(false);
-
 		mCacheWord = new CacheWordHandler(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onStart();
+		// Notify the CacheWordHandler
 		mCacheWord.onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		// Notify the CacheWordHandler
 		mCacheWord.onPause();
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_cache_word_sample, menu);
-		return true;
-	}
-
 	private void saveMessage(String contents) {
+
+		// ensure we're unlocked
 		if (mCacheWord.isLocked())
 			return;
 
+		// fetch the passphrase from CacheWord
 		String passphrase = mCacheWord.getCachedSecrets().getPassphrase();
 		SecretMessage.saveMessage(this, passphrase, contents);
 	}
 
 	private void buttonClicked() {
 
+		// this button locks and unlocks the secret message
 		if (mCacheWord.isLocked()) {
-
+			// lets unlock!
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Enter your passphrase");
 			final EditText input = new EditText(this);
@@ -115,7 +126,7 @@ public class CacheWordSampleActivity extends Activity implements
 						public void onClick(DialogInterface dialog, int which) {
 							String passphrase = input.getText().toString();
 
-							Log.d(TAG, "User entered pass:" + passphrase);
+							// set the passphrase
 							mCacheWord.setCachedSecrets(new CachedSecrets(
 									passphrase));
 						}
@@ -131,6 +142,7 @@ public class CacheWordSampleActivity extends Activity implements
 			builder.show();
 
 		} else {
+			// lock the secret message
 			mCacheWord.manuallyLock();
 		}
 	}
@@ -138,6 +150,9 @@ public class CacheWordSampleActivity extends Activity implements
 	@Override
 	public void onCacheWordLockedEvent() {
 		Log.d(TAG, "onCacheWordLockedEvent()");
+
+		// close up everything
+
 		mSecretEdit.clearComposingText();
 		mSecretEdit.setText("");
 		mSecretEdit.setEnabled(false);
@@ -167,6 +182,7 @@ public class CacheWordSampleActivity extends Activity implements
 
 	@Override
 	public void onCacheWordUninitializedEvent() {
+		// if we're uninitialized, we want to initialize CacheWord with a new passphrase
 		mStatusLabel.setText("Uninitialized");
 		mSecretEdit.setEnabled(false);
 
@@ -182,7 +198,6 @@ public class CacheWordSampleActivity extends Activity implements
 			public void onClick(DialogInterface dialog, int which) {
 				String passphrase = input.getText().toString();
 
-				Log.d(TAG, "User entered pass:" + passphrase);
 				mCacheWord.setCachedSecrets(new CachedSecrets(passphrase));
 			}
 		});
