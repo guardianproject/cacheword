@@ -163,7 +163,7 @@ public class CacheWordService extends Service {
 		startForeground(Constants.SERVICE_FOREGROUND_ID, notification);
 	}
 
-	public class CacheWordBinder extends Binder implements ICacheWord {
+	public class CacheWordBinder extends Binder implements ICacheWordBinder {
 
 		public CacheWordService getService() {
 			Log.d("CacheWordBinder", "giving service");

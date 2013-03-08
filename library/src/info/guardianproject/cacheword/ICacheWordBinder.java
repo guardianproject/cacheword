@@ -1,6 +1,6 @@
 package info.guardianproject.cacheword;
 
-public interface ICacheWord {
+public interface ICacheWordBinder {
 
 	CacheWordService getService();
 

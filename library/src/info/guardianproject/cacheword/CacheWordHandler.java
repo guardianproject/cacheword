@@ -159,7 +159,7 @@ public class CacheWordHandler {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder binder) {
-			ICacheWord cwBinder = (ICacheWord) binder;
+			ICacheWordBinder cwBinder = (ICacheWordBinder) binder;
 			if( cwBinder != null ) {
 				Log.d(TAG, "Connected to CacheWordService");
 				mCacheWordService = cwBinder.getService();
