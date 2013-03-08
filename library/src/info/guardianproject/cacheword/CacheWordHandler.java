@@ -57,6 +57,7 @@ public class CacheWordHandler {
 	 */
 	public void onPause() {
 		if(mCacheWordService != null) {
+			mCacheWordService.detachSubscriber();
 			mContext.unbindService(mCacheWordServiceConnection);
 		}
 	}
@@ -164,6 +165,7 @@ public class CacheWordHandler {
 			if( cwBinder != null ) {
 				Log.d(TAG, "Connected to CacheWordService");
 				mCacheWordService = cwBinder.getService();
+				mCacheWordService.attachSubscriber();
 				checkCacheWordState();
 			}
 		}

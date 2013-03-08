@@ -25,6 +25,8 @@ public class CacheWordService extends Service {
 	private PendingIntent mTimeoutIntent;
 	private Intent mBroadcastIntent = new Intent(Constants.INTENT_NEW_SECRETS);
 
+	private int mSubscriberCount = 0;
+
 	@Override
 	public void onStart(Intent intent, int startId) {
 		if (intent == null)
@@ -81,6 +83,16 @@ public class CacheWordService extends Service {
 		expirePassphrase();
 	}
 
+	public synchronized void attachSubscriber() {
+		mSubscriberCount++;
+		resetTimeout();
+	}
+
+	public synchronized void detachSubscriber() {
+		mSubscriberCount--;
+		resetTimeout();
+	}
+
 	// / private methods
 	// ////////////////////////////////////
 
@@ -94,14 +106,8 @@ public class CacheWordService extends Service {
 			}
 		}
 
-		int timeoutMinutes = getTimeoutMinutes();
-		boolean timeoutEnabled = timeoutMinutes > 0;
-
-		if (timeoutEnabled) {
-			startTimeout(timeoutMinutes * 60 * 1000);
-			goForeground();
-		}
-
+		goForeground();
+		resetTimeout();
 		LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
 	}
 
@@ -116,12 +122,29 @@ public class CacheWordService extends Service {
 	}
 
 	private void expirePassphrase() {
+		Log.d(TAG, "expirePassphrase");
 		stopForeground(true);
 
 		synchronized (this) {
 			mSecrets = null;
 		}
 		LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
+	}
+
+	private void resetTimeout() {
+		int timeoutMinutes = getTimeoutMinutes();
+		boolean timeoutEnabled = timeoutMinutes > 0;
+
+		Log.d(TAG, "timeout enabled: " + timeoutEnabled);
+		Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
+
+		if (timeoutEnabled && mSubscriberCount == 0) {
+			startTimeout(timeoutMinutes * 60 * 1000);
+		} else {
+			Log.d(TAG, "disabled timeout alarm");
+			AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+			alarmManager.cancel(mTimeoutIntent);
+		}
 	}
 
 	/**
@@ -160,6 +183,7 @@ public class CacheWordService extends Service {
 				getText(R.string.cacheword_notification_cached_message),
 				pendingIntent);
 
+		stopForeground(true);
 		startForeground(Constants.SERVICE_FOREGROUND_ID, notification);
 	}
 
