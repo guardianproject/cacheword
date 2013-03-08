@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -75,10 +77,23 @@ public class CacheWordService extends Service {
 		return mSecrets == null;
 	}
 
+	public void manuallyLock() {
+		expirePassphrase();
+	}
+
 	// / private methods
 	// ////////////////////////////////////
 
 	private void handleNewSecrets() {
+
+		if( !SecretsManager.isInitialized(this) ) {
+			if( !initializeSecretStorage() ) {
+				//TODO(abel): how to handle this error condition?
+				Log.e(TAG, "failed to initialize secret storage");
+				return;
+			}
+		}
+
 		int timeoutMinutes = getTimeoutMinutes();
 		boolean timeoutEnabled = timeoutMinutes > 0;
 
@@ -90,12 +105,23 @@ public class CacheWordService extends Service {
 		LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
 	}
 
+	private boolean initializeSecretStorage() {
+		//TODO(abel): here will encrypt the secrets and store them securely, but for now we just write a dummy value
+
+		SharedPreferences prefs = getSharedPreferences(Constants.SHARED_PREFS, Constants.SHARED_PREFS_PRIVATE_MODE);
+		Editor editor = prefs.edit();
+		editor.putString(Constants.SHARED_PREFS_SECRETS, "dummy value");
+		editor.putBoolean(Constants.SHARED_PREFS_INITIALIZED, true);
+		return editor.commit();
+	}
+
 	private void expirePassphrase() {
 		stopForeground(true);
 
 		synchronized (this) {
 			mSecrets = null;
 		}
+		LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
 	}
 
 	/**

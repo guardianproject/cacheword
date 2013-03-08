@@ -10,6 +10,7 @@ public class Constants {
 	public static final String SHARED_PREFS = "info.guardianproject.cacheword.prefs";
 	public static final int  SHARED_PREFS_PRIVATE_MODE = 0;
 	public static final String SHARED_PREFS_INITIALIZED = "initialized";
+	public static final String SHARED_PREFS_SECRETS = "encrypted_secrets";
 
 	public static final int DEFAULT_TIMEOUT_MINUTES = 5;
 	public static final int SERVICE_FOREGROUND_ID = 81231;
