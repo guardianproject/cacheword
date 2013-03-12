@@ -5,6 +5,8 @@ CacheWord is an Android library project for passphrase caching and management.
 It enables app developers to securely handle and store secrets derived from the
 user's passphrase.
 
+**CacheWord is still under development. DO NOT USE**
+
 More specifically this library provides:
 
 1. Passphrase caching: store the passphrase in memory to avoid constantly prompting the user
