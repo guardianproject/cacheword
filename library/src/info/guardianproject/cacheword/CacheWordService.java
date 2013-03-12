@@ -174,9 +174,10 @@ public class CacheWordService extends Service {
 		Notification notification = new Notification(R.drawable.ic_menu_key,
 				getText(R.string.cacheword_notification_cached),
 				System.currentTimeMillis());
-		Intent notificationIntent = new Intent(Constants.INTENT_PASS_EXPIRED,
-				null, this, CacheWordService.class);
-		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+		Intent notificationIntent = new Intent();
+		notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+		notificationIntent.setClassName(getApplicationContext(), "info.guardianproject.cacheword.CacheWordService");
+		PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0,
 				notificationIntent, 0);
 		notification.setLatestEventInfo(this,
 				getText(R.string.cacheword_notification_cached_title),
