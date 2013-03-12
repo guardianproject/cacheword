@@ -2,6 +2,9 @@ package info.guardianproject.cacheword;
 
 public class Constants {
 
+	// Service class name
+	public static final String SERVICE_CLASS_NAME = "info.guardianproject.cacheword.CacheWordService";
+
 	// Intents
 	public static final String INTENT_PASS_EXPIRED = "info.guardianproject.cacheword.PASS_EXPIRED";
 	public static final String INTENT_NEW_SECRETS = "info.guardianproject.cacheword.NEW_SECRETS";

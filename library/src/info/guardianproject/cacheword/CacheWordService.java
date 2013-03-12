@@ -176,7 +176,7 @@ public class CacheWordService extends Service {
 				System.currentTimeMillis());
 		Intent notificationIntent = new Intent();
 		notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
-		notificationIntent.setClassName(getApplicationContext(), "info.guardianproject.cacheword.CacheWordService");
+		notificationIntent.setClassName(getApplicationContext(), Constants.SERVICE_CLASS_NAME);
 		PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0,
 				notificationIntent, 0);
 		notification.setLatestEventInfo(this,

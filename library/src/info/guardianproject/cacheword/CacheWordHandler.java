@@ -47,7 +47,7 @@ public class CacheWordHandler {
 	 */
 	public void onResume() {
 		Intent cacheWordIntent = new Intent();
-		cacheWordIntent.setClassName(mContext.getApplicationContext(), "info.guardianproject.cacheword.CacheWordService");
+		cacheWordIntent.setClassName(mContext.getApplicationContext(), Constants.SERVICE_CLASS_NAME);
 		mContext.startService(cacheWordIntent);
 		mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE);
 	}
