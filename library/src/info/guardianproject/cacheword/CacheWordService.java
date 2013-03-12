@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -155,10 +156,9 @@ public class CacheWordService extends Service {
 		Log.d(TAG, "starting timeout: " + interval);
 
 		if (mTimeoutIntent == null) {
-			Intent passExpiredIntent = new Intent(
-					Constants.INTENT_PASS_EXPIRED, null, this,
-					CacheWordService.class);
-			mTimeoutIntent = PendingIntent.getService(this, 0,
+			Intent passExpiredIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
+			passExpiredIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+			mTimeoutIntent = PendingIntent.getService(getApplicationContext(), 0,
 					passExpiredIntent, 0);
 		}
 
@@ -174,9 +174,9 @@ public class CacheWordService extends Service {
 		Notification notification = new Notification(R.drawable.ic_menu_key,
 				getText(R.string.cacheword_notification_cached),
 				System.currentTimeMillis());
-		Intent notificationIntent = new Intent();
+		Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
 		notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
-		notificationIntent.setClassName(getApplicationContext(), Constants.SERVICE_CLASS_NAME);
+
 		PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0,
 				notificationIntent, 0);
 		notification.setLatestEventInfo(this,
@@ -194,6 +194,17 @@ public class CacheWordService extends Service {
 			Log.d("CacheWordBinder", "giving service");
 			return CacheWordService.this;
 		}
+	}
+
+	/**
+	 * Create a blank intent to start the CachewordService
+	 * Blank means only the Component field is set
+	 * @param applicationContext
+	 */
+	static public Intent getBlankServiceIntent(Context applicationContext) {
+		Intent i = new Intent();
+		i.setClassName(applicationContext, Constants.SERVICE_CLASS_NAME);
+		return i;
 	}
 
 }
