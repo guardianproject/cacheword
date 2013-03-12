@@ -1,10 +1,10 @@
 package info.guardianproject.cacheword;
 
-public class CachedSecrets {
+public class PassphraseSecrets implements ICachedSecrets {
 
 	private final String mPassphrase;
 
-	public CachedSecrets(String passphrase) {
+	public PassphraseSecrets(String passphrase) {
 		mPassphrase = passphrase;
 	}
 

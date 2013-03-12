@@ -21,7 +21,7 @@ public class CacheWordService extends Service {
 
     private final IBinder mBinder = new CacheWordBinder();
 
-    private CachedSecrets mSecrets;
+    private ICachedSecrets mSecrets;
     private int mTimeoutMinutes = Constants.DEFAULT_TIMEOUT_MINUTES;
 
     private PendingIntent mTimeoutIntent;
@@ -58,11 +58,11 @@ public class CacheWordService extends Service {
     // API for Clients
     // //////////////////////////////////////
 
-    public synchronized CachedSecrets getCachedSecrets() {
+    public synchronized ICachedSecrets getCachedSecrets() {
         return mSecrets;
     }
 
-    public synchronized void setCachedSecrets(CachedSecrets secrets) {
+    public synchronized void setCachedSecrets(ICachedSecrets secrets) {
         Log.d(TAG, "setCachedSecrets()");
         mSecrets = secrets;
 

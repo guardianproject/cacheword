@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import info.guardianproject.cacheword.CacheWordHandler;
 import info.guardianproject.cacheword.CacheWordSubscriber;
-import info.guardianproject.cacheword.CachedSecrets;
+import info.guardianproject.cacheword.PassphraseSecrets;
 import sample.cacheword.R.id;
 
 /**
@@ -105,7 +105,7 @@ public class CacheWordSampleActivity extends Activity implements
             return;
 
         // fetch the passphrase from CacheWord
-        String passphrase = mCacheWord.getCachedSecrets().getPassphrase();
+        String passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
         SecretMessage.saveMessage(this, passphrase, contents);
     }
 
@@ -128,7 +128,7 @@ public class CacheWordSampleActivity extends Activity implements
                             String passphrase = input.getText().toString();
 
                             // set the passphrase
-                            mCacheWord.setCachedSecrets(new CachedSecrets(
+                            mCacheWord.setCachedSecrets(new PassphraseSecrets(
                                     passphrase));
                         }
                     });
@@ -170,7 +170,7 @@ public class CacheWordSampleActivity extends Activity implements
         mStatusLabel.setText("Unlocked");
 
         // fetch the password from CacheWordService
-        String passphrase = mCacheWord.getCachedSecrets().getPassphrase();
+        String passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
         String message = SecretMessage.retrieveMessage(this, passphrase);
 
         if (message == null) {
@@ -200,7 +200,7 @@ public class CacheWordSampleActivity extends Activity implements
             public void onClick(DialogInterface dialog, int which) {
                 String passphrase = input.getText().toString();
 
-                mCacheWord.setCachedSecrets(new CachedSecrets(passphrase));
+                mCacheWord.setCachedSecrets(new PassphraseSecrets(passphrase));
             }
         });
         builder.setNegativeButton("Cancel",

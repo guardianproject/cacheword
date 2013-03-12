@@ -70,7 +70,7 @@ public class CacheWordHandler {
      *
      * @return the secrets or null on failure
      */
-    public CachedSecrets getCachedSecrets() {
+    public ICachedSecrets getCachedSecrets() {
         if (!isCacheWordConnected())
             return null;
 
@@ -82,7 +82,7 @@ public class CacheWordHandler {
      *
      * @param secrets
      */
-    public void setCachedSecrets(CachedSecrets secrets) {
+    public void setCachedSecrets(ICachedSecrets secrets) {
         if (!isCacheWordConnected())
             return;
 
