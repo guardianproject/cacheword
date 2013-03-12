@@ -16,7 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import info.guardianproject.cacheword.CacheWordHandler;
-import info.guardianproject.cacheword.CacheWordSubscriber;
+import info.guardianproject.cacheword.ICacheWordSubscriber;
 import info.guardianproject.cacheword.PassphraseSecrets;
 import sample.cacheword.R.id;
 
@@ -33,7 +33,7 @@ import sample.cacheword.R.id;
  * These three items are required to successfully use CacheWord.
  */
 public class CacheWordSampleActivity extends Activity implements
-        CacheWordSubscriber {
+        ICacheWordSubscriber {
 
     private static final String TAG = "CacheWordSampleActivity";
 

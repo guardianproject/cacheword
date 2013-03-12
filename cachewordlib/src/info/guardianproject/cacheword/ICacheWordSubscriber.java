@@ -3,7 +3,7 @@ package info.guardianproject.cacheword;
 /**
  * A simple interface for notifying about state changes.
  */
-public interface CacheWordSubscriber {
+public interface ICacheWordSubscriber {
 
 	/**
 	 * Called when the cached secrets are wiped from memory.

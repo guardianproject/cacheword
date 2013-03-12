@@ -14,7 +14,7 @@ import android.util.Log;
 /**
  * This class is designed to accompany any Activity that is interested in the
  * secrets cached by CacheWord. <i>The context provided in the constructor must
- * implement the CacheWordSubscriber interface.</i> This is so the Activity can be
+ * implement the ICacheWordSubscriber interface.</i> This is so the Activity can be
  * alerted to the state change events.
  */
 public class CacheWordHandler {
@@ -22,10 +22,10 @@ public class CacheWordHandler {
 
     private Context mContext;
     private CacheWordService mCacheWordService;
-    private CacheWordSubscriber mSubscriber;
+    private ICacheWordSubscriber mSubscriber;
 
     /**
-     * @param context must implement the CacheWordSubscriber interface
+     * @param context must implement the ICacheWordSubscriber interface
      */
     public CacheWordHandler(Context context) {
         mContext = context;
@@ -33,10 +33,10 @@ public class CacheWordHandler {
         try {
             // shame we have to do this at runtime.
             // must ponder a way to enforce this relationship at compile time
-            mSubscriber = (CacheWordSubscriber) context;
+            mSubscriber = (ICacheWordSubscriber) context;
         } catch (ClassCastException e) {
             throw new IllegalArgumentException(
-                    "CacheWordHandler passed invalid Activity. Expects class that implements CacheWordSubscriber");
+                    "CacheWordHandler passed invalid Activity. Expects class that implements ICacheWordSubscriber");
         }
 
         LocalBroadcastManager.getInstance(mContext).registerReceiver(
