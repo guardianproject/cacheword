@@ -21,8 +21,8 @@ import info.guardianproject.cacheword.PassphraseSecrets;
 import sample.cacheword.R.id;
 
 /**
- * A sample activity demonstrating how to use CacheWord There are three primary
- * items of note:
+ * A sample activity demonstrating how to use CacheWord. <br>
+ * There are three primary items of note:
  * <ol>
  * <li>1. The Activity implements the CacheWordSubscriber interface and handles
  * the state change methods.</li>
