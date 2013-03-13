@@ -2,8 +2,7 @@ CacheWord
 =========
 
 CacheWord is an Android library project for passphrase caching and management.
-It enables app developers to securely handle and store secrets derived from the
-user's passphrase.
+It helps app developers securely generate, store, and access secrets derived from a user's passphrase.
 
 **CacheWord is still under development. DO NOT USE**
 
@@ -49,7 +48,9 @@ TODO: non-eclipse instructions
 
 Add the following to between the `<application>....</application>` tags
 
-   <service android:name="info.guardianproject.cacheword.CacheWordService" android:enabled="true" android:exported="false" />
+```xml
+<service android:name="info.guardianproject.cacheword.CacheWordService" android:enabled="true" android:exported="false" />
+```
 
 ## Integration
 
@@ -74,7 +75,7 @@ For each of these interested components you *must* implement three things
 
 The `ICacheWordSubscriber` interface consists of three state change methods.
 
-1. `onCacheWordUninitializedEvent`
+1. **onCacheWordUninitializedEvent**
 
     This event is called when CacheWord determines there is no saved state.
     Usually this occurs the first time the user runs your app. At this point there
@@ -86,7 +87,7 @@ The `ICacheWordSubscriber` interface consists of three state change methods.
 
     This state could also be entered after the Application's data is cleared/reset.
 
-2. `onCacheWordLockedEvent`
+2. **onCacheWordLockedEvent**
 
     This state signifies the secrets are unavailable or have become unavailable.
     It occurs when the secrets expiration timeout is reached, or the user
@@ -98,7 +99,7 @@ The `ICacheWordSubscriber` interface consists of three state change methods.
     Prompt the user for the passphrase and pass it to CacheWord with
     `setCachedSecrets()`
 
-3. `onCacheWordUnLockedEvent`
+3. **onCacheWordUnLockedEvent**
 
     This state is entered when CacheWord has received *valid* credentials via the
     `setCachedSecrets()` method.
@@ -109,8 +110,8 @@ The `ICacheWordSubscriber` interface consists of three state change methods.
 Example:
 
 ```java
-    public class MyActivity extends Activity implements ICacheWordSubscriber
-    {
+public class MyActivity extends Activity implements ICacheWordSubscriber
+{
 
     ...
 
@@ -123,7 +124,7 @@ Example:
     @Override
     public void onCacheWordLockedEvent() {
         clearUi();
-        startPasspharsePromptActivity();
+        startPassphrasePromptActivity();
     }
 
     @Override
@@ -133,7 +134,7 @@ Example:
     }
 
     ...
-    }
+}
 
 ```
 
@@ -141,8 +142,8 @@ Example:
 
 ```java
 
-    class YourClass implements ICacheWordSubscriber
-    {
+class YourClass implements ICacheWordSubscriber
+{
         ...
         private CacheWordHandler mCacheWord;
         ...
@@ -153,15 +154,14 @@ Example:
             ...
         }
         ...
-    }
+}
 ```
 
 ### 3. Propagate Lifecycle changes
 
 ```java
-
-    class YourClass implements ICacheWordSubscriber
-    {
+class YourClass implements ICacheWordSubscriber
+{
         ...
         private CacheWordHandler mCacheWord;
         ...
@@ -177,7 +177,7 @@ Example:
             mCacheWord.onPause();
         }
         ...
-    }
+}
 ```
 
 # Security Design Notes
