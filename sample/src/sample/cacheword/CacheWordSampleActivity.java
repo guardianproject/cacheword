@@ -105,7 +105,7 @@ public class CacheWordSampleActivity extends Activity implements
             return;
 
         // fetch the passphrase from CacheWord
-        String passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
+        char[] passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
         SecretMessage.saveMessage(this, passphrase, contents);
     }
 
@@ -129,7 +129,7 @@ public class CacheWordSampleActivity extends Activity implements
 
                             // set the passphrase
                             mCacheWord.setCachedSecrets(new PassphraseSecrets(
-                                    passphrase));
+                                    passphrase.toCharArray()));
                         }
                     });
             builder.setNegativeButton("Cancel",
@@ -141,7 +141,6 @@ public class CacheWordSampleActivity extends Activity implements
                     });
 
             builder.show();
-
         } else {
             // lock the secret message
             mCacheWord.manuallyLock();
@@ -170,7 +169,7 @@ public class CacheWordSampleActivity extends Activity implements
         mStatusLabel.setText("Unlocked");
 
         // fetch the password from CacheWordService
-        String passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
+        char[] passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
         String message = SecretMessage.retrieveMessage(this, passphrase);
 
         if (message == null) {
@@ -200,7 +199,7 @@ public class CacheWordSampleActivity extends Activity implements
             public void onClick(DialogInterface dialog, int which) {
                 String passphrase = input.getText().toString();
 
-                mCacheWord.setCachedSecrets(new PassphraseSecrets(passphrase));
+                mCacheWord.setCachedSecrets(new PassphraseSecrets(passphrase.toCharArray()));
             }
         });
         builder.setNegativeButton("Cancel",

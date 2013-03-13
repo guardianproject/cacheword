@@ -2,13 +2,13 @@ package info.guardianproject.cacheword;
 
 public class PassphraseSecrets implements ICachedSecrets {
 
-	private final String mPassphrase;
+	private final char[] mPassphrase;
 
-	public PassphraseSecrets(String passphrase) {
+	public PassphraseSecrets(char[] passphrase) {
 		mPassphrase = passphrase;
 	}
 
-	public String getPassphrase() {
+	public char[] getPassphrase() {
 		return mPassphrase;
 	}
 
