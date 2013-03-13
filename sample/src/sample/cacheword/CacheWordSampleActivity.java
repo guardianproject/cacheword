@@ -127,7 +127,7 @@ public class CacheWordSampleActivity extends Activity implements
                         public void onClick(DialogInterface dialog, int which) {
                             String passphrase = input.getText().toString();
 
-                            // set the passphrase
+                            // assign the passphrase to CacheWord
                             mCacheWord.setCachedSecrets(new PassphraseSecrets(
                                     passphrase.toCharArray()));
                         }
