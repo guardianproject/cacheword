@@ -105,7 +105,7 @@ public class CacheWordService extends Service {
 
         if (!SecretsManager.isInitialized(this)) {
             if (!initializeSecretStorage()) {
-                // TODO(abel): how to handle this error condition?
+                // TODO(abel): handle initialization failure
                 Log.e(TAG, "failed to initialize secret storage");
                 return;
             }
@@ -117,8 +117,7 @@ public class CacheWordService extends Service {
     }
 
     private boolean initializeSecretStorage() {
-        // TODO(abel): here will encrypt the secrets and store them securely,
-        // but for now we just write a dummy value
+        // TODO(abel): init secrets properly
 
         SharedPreferences prefs = getSharedPreferences(Constants.SHARED_PREFS,
                 Constants.SHARED_PREFS_PRIVATE_MODE);
