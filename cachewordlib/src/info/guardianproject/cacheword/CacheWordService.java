@@ -74,7 +74,10 @@ public class CacheWordService extends Service {
     }
 
     public synchronized void setTimeoutMinutes(int minutes) {
-        mTimeoutMinutes = minutes;
+        if(minutes != mTimeoutMinutes) {
+            mTimeoutMinutes = minutes;
+            resetTimeout();
+        }
     }
 
     public synchronized boolean isLocked() {
