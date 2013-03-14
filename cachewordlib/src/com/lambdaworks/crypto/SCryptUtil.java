@@ -2,6 +2,8 @@
 
 package com.lambdaworks.crypto;
 
+import info.guardianproject.cacheword.Wiper;
+
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -39,12 +41,12 @@ public class SCryptUtil {
      *
      * @return The hashed password.
      */
-    public static String scrypt(String passwd, int N, int r, int p) {
+    public static String scrypt(char[] passwd, int N, int r, int p) {
         try {
             byte[] salt = new byte[16];
             SecureRandom.getInstance("SHA1PRNG").nextBytes(salt);
 
-            byte[] derived = SCrypt.scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
+            byte[] derived = SCrypt.scrypt(Wiper.utf8charsToBytes(passwd), salt, N, r, p, 32);
 
             String params = Long.toString(log2(N) << 16L | r << 8 | p, 16);
 
@@ -54,8 +56,6 @@ public class SCryptUtil {
             sb.append(encode(derived));
 
             return sb.toString();
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("JVM doesn't support UTF-8?");
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("JVM doesn't support SHA1PRNG or HMAC_SHA256?");
         }
@@ -69,7 +69,7 @@ public class SCryptUtil {
      *
      * @return true if passwd matches hashed value.
      */
-    public static boolean check(String passwd, String hashed) {
+    public static boolean check(char[] passwd, String hashed) {
         try {
             String[] parts = hashed.split("\\$");
 
@@ -85,7 +85,7 @@ public class SCryptUtil {
             int r = (int) params >> 8 & 0xff;
             int p = (int) params      & 0xff;
 
-            byte[] derived1 = SCrypt.scrypt(passwd.getBytes("UTF-8"), salt, N, r, p, 32);
+            byte[] derived1 = SCrypt.scrypt(Wiper.utf8charsToBytes(passwd), salt, N, r, p, 32);
 
             if (derived0.length != derived1.length) return false;
 
@@ -94,8 +94,6 @@ public class SCryptUtil {
                 result |= derived0[i] ^ derived1[i];
             }
             return result == 0;
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("JVM doesn't support UTF-8?");
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("JVM doesn't support SHA1PRNG or HMAC_SHA256?");
         }
