@@ -15,6 +15,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.security.GeneralSecurityException;
+
+import javax.crypto.SecretKey;
+
 import info.guardianproject.cacheword.CacheWordHandler;
 import info.guardianproject.cacheword.ICacheWordSubscriber;
 import info.guardianproject.cacheword.PassphraseSecrets;
@@ -104,9 +108,9 @@ public class CacheWordSampleActivity extends Activity implements
         if (mCacheWord.isLocked())
             return;
 
-        // fetch the passphrase from CacheWord
-        char[] passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
-        SecretMessage.saveMessage(this, passphrase, contents);
+        // fetch the encryption key from CacheWord
+        SecretKey key = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getSecretKey();
+        SecretMessage.saveMessage(this, key, contents);
     }
 
     private void buttonClicked() {
@@ -127,9 +131,21 @@ public class CacheWordSampleActivity extends Activity implements
                         public void onClick(DialogInterface dialog, int which) {
                             String passphrase = input.getText().toString();
 
-                            // assign the passphrase to CacheWord
-                            mCacheWord.setCachedSecrets(new PassphraseSecrets(
-                                    passphrase.toCharArray()));
+                            // verify the passphrase with CacheWord
+
+                            char[] passwd = passphrase.toCharArray();
+                            PassphraseSecrets secrets;
+                            try {
+                                secrets = PassphraseSecrets.fetchSecrets(CacheWordSampleActivity.this, passwd);
+                                mCacheWord.setCachedSecrets(secrets);
+                            } catch (GeneralSecurityException e) {
+                                // Invalid password or the secret key has been tampered with
+                                // TODO(abel) handle bad password in sample app
+                                Log.e(TAG, "invalid password or secrets has been tampered with");
+                                Log.e(TAG, e.getClass().getName() + " : " + e.getMessage());
+                                e.printStackTrace();
+                            }
+
                         }
                     });
             builder.setNegativeButton("Cancel",
@@ -168,9 +184,9 @@ public class CacheWordSampleActivity extends Activity implements
         mSecretEdit.setEnabled(true);
         mStatusLabel.setText("Unlocked");
 
-        // fetch the password from CacheWordService
-        char[] passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
-        String message = SecretMessage.retrieveMessage(this, passphrase);
+        // fetch the encryption key from CacheWordService
+        SecretKey key = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getSecretKey();
+        String message = SecretMessage.retrieveMessage(this, key);
 
         if (message == null) {
             mSecretEdit.setText("");
@@ -199,7 +215,7 @@ public class CacheWordSampleActivity extends Activity implements
             public void onClick(DialogInterface dialog, int which) {
                 String passphrase = input.getText().toString();
 
-                mCacheWord.setCachedSecrets(new PassphraseSecrets(passphrase.toCharArray()));
+                mCacheWord.setCachedSecrets(PassphraseSecrets.initializeSecrets(CacheWordSampleActivity.this, passphrase.toCharArray()));
             }
         });
         builder.setNegativeButton("Cancel",
