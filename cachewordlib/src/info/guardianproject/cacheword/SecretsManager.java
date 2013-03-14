@@ -25,6 +25,12 @@ public class SecretsManager {
         return Base64.decode(encoded, Base64.DEFAULT);
     }
 
+    public static boolean setInitialized(Context ctx, boolean initialized) {
+        Editor e = getPrefs(ctx).edit();
+        e.putBoolean(Constants.SHARED_PREFS_INITIALIZED, initialized);
+        return e.commit();
+    }
+
     private static SharedPreferences getPrefs(Context ctx) {
         return ctx
                 .getSharedPreferences(Constants.SHARED_PREFS, Constants.SHARED_PREFS_PRIVATE_MODE);

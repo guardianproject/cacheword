@@ -104,11 +104,7 @@ public class CacheWordService extends Service {
     private void handleNewSecrets() {
 
         if (!SecretsManager.isInitialized(this)) {
-            if (!initializeSecretStorage()) {
-                // TODO(abel): handle initialization failure
-                Log.e(TAG, "failed to initialize secret storage");
-                return;
-            }
+            return;
         }
 
         goForeground();
