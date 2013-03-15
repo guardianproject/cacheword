@@ -23,7 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Initialization process consists of:
  * <ol>
  * <li>1. Run the password through PBKDF2 with a random salt
- * <li>2. Generate a random 128 bit AES key with a random IV
+ * <li>2. Generate a random 256 bit AES key with a random IV
  * <li>3. Use the derived key to encrypt the AES key in GCM mode
  * <li>4. Write the ciphertext, iv, and salt to disk
  * </ol>
@@ -156,7 +156,7 @@ public class PassphraseSecrets implements ICachedSecrets {
         try {
 
             KeyGenerator generator = KeyGenerator.getInstance("AES");
-            generator.init(128);
+            generator.init(Constants.AES_KEY_LENGTH);
 
             return generator.generateKey();
 
