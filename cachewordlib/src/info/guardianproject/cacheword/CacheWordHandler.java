@@ -11,6 +11,8 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.security.GeneralSecurityException;
+
 /**
  * This class is designed to accompany any Activity that is interested in the
  * secrets cached by CacheWord. <i>The context provided in the constructor must
@@ -77,6 +79,14 @@ public class CacheWordHandler {
         return mCacheWordService.getCachedSecrets();
     }
 
+    public byte[] getEncryptionKey() {
+        final ICachedSecrets s = getCachedSecrets();
+        if( s instanceof PassphraseSecrets ) {
+            return ((PassphraseSecrets) s).getSecretKey().getEncoded();
+        }
+        return null;
+    }
+
     /**
      * Write the secrets into CacheWord, initializing the cache if necessary.
      *
@@ -87,6 +97,22 @@ public class CacheWordHandler {
             return;
 
         mCacheWordService.setCachedSecrets(secrets);
+    }
+
+    /**
+     * Use the basic PassphraseSecrets implementation to derive encryption keys securely.
+     * Initializes cacheword if necessary.
+     * @param passphrase
+     * @throws GeneralSecurityException on invalid password
+     */
+    public void setPassphrase(char[] passphrase) throws GeneralSecurityException {
+        final PassphraseSecrets ps;
+        if(SecretsManager.isInitialized(mContext)) {
+            ps = PassphraseSecrets.fetchSecrets(mContext, passphrase);
+        } else {
+            ps = PassphraseSecrets.initializeSecrets(mContext, passphrase);
+        }
+        setCachedSecrets(ps);
     }
 
     /**
