@@ -24,4 +24,12 @@ public class Constants {
     public static final int STATE_LOCKED = 1;
     public static final int STATE_UNLOCKED = 2;
 
+    // Crypto vars
+
+    public static final int SALT_LENGTH = 16;
+    public static final int AES_KEY_LENGTH = 256;
+    public static final int GCM_IV_LENGTH = 12; // 96 bits
+    public static final int PBKDF2_ITER_COUNT = 100;
+    public static final int PBKDF2_KEY_LEN = 128;
+
 }
