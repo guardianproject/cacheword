@@ -190,6 +190,10 @@ class YourClass implements ICacheWordSubscriber
 
 # Security Design Notes
 
+## Key Derivation and Encryption Key Generation
+
+TODO: copy documenttion of the crypto in PassphraseSecrets.java to here
+
 ## Managing Key Material Securely
 
 TODO: write some bits about secrets in memory
