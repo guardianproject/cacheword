@@ -1,6 +1,7 @@
 package info.guardianproject.cacheword;
 
 import android.content.Context;
+import android.util.Log;
 
 import net.sqlcipher.database.SQLiteDatabase.CursorFactory;
 import net.sqlcipher.database.SQLiteDatabase;
@@ -8,6 +9,8 @@ import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
 import org.apache.commons.codec.binary.Hex;
+
+import java.lang.reflect.Method;
 
 
 /**
@@ -20,6 +23,8 @@ import org.apache.commons.codec.binary.Hex;
  * in the <em>samples/</em> directory of the SDK.</p>
  */
 public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
+
+    private static final String TAG = "SQLCipherOpenHelper";
 
     protected Context mContext; // shame we have to duplicate this here
     private CacheWordHandler mHandler;
@@ -71,8 +76,8 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * Formats a byte sequence into the literal string format expected by
      * SQLCipher: hex'HEX ENCODED BYTES'
      * The key data must be 256 bits (32 bytes) wide.
-     * The key data will be formatted into a 64 character hex string, and the returned
-     * string will be exactly 67 characters in length.
+     * The key data will be formatted into a 64 character hex string with a special
+     * prefix and suffix SQLCipher uses to distinguish raw key data from a password.
      * @link http://sqlcipher.net/sqlcipher-api/#key
      * @param raw_key a 32 byte array
      * @return the encoded key
@@ -80,13 +85,40 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
     private static String encodeRawKey(byte[] raw_key) {
         if( raw_key.length != 32 ) throw new IllegalArgumentException("provided key not 32 bytes (256 bits) wide");
 
-        final String kPrefix = "x'";
-        final String kSuffix = "'";
+        final String kPrefix;
+        final String kSuffix;
+
+        if(sqlcipher_uses_native_key) {
+            Log.d(TAG, "sqlcipher uses native method to set key");
+            kPrefix = "x'";
+            kSuffix = "'";
+        } else {
+            Log.d(TAG, "sqlcipher uses PRAGMA to set key - SPECIAL HACK IN PROGRESS");
+            kPrefix = "x''";
+            kSuffix = "''";
+        }
 
         final char[] key_chars = Hex.encodeHex(raw_key);
         if( key_chars.length != 64 ) throw new IllegalStateException("encoded key is not 64 bytes wide");
 
         return kPrefix + new String(key_chars) + kSuffix;
+    }
+
+    /*
+     * Special hack for detecting whether or not we're using a new SQLCipher for Android library
+     * The old version uses the PRAGMA to set the key, which requires escaping of the single quote
+     * characters. The new version calls a native method to set the key instead.
+     *
+     * @see https://github.com/sqlcipher/android-database-sqlcipher/pull/95
+     */
+    private static final boolean sqlcipher_uses_native_key = check_sqlcipher_uses_native_key();
+    private static boolean check_sqlcipher_uses_native_key() {
+
+        for(Method method : SQLiteDatabase.class.getDeclaredMethods()) {
+            if(method.getName().equals("native_key"))
+                return true;
+        }
+        return false;
     }
 
 }
