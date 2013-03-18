@@ -16,7 +16,7 @@ public interface ICacheWordSubscriber {
 	public void onCacheWordLockedEvent();
 
 	/**
-	 * Called when the secrets become available.
+	 * Called when the secrets are available.
 	 */
 	public void onCacheWordUnLockedEvent();
 

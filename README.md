@@ -11,15 +11,16 @@ Broadly speaking this library assists developers with two related problems:
 1. Secrets Management: how the secret key material for your app is generated, stored, and accessed
 2. Passphrase caching: store the passphrase in memory to avoid constantly prompting the user
 
-## Passphrase Caching
-Features:
+### Passphrase Caching
+
+*Features:*
 
 * Persistent notification: informs the user the app data is unlocked.
 * Configurable timeout: after a specified time of inactivity your app locks itself
 * Manual clearing: the user can forcibly lock the application
 * Uses Android's Keystore on 4.x if available
 
-### Why?
+#### Why?
 
 Once the user has input her password into your application, what does your app
 do with it? Do you just drop it in a static variable or in a singleton and let
@@ -27,11 +28,11 @@ the various bits of your app access it willy nilly?
 
 TODO write more here
 
-## Secrets Management
+### Secrets Management
 
 CacheWord manages key derivation, verification, persistence, and passphrase resetting.
 
-TODO: some links to primers on secure password management
+TODO: some links to primers on secure password storage
 
 **Features:**
 
@@ -77,11 +78,19 @@ For each of these interested components you *must* implement three things
 
 1. Implement the `ICacheWordSubscriber` interface
 2. Instantiate a `CacheWordHandler` to assist the component
-3. Propagate the lifecycle methods `onPause` and `onResume` to the `CacheWordHandler`
+3. Call `connect()` and `disconnect()` as appropriate
+
+**TIP**: Activities should implement `CacheWordActivityHandler` and propagate
+the lifecycle methods `onPause` and `onResume` instead of calling [dis]connect().
 
 ### 1. Implementing `ICacheWordSubscriber`
 
 The `ICacheWordSubscriber` interface consists of three state change methods.
+
+**NOTE:** Strictly speaking these aren't state *change* methods, as they can be
+invoked even when the state hasn't changed. For example, every call to
+CacheWord's `onPause` or `onPause` resume will result in an event. This is so
+new Activities can learn about CacheWord's state.
 
 1. **onCacheWordUninitializedEvent**
 
@@ -115,7 +124,7 @@ The `ICacheWordSubscriber` interface consists of three state change methods.
     In this state you can call `getCachedSecrets()` to retrieve the unencrypted
     secrets from CacheWord.
 
-Example:
+**Example:**
 
 ```java
 public class MyActivity extends Activity implements ICacheWordSubscriber
@@ -137,8 +146,7 @@ public class MyActivity extends Activity implements ICacheWordSubscriber
 
     @Override
     public void onCacheWordUnLockedEvent() {
-        char[] passphrase = ((PassphraseSecrets) mCacheWord.getCachedSecrets()).getPassphrase();
-        decryptDataAndPopulateUi(passphrase);
+        decryptDataAndPopulateUi(mCacheWord.getEncryptionKey());
     }
 
     ...
@@ -171,7 +179,7 @@ class YourClass implements ICacheWordSubscriber
 class YourClass implements ICacheWordSubscriber
 {
         ...
-        private CacheWordHandler mCacheWord;
+        private CacheWordActivityHandler mCacheWord;
         ...
         @Override
         protected void onResume() {
@@ -187,6 +195,10 @@ class YourClass implements ICacheWordSubscriber
         ...
 }
 ```
+
+In most applications, much of your usual state handling code that usually goes
+in `onResume` and `onPause` should instead go in one of the CacheWord event
+methods.
 
 # Library Development - Building CacheWord
 
