@@ -59,11 +59,12 @@ public class PassphraseSecrets implements ICachedSecrets {
             SecretKey secretKey = generateSecretKey();
             byte[] encryptedSecretKey = encryptSecretKey(passphraseKey, iv, secretKey.getEncoded());
 
-            byte[] preparedSecret = concatenate(salt, iv, encryptedSecretKey);
+            SerializedSecrets ss = new SerializedSecrets(salt, iv, encryptedSecretKey);
+            byte[] preparedSecret = ss.concatenate();
+
             boolean saved = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
             SecretsManager.setInitialized(ctx, saved);
 
-            Log.d(TAG, "initializeSecrets: iv=" + iv.length + " salt=" +salt.length + " cipher=" + encryptedSecretKey.length + " = " + preparedSecret.length);
             return new PassphraseSecrets(secretKey);
         } catch (GeneralSecurityException e ) {
             Log.e(TAG, "initializeSecrets failed: " +e.getClass().getName() + " : " + e.getMessage());
@@ -74,14 +75,17 @@ public class PassphraseSecrets implements ICachedSecrets {
     public static PassphraseSecrets fetchSecrets(Context ctx, char[] passphrase)
             throws GeneralSecurityException {
         byte[] preparedSecret = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
-        byte[] salt = parseSalt(preparedSecret);
+
+        SerializedSecrets ss = new SerializedSecrets(preparedSecret);
+        ss.parse();
+        byte[] salt = ss.salt;
+        byte[] iv = ss.iv;
+        byte[] ciphertext = ss.ciphertext;
+
         SecretKey passphraseKey = hashPassphrase(passphrase, salt);
-
-        byte[] iv = parseIv(preparedSecret);
-        byte[] ciphertext = parseCiphertext(preparedSecret);
-        Log.d(TAG, "fetchSecrets: iv=" + iv.length + " salt=" +salt.length + " cipher=" + ciphertext.length + " = " + preparedSecret.length);
-
         byte[] rawSecretKey = decryptSecretKey(passphraseKey, iv, ciphertext);
+
+
         return new PassphraseSecrets(rawSecretKey);
     }
 
@@ -105,35 +109,8 @@ public class PassphraseSecrets implements ICachedSecrets {
         return cipher.doFinal(ciphertext);
     }
 
-    private static byte[] parseCiphertext(byte[] preparedSecret) {
-        final int cipherLen = preparedSecret.length - Constants.GCM_IV_LENGTH
-                - Constants.SALT_LENGTH;
-        byte[] cipher = new byte[cipherLen];
-        System.arraycopy(preparedSecret, Constants.SALT_LENGTH+Constants.GCM_IV_LENGTH, cipher, 0, cipherLen);
-        return cipher;
-    }
-
-    private static byte[] parseIv(byte[] preparedSecret) {
-        byte[] iv = new byte[Constants.GCM_IV_LENGTH];
-        System.arraycopy(preparedSecret, Constants.SALT_LENGTH, iv, 0, Constants.GCM_IV_LENGTH);
-        return iv;
-    }
-
-    private static byte[] parseSalt(byte[] preparedSecret) {
-        byte[] salt = new byte[Constants.SALT_LENGTH];
-        System.arraycopy(preparedSecret, 0, salt, 0, Constants.SALT_LENGTH);
-        return salt;
-    }
-
     // initialization routines: creates secrets
 
-    private static byte[] concatenate(byte[] salt, byte[] iv, byte[] ciphertext) {
-        ByteBuffer bb = ByteBuffer.allocateDirect(salt.length + iv.length + ciphertext.length);
-        bb.put(salt);
-        bb.put(iv);
-        bb.put(ciphertext);
-        return bb.array();
-    }
 
     private static byte[] encryptSecretKey(SecretKey passphraseKey, byte[] iv, byte[] data)
             throws GeneralSecurityException {
@@ -166,6 +143,49 @@ public class PassphraseSecrets implements ICachedSecrets {
         } catch (NoSuchAlgorithmException e) {
             return null;
         }
+    }
+
+    /**
+     * Simple wrapper class to encapsulate array manipulation
+     *
+     * This class does not handle sensitive data.
+     */
+    private static class SerializedSecrets {
+        public byte[] salt;
+        public byte[] iv;
+        public byte[] ciphertext;
+        public byte[] serialized;
+
+        public SerializedSecrets(byte[] salt, byte[] iv, byte[] ciphertext) {
+            this.salt = salt;
+            this.iv = iv;
+            this.ciphertext = ciphertext;
+        }
+
+        public SerializedSecrets(byte[] serialized) {
+            this.serialized = serialized;
+        }
+
+        public void parse() {
+            salt = new byte[Constants.SALT_LENGTH];
+            iv = new byte[Constants.GCM_IV_LENGTH];
+            ciphertext = new byte[serialized.length - Constants.SALT_LENGTH - Constants.GCM_IV_LENGTH];
+            ByteBuffer bb = ByteBuffer.wrap(serialized);
+            bb.get(salt);
+            bb.get(iv);
+            bb.get(ciphertext);
+        }
+
+        public byte[] concatenate() {
+            serialized = new byte[salt.length + iv.length + ciphertext.length];
+            ByteBuffer bb = ByteBuffer.wrap(serialized);
+            bb.put(salt);
+            bb.put(iv);
+            bb.put(ciphertext);
+            serialized = bb.array();
+            return serialized;
+        }
+
     }
 
 }
