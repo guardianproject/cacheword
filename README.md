@@ -207,6 +207,19 @@ If you use SQLCipher for encrypted database storage you should use CacheWord's
 See the [cacheword branch][notecipher] in the NoteCipher application for an
 example of how to use it.
 
+### What Are These Cached Secrets?
+
+The sensitive data that is cached by CacheWord can be specified by the user as
+a class implementing `ICachedSecrets`.
+
+The default implementation of this class (`PassphraseSecrets`) attempts to
+provide for most use cases. It generates a 256 bit encryption key that can be
+used by other libraries like [SQLCipher][sqlcipher] or [IOCipher][iocipher]
+
+In this case the user's password is used to encrypt (after being hashed of
+course) the generated encryption key, and is never written to disk.
+
+
 # Library Development
 
 See [HACKING.md](HACKING.md)
@@ -217,3 +230,4 @@ See [SECURITY.md](SECURITY.md)
 
 [notecipher]: https://github.com/guardianproject/notepadbot/tree/cacheword
 [sqlcipher]: http://sqlcipher.net/sqlcipher-for-android/
+[iocipher]: https://guardianproject.info/code/IOCipher
