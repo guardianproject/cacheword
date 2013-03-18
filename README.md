@@ -188,6 +188,10 @@ class YourClass implements ICacheWordSubscriber
 }
 ```
 
+# Library Development - Building CacheWord
+
+See `HACKING.md`
+
 # Security Design Notes
 
 ## Key Derivation and Encryption Key Generation
