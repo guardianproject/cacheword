@@ -4,6 +4,7 @@ package info.guardianproject.cacheword;
 import android.content.Context;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -56,12 +57,13 @@ public class PassphraseSecrets implements ICachedSecrets {
 
             SecretKey passphraseKey = hashPassphrase(passphrase, salt);
             SecretKey secretKey = generateSecretKey();
-            byte[] encryptedSecretKey = encryptSecretKey(passphraseKey, secretKey.getEncoded(), iv);
+            byte[] encryptedSecretKey = encryptSecretKey(passphraseKey, iv, secretKey.getEncoded());
 
             byte[] preparedSecret = concatenate(salt, iv, encryptedSecretKey);
             boolean saved = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
             SecretsManager.setInitialized(ctx, saved);
-            Log.d(TAG, "initializeSecrets: iv=" + iv.length + " salt=" +salt.length + " cipher=" + secretKey.getEncoded().length + " = " + preparedSecret.length);
+
+            Log.d(TAG, "initializeSecrets: iv=" + iv.length + " salt=" +salt.length + " cipher=" + encryptedSecretKey.length + " = " + preparedSecret.length);
             return new PassphraseSecrets(secretKey);
         } catch (GeneralSecurityException e ) {
             Log.e(TAG, "initializeSecrets failed: " +e.getClass().getName() + " : " + e.getMessage());
@@ -77,9 +79,9 @@ public class PassphraseSecrets implements ICachedSecrets {
 
         byte[] iv = parseIv(preparedSecret);
         byte[] ciphertext = parseCiphertext(preparedSecret);
-        byte[] rawSecretKey = decryptSecretKey(passphraseKey, iv, ciphertext);
-
         Log.d(TAG, "fetchSecrets: iv=" + iv.length + " salt=" +salt.length + " cipher=" + ciphertext.length + " = " + preparedSecret.length);
+
+        byte[] rawSecretKey = decryptSecretKey(passphraseKey, iv, ciphertext);
         return new PassphraseSecrets(rawSecretKey);
     }
 
@@ -104,10 +106,11 @@ public class PassphraseSecrets implements ICachedSecrets {
     }
 
     private static byte[] parseCiphertext(byte[] preparedSecret) {
-        byte[] iv = new byte[preparedSecret.length - Constants.GCM_IV_LENGTH
-                - Constants.SALT_LENGTH];
-        System.arraycopy(preparedSecret, Constants.GCM_IV_LENGTH, iv, 0, Constants.GCM_IV_LENGTH);
-        return iv;
+        final int cipherLen = preparedSecret.length - Constants.GCM_IV_LENGTH
+                - Constants.SALT_LENGTH;
+        byte[] cipher = new byte[cipherLen];
+        System.arraycopy(preparedSecret, Constants.SALT_LENGTH+Constants.GCM_IV_LENGTH, cipher, 0, cipherLen);
+        return cipher;
     }
 
     private static byte[] parseIv(byte[] preparedSecret) {
@@ -125,11 +128,11 @@ public class PassphraseSecrets implements ICachedSecrets {
     // initialization routines: creates secrets
 
     private static byte[] concatenate(byte[] salt, byte[] iv, byte[] ciphertext) {
-        byte[] four = new byte[salt.length + iv.length + ciphertext.length];
-        System.arraycopy(salt, 0, four, 0, salt.length);
-        System.arraycopy(iv, 0, four, salt.length, iv.length);
-        System.arraycopy(ciphertext, 0, four, iv.length, ciphertext.length);
-        return four;
+        ByteBuffer bb = ByteBuffer.allocateDirect(salt.length + iv.length + ciphertext.length);
+        bb.put(salt);
+        bb.put(iv);
+        bb.put(ciphertext);
+        return bb.array();
     }
 
     private static byte[] encryptSecretKey(SecretKey passphraseKey, byte[] iv, byte[] data)
