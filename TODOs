@@ -1,0 +1,13 @@
+everything in:
+  $ ack src/ "TODO"
+
+and also:
+
+* configurable notifications (icon, message, etc)
+* adaptive KDF iterations
+* android 4.x KeyStore
+* memory wiping / zeroizing
+* binary and library hash verification
+* scrypt: include library properly
+* scrypt: determine cost parameters
+
