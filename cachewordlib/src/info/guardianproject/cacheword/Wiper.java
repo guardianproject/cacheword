@@ -1,10 +1,15 @@
 
 package info.guardianproject.cacheword;
 
+import android.util.Log;
+
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * A utility class for securely wiping memory locations and handling sensitive
@@ -41,6 +46,30 @@ public class Wiper {
      */
     public static void wipe(CharBuffer cb) {
         wipe(cb.array());
+    }
+
+    public static void wipe(SecretKeySpec key) {
+        /*for( Field field : SecretKeySpec.class.getDeclaredFields() ) {
+            Log.d("Wiper", "SecretKeySpec field: " + field.getName());
+        }*/
+        try {
+            Field key_field = SecretKeySpec.class.getDeclaredField("key");
+            key_field.setAccessible(true);
+            byte[] bytes = (byte[]) key_field.get(key);
+            wipe(bytes);
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
