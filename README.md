@@ -52,6 +52,14 @@ Add the following to between the `<application>....</application>` tags
 <service android:name="info.guardianproject.cacheword.CacheWordService" android:enabled="true" android:exported="false" />
 ```
 
+### Dependencies
+
+CacheWord provides a support class for SQLCipher for Android. You probably want
+to use this.
+
+Download the [SQLCipher for Android sources][sqlcipher] and copy the `libs/`
+and `assets/` dir into your Android project dir.
+
 ## Integration
 
 A CacheWordSubscriber is any component in your application interested in the
@@ -191,42 +199,21 @@ In most applications, much of your usual state handling code that usually goes
 in `onResume` and `onPause` should instead go in one of the CacheWord event
 methods.
 
-# Library Development - Building CacheWord
+### SQLCipher Support
+
+If you use SQLCipher for encrypted database storage you should use CacheWord's
+`SQLCipherOpenHelper` 
+
+See the [cacheword branch][notecipher] in the NoteCipher application for an
+example of how to use it.
+
+# Library Development
 
 See [HACKING.md](HACKING.md)
 
 # Security Design Notes
 
-## Key Derivation and Encryption Key Generation
+See [SECURITY.md](SECURITY.md)
 
-TODO: copy documenttion of the crypto in PassphraseSecrets.java to here
-
-## Managing Key Material Securely
-
-TODO: write some bits about secrets in memory
-
-### Official Authorities On The Use of `String`
-
-The [Java Cryptography Architecture guide][java-crypto-arch] states,
-
-> It would seem logical to collect and store the password in an object of type
-> java.lang.String. However, here's the caveat: Objects of type String are
-> immutable, i.e., there are no methods defined that allow you to change
-> (overwrite) or zero out the contents of a String after usage. This feature
-> makes String objects unsuitable for storing security sensitive information such
-> as user passwords. You should always collect and store security sensitive
-> information in a char array instead.
-
-Yet, the [Secure Coding Guidelines for the Java Programming Language][java-secure-coding] counters,
-
-> [...]Some transient data may be kept in mutable data structures, such as char
-> arrays, and cleared immediately after use. Clearing data structures **has reduced
-> effectiveness** on typical Java runtime systems *as objects are moved in memory
-> transparently to the programmer.*
-
-**Conclusion:** In Java, even char[] arrays aren't a good storage primitive.
-
-[java-crypto-arch]: http://docs.oracle.com/javase/6/docs/technotes/guides/security/crypto/CryptoSpec.html#PBEEx
-[java-secure-coding]: http://www.oracle.com/technetwork/java/seccodeguide-139067.html#2
-
-
+[notecipher]: https://github.com/guardianproject/notepadbot/tree/cacheword
+[sqlcipher]: http://sqlcipher.net/sqlcipher-for-android/
