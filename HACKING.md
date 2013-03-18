@@ -6,7 +6,7 @@
 
 Version 2.1.1 [Source][sqlcipher-github]
 
-CacheWord depends on the class files for [SQLCipher for Android[sqlcipher], but
+CacheWord depends on the class files for [SQLCipher for Android][sqlcipher], but
 not the native shared libraries nor assets. To minimize disk space, only the
 jars are included in this repo.
 
