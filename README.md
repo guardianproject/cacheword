@@ -9,16 +9,19 @@ It helps app developers securely generate, store, and access secrets derived fro
 Broadly speaking this library assists developers with two related problems:
 
 1. Secrets Management: how the secret key material for your app is generated, stored, and accessed
-2. Passphrase caching: store the passphrase in memory to avoid constantly prompting the user
+2. Passphrase Caching: store the passphrase in memory to avoid constantly prompting the user
 
-### Passphrase Caching
+CacheWord manages key derivation, verification, persistence, passphrase
+resetting, and caching secret key material in memory.
 
 *Features:*
 
-* Persistent notification: informs the user the app data is unlocked.
-* Configurable timeout: after a specified time of inactivity your app locks itself
+* Strong key derivation (PBKDF2)
+* Secure secret storage (AES-256 GCM)
+* Persistent notification: informs the user the app data is unlocked
+* Configurable timeout: after a specified time of inactivity the app locks itself
 * Manual clearing: the user can forcibly lock the application
-* Uses Android's Keystore on 4.x if available
+* Uses Android's Keystore on 4.x if available - *Not Yet Implemented*
 
 #### Why?
 
@@ -27,18 +30,6 @@ do with it? Do you just drop it in a static variable or in a singleton and let
 the various bits of your app access it willy nilly?
 
 TODO write more here
-
-### Secrets Management
-
-CacheWord manages key derivation, verification, persistence, and passphrase resetting.
-
-TODO: some links to primers on secure password storage
-
-**Features:**
-
-* Strong key derivation (using scrypt)
-* Secure secret storage (AES-256 GCM)
-* Uses Android's Keystore on 4.x if available
 
 # Usage
 
@@ -202,7 +193,7 @@ methods.
 
 # Library Development - Building CacheWord
 
-See `HACKING.md`
+See [HACKING.md](HACKING.md)
 
 # Security Design Notes
 
