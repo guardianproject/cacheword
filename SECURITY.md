@@ -11,53 +11,53 @@ CacheWord assumes four distinct adversaries.
 
 1. **The Developer**
 
-If the developer has malicious intentions, everything we do is bust. Instead,
-we aim to mitigate weaknesses posed by a careless or ignorant developer.
-
-Tactics:
-* Hide all crypto decisions
-* Use secure defaults
-* Provide support classes for commonly used libraries that consume secret key material (e.g., SQLCipher)
+  If the developer has malicious intentions, everything we do is bust. Instead,
+  we aim to mitigate weaknesses posed by a careless or ignorant developer.
+  
+  Tactics:
+  * Hide all crypto decisions
+  * Use secure defaults
+  * Provide support classes for commonly used libraries that consume secret key material (e.g., SQLCipher)
 
 2. **The User**
 
-Once again the if user is intentionally trying to disclose secret key material,
-it is unlikely we can stop her. We do not think this is a common case however.
-Most users will unintentionally harm their security due to usability issues.
-
-For example, typing a password with *sufficient* entropy on a smartphone's soft
-keyboard is a severe pain in the ass for all but the most proficient of tween
-txtrs. Even this speedy group will grow weary when their phone prompts them for
-the password every time they pull it out of their pocket. Unsurprisingly, users
-choose short, low entropy passwords.
-
-Users often reuse passwords, so the protection of their password should be
-considered more important than an application specific encryption key.
-
-Tactics:
-* Sane cache timeouts
-* Password hashing using a strong KDF (PBKDF2, and hopefully scrypt soon)
-* Adaptive KDF iterations
+  Once again the if user is intentionally trying to disclose secret key material,
+  it is unlikely we can stop her. We do not think this is a common case however.
+  Most users will unintentionally harm their security due to usability issues.
+  
+  For example, typing a password with *sufficient* entropy on a smartphone's soft
+  keyboard is a severe pain in the ass for all but the most proficient of tween
+  txtrs. Even this speedy group will grow weary when their phone prompts them for
+  the password every time they pull it out of their pocket. Unsurprisingly, users
+  choose short, low entropy passwords.
+  
+  Users often reuse passwords, so the protection of their password should be
+  considered more important than an application specific encryption key.
+  
+  Tactics:
+  * Sane cache timeouts
+  * Password hashing using a strong KDF (PBKDF2, and hopefully scrypt soon)
+  * Adaptive KDF iterations
 
 3. **The Bad Guys**
 
-The Bad Guys consist of a number of potential adversaries, such as forensic analysts,
-cops or border agents with [plug-n-pwn data suckers][cellibrite], and malware.
-
-Their common capability in our case is access to our application's binary,
-memory and disk. They probably have root access too. Strictly speaking, given
-an attacker with sufficient patient and skill, our secrets will become theirs.
-
-That said, we strive to make key recovery from memory as difficult as possible.
-
-When it comes to non-memory based attacks, such as brute force attacks on our
-persisted data, we employ strong authenticated encryption and reasonable KDF
-parameters.
-
-Tactics:
-* Aggressive zeroizing
-* Using native memory (non-VM) when possible to void the GC (?)
-* Never store the password in any form on disk (even a hash)
+  The Bad Guys consist of a number of potential adversaries, such as forensic analysts,
+  cops or border agents with [plug-n-pwn data suckers][cellibrite], and malware.
+  
+  Their common capability in our case is access to our application's binary,
+  memory and disk. They probably have root access too. Strictly speaking, given
+  an attacker with sufficient patient and skill, our secrets will become theirs.
+  
+  That said, we strive to make key recovery from memory as difficult as possible.
+  
+  When it comes to non-memory based attacks, such as brute force attacks on our
+  persisted data, we employ strong authenticated encryption and reasonable KDF
+  parameters.
+  
+  Tactics:
+  * Aggressive zeroizing
+  * Using native memory (non-VM) when possible to void the GC (?)
+  * Never store the password in any form on disk (even a hash)
 
 
 ## Key Derivation and Encryption Key Generation
