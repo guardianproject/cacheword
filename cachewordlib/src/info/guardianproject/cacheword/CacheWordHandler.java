@@ -47,9 +47,9 @@ public class CacheWordHandler {
     }
 
     /**
-     * Call this method in your Activity's onResume()
+     * TODO write me
      */
-    public void onResume() {
+    public void connectToService() {
         Intent cacheWordIntent = CacheWordService
                 .getBlankServiceIntent(mContext.getApplicationContext());
         mContext.startService(cacheWordIntent);
@@ -58,9 +58,9 @@ public class CacheWordHandler {
     }
 
     /**
-     * Call this method in your Activity's onPause()
+     * TODO write me
      */
-    public void onPause() {
+    public void disconnect() {
         if (mCacheWordService != null) {
             mCacheWordService.detachSubscriber();
             mContext.unbindService(mCacheWordServiceConnection);

@@ -19,7 +19,7 @@ import java.security.GeneralSecurityException;
 
 import javax.crypto.SecretKey;
 
-import info.guardianproject.cacheword.CacheWordHandler;
+import info.guardianproject.cacheword.CacheWordActivityHandler;
 import info.guardianproject.cacheword.ICacheWordSubscriber;
 import info.guardianproject.cacheword.PassphraseSecrets;
 import sample.cacheword.R.id;
@@ -30,9 +30,9 @@ import sample.cacheword.R.id;
  * <ol>
  * <li>1. The Activity implements the CacheWordSubscriber interface and handles
  * the state change methods.</li>
- * <li>2. a CacheWordHandler is instantiated in onCreate()</li>
+ * <li>2. a CacheWordActivityHandler is instantiated in onCreate()</li>
  * <li>3. in onResume and onPause the corresponding methods are called in the
- * CacheWordHandler</li>
+ * CacheWordActivityHandler</li>
  * </ol>
  * These three items are required to successfully use CacheWord.
  */
@@ -42,7 +42,7 @@ public class CacheWordSampleActivity extends Activity implements
     private static final String TAG = "CacheWordSampleActivity";
 
     // our handler does all the work in talking to the CacheWordService
-    private CacheWordHandler mCacheWord;
+    private CacheWordActivityHandler mCacheWord;
 
     private TextView mStatusLabel;
     private Button mLockButton;
@@ -85,7 +85,7 @@ public class CacheWordSampleActivity extends Activity implements
             }
         });
 
-        mCacheWord = new CacheWordHandler(this);
+        mCacheWord = new CacheWordActivityHandler(this);
     }
 
     @Override
