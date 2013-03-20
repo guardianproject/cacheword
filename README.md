@@ -54,6 +54,9 @@ Add the following to between the `<application>....</application>` tags
 
 ### Dependencies
 
+* Android support library v4 (`android-support-v4.jar`)
+* [SQLCipher for Android][sqlcipher]
+
 CacheWord provides a support class for SQLCipher for Android. You probably want
 to use this.
 
