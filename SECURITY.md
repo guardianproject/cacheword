@@ -7,7 +7,7 @@ data (such as the data encrypted by said keys) from secrets we aim to protect.
 
 ### Threat Model
 
-CacheWord assumes four distinct adversaries.
+CacheWord assumes three distinct adversaries.
 
 1. **The Developer**
 
