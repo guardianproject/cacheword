@@ -91,7 +91,7 @@ The `ICacheWordSubscriber` interface consists of three state change methods.
 
 **NOTE:** Strictly speaking these aren't state *change* methods, as they can be
 invoked even when the state hasn't changed. For example, every call to
-CacheWord's `onPause` or `onPause` resume will result in an event. This is so
+CacheWord's `onResume` or `onPause` resume will result in an event. This is so
 new Activities can learn about CacheWord's state.
 
 1. **onCacheWordUninitializedEvent**
