@@ -87,12 +87,17 @@ the lifecycle methods `onPause` and `onResume` instead of calling [dis]connect()
 
 ### 1. Implementing `ICacheWordSubscriber`
 
-The `ICacheWordSubscriber` interface consists of three state change methods.
+The `ICacheWordSubscriber` interface consists of three event methods.
 
-**NOTE:** Strictly speaking these aren't state *change* methods, as they can be
-invoked even when the state hasn't changed. For example, every call to
-CacheWord's `onResume` or `onPause` resume will result in an event. This is so
-new Activities can learn about CacheWord's state.
+These event methods are similar to the Android lifecycle methods onResume,
+onPause, etc. The appropriate event is guaranteed to be called for every
+CacheWord enhanced Activity during the onResume method when then lifecycle
+change is propagated correctly (see below). This ensures your Activities will
+always be aware of the current status of CacheWord.
+
+In most applications, your state and view handling code that usually goes
+in `onResume` and `onPause` should instead go in one of the CacheWord event
+methods.
 
 1. **onCacheWordUninitializedEvent**
 
@@ -104,27 +109,27 @@ new Activities can learn about CacheWord's state.
     In this event you should prompt the user to create a password and the pass the
     new password to CacheWord with `setCachedSecrets()`.
 
-    This state could also be entered after the Application's data is cleared/reset.
+    This event could also be triggered after the Application's data is cleared or reset.
 
 2. **onCacheWordLockedEvent**
 
-    This state signifies the secrets are unavailable or have become unavailable.
-    It occurs when the secrets expiration timeout is reached, or the user
+    This event signifies the secrets are unavailable or have become unavailable.
+    It is triggered when the secrets expiration timeout is reached, or the user
     manually locks CacheWord.
 
     You should clear all UI components and data structures containing sensitive
-    information, perhaps show a dedicated lock screen.
+    information and perhaps show a dedicated lock screen.
 
-    Prompt the user for the passphrase and pass it to CacheWord with
-    `setCachedSecrets()`
+    At this stage your app should prompt the user for the passphrase and give
+    it to CacheWord with `setCachedSecrets()`
 
 3. **onCacheWordUnLockedEvent**
 
-    This state is entered when CacheWord has received *valid* credentials via the
+    This event is triggered when CacheWord has received *valid* credentials via the
     `setCachedSecrets()` method.
 
-    In this state you can call `getCachedSecrets()` to retrieve the unencrypted
-    secrets from CacheWord.
+    At this stage in your app you may call `getCachedSecrets()` to retrieve the
+    unencrypted secrets from CacheWord.
 
 **Example:**
 
@@ -197,10 +202,6 @@ class YourClass implements ICacheWordSubscriber
         ...
 }
 ```
-
-In most applications, much of your usual state handling code that usually goes
-in `onResume` and `onPause` should instead go in one of the CacheWord event
-methods.
 
 ### SQLCipher Support
 
