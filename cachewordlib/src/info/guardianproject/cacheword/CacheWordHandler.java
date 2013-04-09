@@ -47,18 +47,25 @@ public class CacheWordHandler {
     }
 
     /**
-     * TODO write me
+     * Connect to the CacheWord service, starting it if necessary.
+     * Once connected, the attached Context will begin receiving
+     * CacheWord events.
      */
     public void connectToService() {
         Intent cacheWordIntent = CacheWordService
                 .getBlankServiceIntent(mContext.getApplicationContext());
+        /* We start AND bind the service
+         *
+         * starting - ensures the cacheword service will outlive the activity
+         * binding  - allows us to notify  the service of active subscribers
+         */
         mContext.startService(cacheWordIntent);
         mContext.bindService(cacheWordIntent, mCacheWordServiceConnection,
                 Context.BIND_AUTO_CREATE);
     }
 
     /**
-     * TODO write me
+     * Disconnect from the CacheWord service. No further CacheWord events will be received.
      */
     public void disconnect() {
         if (mCacheWordService != null) {
@@ -208,6 +215,8 @@ public class CacheWordHandler {
             mCacheWordServiceConnection = null;
             mCacheWordService = null;
             checkCacheWordState();
+            // calling detachSubscriber() here doesn't work
+            // because the service connection has already been lost
         }
 
     };

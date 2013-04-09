@@ -60,7 +60,15 @@ public class CacheWordService extends Service {
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        // note: this method is called when ALL clients
+        // have unbound, and not per-client.
+        return super.onUnbind(intent);
+    }
+    @Override
     public IBinder onBind(Intent intent) {
+        // note: this method is called on the first binding
+        // not per-client
         return mBinder;
     }
 
