@@ -13,6 +13,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -140,11 +141,15 @@ public class CacheWordService extends Service {
         synchronized (this) {
             mSecrets = null;
         }
+
         LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
 
         if( mIsForegrounded ) {
             stopForeground(true);
             mIsForegrounded = false;
+        } else {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.cancel(Constants.SERVICE_BACKGROUND_ID);
         }
     }
 
@@ -184,43 +189,34 @@ public class CacheWordService extends Service {
 
     }
 
+    private Notification buildNotification() {
+
+        NotificationCompat.Builder b = new NotificationCompat.Builder(this);
+        b.setSmallIcon(R.drawable.ic_menu_key);
+        b.setContentTitle(getText(R.string.cacheword_notification_cached_title));
+        b.setContentText(getText(R.string.cacheword_notification_cached_message));
+        b.setTicker(getText(R.string.cacheword_notification_cached));
+        b.setDefaults(Notification.DEFAULT_VIBRATE);
+        b.setWhen(System.currentTimeMillis());
+        b.setOngoing(true);
+        Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
+        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+        b.setContentIntent(PendingIntent.getService(getApplicationContext(), 0,
+            notificationIntent, 0));
+
+        return b.build();
+    }
+
     private void goForeground() {
         Log.d(TAG, "goForeground()");
 
-        Notification notification = new Notification(R.drawable.ic_menu_key,
-                getText(R.string.cacheword_notification_cached),
-                System.currentTimeMillis());
-        Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
-        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
-
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0,
-                notificationIntent, 0);
-        notification.setLatestEventInfo(this,
-                getText(R.string.cacheword_notification_cached_title),
-                getText(R.string.cacheword_notification_cached_message),
-                pendingIntent);
-
         stopForeground(true);
-        startForeground(Constants.SERVICE_FOREGROUND_ID, notification);
+        startForeground(Constants.SERVICE_FOREGROUND_ID, buildNotification());
         mIsForegrounded = true;
     }
 
     private void goBackground() {
         Log.d(TAG, "goBackground()");
-
-        Notification notification = new Notification(R.drawable.ic_menu_key,
-                getText(R.string.cacheword_notification_cached),
-                System.currentTimeMillis());
-        Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
-        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
-
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0,
-                notificationIntent, 0);
-        notification.setLatestEventInfo(this,
-                getText(R.string.cacheword_notification_cached_title),
-                getText(R.string.cacheword_notification_cached_message),
-                pendingIntent);
-
 
         if(mIsForegrounded) {
             stopForeground(true);
@@ -228,7 +224,7 @@ public class CacheWordService extends Service {
         }
 
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(Constants.SERVICE_BACKGROUND_ID, notification);
+        nm.notify(Constants.SERVICE_BACKGROUND_ID, buildNotification());
 
     }
 
