@@ -3,6 +3,7 @@ package info.guardianproject.cacheword;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -28,6 +29,7 @@ public class CacheWordService extends Service {
     private Intent mBroadcastIntent = new Intent(Constants.INTENT_NEW_SECRETS);
 
     private int mSubscriberCount = 0;
+    private boolean mIsForegrounded = false;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -48,6 +50,12 @@ public class CacheWordService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        expirePassphrase();
     }
 
     @Override
@@ -107,7 +115,10 @@ public class CacheWordService extends Service {
             return;
         }
 
-        goForeground();
+        if( shouldForeground() )
+            goForeground();
+        else
+            goBackground();
         resetTimeout();
         LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
     }
@@ -125,12 +136,16 @@ public class CacheWordService extends Service {
 
     private void expirePassphrase() {
         Log.d(TAG, "expirePassphrase");
-        stopForeground(true);
 
         synchronized (this) {
             mSecrets = null;
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
+
+        if( mIsForegrounded ) {
+            stopForeground(true);
+            mIsForegrounded = false;
+        }
     }
 
     private void resetTimeout() {
@@ -187,6 +202,34 @@ public class CacheWordService extends Service {
 
         stopForeground(true);
         startForeground(Constants.SERVICE_FOREGROUND_ID, notification);
+        mIsForegrounded = true;
+    }
+
+    private void goBackground() {
+        Log.d(TAG, "goBackground()");
+
+        Notification notification = new Notification(R.drawable.ic_menu_key,
+                getText(R.string.cacheword_notification_cached),
+                System.currentTimeMillis());
+        Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
+        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0,
+                notificationIntent, 0);
+        notification.setLatestEventInfo(this,
+                getText(R.string.cacheword_notification_cached_title),
+                getText(R.string.cacheword_notification_cached_message),
+                pendingIntent);
+
+
+        if(mIsForegrounded) {
+            stopForeground(true);
+            mIsForegrounded = false;
+        }
+
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm.notify(Constants.SERVICE_BACKGROUND_ID, notification);
+
     }
 
     public class CacheWordBinder extends Binder implements ICacheWordBinder {
@@ -209,4 +252,7 @@ public class CacheWordService extends Service {
         return i;
     }
 
+    private boolean shouldForeground() {
+        return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_FOREGROUND, false);
+    }
 }
