@@ -24,6 +24,7 @@ public class Wiper {
      * Fills the parameter with 0s
      */
     public static void wipe(byte[] bytes) {
+        if (bytes == null) return;
         Arrays.fill(bytes, (byte) 0);
     }
 
@@ -31,6 +32,7 @@ public class Wiper {
      * Fills the parameter with 0s
      */
     public static void wipe(char[] chars) {
+        if(chars == null) return;
         Arrays.fill(chars, '\0');
     }
 
@@ -38,6 +40,7 @@ public class Wiper {
      * Fills the underlying array with 0s
      */
     public static void wipe(ByteBuffer bb) {
+        if(bb == null ) return;
         wipe(bb.array());
     }
 
@@ -45,6 +48,7 @@ public class Wiper {
      * Fills the underlying array with 0s
      */
     public static void wipe(CharBuffer cb) {
+        if(cb == null) return;
         wipe(cb.array());
     }
 
@@ -52,6 +56,8 @@ public class Wiper {
         /*for( Field field : SecretKeySpec.class.getDeclaredFields() ) {
             Log.d("Wiper", "SecretKeySpec field: " + field.getName());
         }*/
+        if( key == null ) return;
+
         try {
             Field key_field = SecretKeySpec.class.getDeclaredField("key");
             key_field.setAccessible(true);
