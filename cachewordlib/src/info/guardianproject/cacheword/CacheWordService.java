@@ -56,7 +56,8 @@ public class CacheWordService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        expirePassphrase();
+        if( mSecrets != null )
+            mSecrets.destroy();
     }
 
     @Override
@@ -147,7 +148,10 @@ public class CacheWordService extends Service {
         Log.d(TAG, "expirePassphrase");
 
         synchronized (this) {
-            mSecrets = null;
+            if( mSecrets != null ) {
+                mSecrets.destroy();
+                mSecrets = null;
+            }
         }
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
