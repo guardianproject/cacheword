@@ -50,50 +50,64 @@ public class PassphraseSecrets implements ICachedSecrets {
         return mSecretKey;
     }
 
-    public static PassphraseSecrets initializeSecrets(Context ctx, char[] passphrase) {
+    public static PassphraseSecrets initializeSecrets(Context ctx, char[] x_passphrase) {
+        SecretKeySpec x_passphraseKey = null;
         try {
-            byte[] salt = generateSalt(Constants.SALT_LENGTH);
-            byte[] iv = generateIv(Constants.GCM_IV_LENGTH);
+            byte[] salt               = generateSalt(Constants.SALT_LENGTH);
+            byte[] iv                 = generateIv(Constants.GCM_IV_LENGTH);
+            x_passphraseKey           = hashPassphrase(x_passphrase, salt);
+            SecretKey secretKey       = generateSecretKey();
+            byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, secretKey.getEncoded());
+            SerializedSecrets ss      = new SerializedSecrets(salt, iv, encryptedSecretKey);
+            byte[] preparedSecret     = ss.concatenate();
+            boolean saved             = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
 
-            SecretKey passphraseKey = hashPassphrase(passphrase, salt);
-            SecretKey secretKey = generateSecretKey();
-            byte[] encryptedSecretKey = encryptSecretKey(passphraseKey, iv, secretKey.getEncoded());
-
-            SerializedSecrets ss = new SerializedSecrets(salt, iv, encryptedSecretKey);
-            byte[] preparedSecret = ss.concatenate();
-
-            boolean saved = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
             SecretsManager.setInitialized(ctx, saved);
 
             return new PassphraseSecrets(secretKey);
         } catch (GeneralSecurityException e ) {
             Log.e(TAG, "initializeSecrets failed: " +e.getClass().getName() + " : " + e.getMessage());
             return null;
+        } finally {
+            Wiper.wipe(x_passphrase);
+            Wiper.wipe(x_passphraseKey);
         }
     }
 
-    public static PassphraseSecrets fetchSecrets(Context ctx, char[] passphrase)
+    public static PassphraseSecrets fetchSecrets(Context ctx, char[] x_passphrase)
             throws GeneralSecurityException {
-        byte[] preparedSecret = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
+        byte[] x_rawSecretKey = null;
+        try {
+            byte[] preparedSecret = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
+            SerializedSecrets ss  = new SerializedSecrets(preparedSecret);
+            ss.parse();
 
-        SerializedSecrets ss = new SerializedSecrets(preparedSecret);
-        ss.parse();
-        byte[] salt = ss.salt;
-        byte[] iv = ss.iv;
-        byte[] ciphertext = ss.ciphertext;
+            byte[] salt                   = ss.salt;
+            byte[] iv                     = ss.iv;
+            byte[] ciphertext             = ss.ciphertext;
+            SecretKeySpec x_passphraseKey = hashPassphrase(x_passphrase, salt);
+            x_rawSecretKey                = decryptSecretKey(x_passphraseKey, iv, ciphertext);
 
-        SecretKey passphraseKey = hashPassphrase(passphrase, salt);
-        byte[] rawSecretKey = decryptSecretKey(passphraseKey, iv, ciphertext);
-
-
-        return new PassphraseSecrets(rawSecretKey);
+            return new PassphraseSecrets(x_rawSecretKey);
+        } finally {
+            Wiper.wipe(x_passphrase);
+            Wiper.wipe(x_rawSecretKey);
+        }
     }
 
     // used by initialization and verification routines
 
-    private static SecretKey hashPassphrase(char[] passwd, byte[] salt)
+    /**
+     * Hash the password with PBKDF2 at Constants.PBKDF2_ITER_COUNT iterations
+     * Does not wipe the password.
+     * @param x_password
+     * @param salt
+     * @return the AES SecretKeySpec containing the hashed password
+     * @throws GeneralSecurityException
+     */
+    private static SecretKeySpec hashPassphrase(char[] x_password, byte[] salt)
             throws GeneralSecurityException {
-        PBEKeySpec spec = new PBEKeySpec(passwd, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN);
+        PBEKeySpec spec          = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
         return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
@@ -101,21 +115,38 @@ public class PassphraseSecrets implements ICachedSecrets {
 
     // verification routines: used to unlock secrets
 
-    private static byte[] decryptSecretKey(SecretKey passphraseKey, byte[] iv, byte[] ciphertext)
+    /**
+     * Decrypt the supplied cipher text with AES GCM
+     * Does not wipe the key nor the plaintext
+     * @param x_passphraseKey
+     * @param iv
+     * @param ciphertext
+     * @return the plaintext
+     * @throws GeneralSecurityException on MAC failure or wrong key
+     */
+    private static byte[] decryptSecretKey(SecretKey x_passphraseKey, byte[] iv, byte[] ciphertext)
             throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        cipher.init(Cipher.DECRYPT_MODE, passphraseKey, new IvParameterSpec(iv));
+        cipher.init(Cipher.DECRYPT_MODE, x_passphraseKey, new IvParameterSpec(iv));
 
         return cipher.doFinal(ciphertext);
     }
 
     // initialization routines: creates secrets
 
-
-    private static byte[] encryptSecretKey(SecretKey passphraseKey, byte[] iv, byte[] data)
+    /**
+     * Encrypts the data with AES GSM
+     * Does not wipe the data nor the key
+     * @param x_passphraseKey
+     * @param iv
+     * @param data
+     * @return the encrypted key ciphertext
+     * @throws GeneralSecurityException
+     */
+    private static byte[] encryptSecretKey(SecretKey x_passphraseKey, byte[] iv, byte[] data)
             throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        cipher.init(Cipher.ENCRYPT_MODE, passphraseKey, new IvParameterSpec(iv));
+        cipher.init(Cipher.ENCRYPT_MODE, x_passphraseKey, new IvParameterSpec(iv));
 
         return cipher.doFinal(data);
     }
@@ -132,6 +163,9 @@ public class PassphraseSecrets implements ICachedSecrets {
         return salt;
     }
 
+    /**
+     * Generate a random AES_KEY_LENGTH bit AES key
+     */
     private static SecretKey generateSecretKey() {
         try {
 
@@ -186,6 +220,12 @@ public class PassphraseSecrets implements ICachedSecrets {
             return serialized;
         }
 
+    }
+
+    @Override
+    public void destroy() {
+        Log.d(TAG, "destroy()");
+        Wiper.wipe((SecretKeySpec)mSecretKey);
     }
 
 }
