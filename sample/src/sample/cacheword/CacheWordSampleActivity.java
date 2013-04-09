@@ -164,8 +164,8 @@ public class CacheWordSampleActivity extends Activity implements
     }
 
     @Override
-    public void onCacheWordLockedEvent() {
-        Log.d(TAG, "onCacheWordLockedEvent()");
+    public void onCacheWordLocked() {
+        Log.d(TAG, "onCacheWordLocked()");
 
         // close up everything
 
@@ -178,8 +178,8 @@ public class CacheWordSampleActivity extends Activity implements
     }
 
     @Override
-    public void onCacheWordUnLockedEvent() {
-        Log.d(TAG, "onCacheWordUnLockedEvent()");
+    public void onCacheWordOpened() {
+        Log.d(TAG, "onCacheWordOpened()");
         mLockButton.setText("Lock Secrets");
         mSecretEdit.setEnabled(true);
         mStatusLabel.setText("Unlocked");
@@ -197,7 +197,7 @@ public class CacheWordSampleActivity extends Activity implements
     }
 
     @Override
-    public void onCacheWordUninitializedEvent() {
+    public void onCacheWordUninitialized() {
         // if we're uninitialized, we want to initialize CacheWord with a new
         // passphrase
         mStatusLabel.setText("Uninitialized");

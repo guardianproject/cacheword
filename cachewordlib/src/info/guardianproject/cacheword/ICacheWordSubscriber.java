@@ -8,16 +8,16 @@ public interface ICacheWordSubscriber {
     /**
      * Called when CacheWord is reset and there are no secrets to unlock.
      */
-    public void onCacheWordUninitializedEvent();
+    public void onCacheWordUninitialized();
 
 	/**
 	 * Called when the cached secrets are wiped from memory.
 	 */
-	public void onCacheWordLockedEvent();
+	public void onCacheWordLocked();
 
 	/**
 	 * Called when the secrets are available.
 	 */
-	public void onCacheWordUnLockedEvent();
+	public void onCacheWordOpened();
 
 }

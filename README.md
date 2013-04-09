@@ -99,7 +99,7 @@ In most applications, your state and view handling code that usually goes
 in `onResume` and `onPause` should instead go in one of the CacheWord event
 methods.
 
-1. **onCacheWordUninitializedEvent**
+1. **onCacheWordUninitialized**
 
     This event is called when CacheWord determines there is no saved state.
     Usually this occurs the first time the user runs your app. At this point there
@@ -111,7 +111,7 @@ methods.
 
     This event could also be triggered after the Application's data is cleared or reset.
 
-2. **onCacheWordLockedEvent**
+2. **onCacheWordLocked**
 
     This event signifies the secrets are unavailable or have become unavailable.
     It is triggered when the secrets expiration timeout is reached, or the user
@@ -123,7 +123,7 @@ methods.
     At this stage your app should prompt the user for the passphrase and give
     it to CacheWord with `setCachedSecrets()`
 
-3. **onCacheWordUnLockedEvent**
+3. **onCacheWordOpened**
 
     This event is triggered when CacheWord has received *valid* credentials via the
     `setCachedSecrets()` method.
@@ -140,19 +140,19 @@ public class MyActivity extends Activity implements ICacheWordSubscriber
     ...
 
     @Override
-    public void onCacheWordUninitializedEvent() {
+    public void onCacheWordUninitialized() {
         startCreatePassphraseActivity();
     }
 
 
     @Override
-    public void onCacheWordLockedEvent() {
+    public void onCacheWordLocked() {
         clearUi();
         startPassphrasePromptActivity();
     }
 
     @Override
-    public void onCacheWordUnLockedEvent() {
+    public void onCacheWordOpened() {
         decryptDataAndPopulateUi(mCacheWord.getEncryptionKey());
     }
 

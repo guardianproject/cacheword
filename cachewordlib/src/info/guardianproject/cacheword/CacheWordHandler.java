@@ -158,11 +158,11 @@ public class CacheWordHandler {
         }
 
         if (newState == Constants.STATE_UNINITIALIZED) {
-            mSubscriber.onCacheWordUninitializedEvent();
+            mSubscriber.onCacheWordUninitialized();
         } else if (newState == Constants.STATE_LOCKED) {
-            mSubscriber.onCacheWordLockedEvent();
+            mSubscriber.onCacheWordLocked();
         } else if (newState == Constants.STATE_UNLOCKED) {
-            mSubscriber.onCacheWordUnLockedEvent();
+            mSubscriber.onCacheWordOpened();
         } else {
             Log.e(TAG, "Unknown CacheWord state entered!");
         }
