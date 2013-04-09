@@ -151,6 +151,8 @@ public class PassphraseSecrets implements ICachedSecrets {
     private static byte[] encryptSecretKey(SecretKey x_passphraseKey, byte[] iv, byte[] data)
             throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+        // TODO(abel) follow this rabbit hole down and wipe it!
         cipher.init(Cipher.ENCRYPT_MODE, x_passphraseKey, new IvParameterSpec(iv));
 
         return cipher.doFinal(data);
