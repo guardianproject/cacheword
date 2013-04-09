@@ -9,6 +9,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -76,6 +77,11 @@ public class Wiper {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public static void wipe(PBEKeySpec spec) {
+        if( spec == null ) return;
+        spec.clearPassword();
     }
 
     /**

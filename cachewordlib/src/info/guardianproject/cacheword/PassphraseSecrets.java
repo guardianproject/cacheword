@@ -107,10 +107,15 @@ public class PassphraseSecrets implements ICachedSecrets {
      */
     private static SecretKeySpec hashPassphrase(char[] x_password, byte[] salt)
             throws GeneralSecurityException {
-        PBEKeySpec spec          = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        PBEKeySpec x_spec = null;
+        try {
+            x_spec                   = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
-        return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+            return new SecretKeySpec(factory.generateSecret(x_spec).getEncoded(), "AES");
+        } finally {
+            Wiper.wipe(x_spec);
+        }
     }
 
     // verification routines: used to unlock secrets
