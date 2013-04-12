@@ -1,8 +1,6 @@
 
 package info.guardianproject.cacheword;
 
-import android.util.Log;
-
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;

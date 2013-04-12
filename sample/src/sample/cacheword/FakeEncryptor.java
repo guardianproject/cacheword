@@ -1,9 +1,6 @@
 package sample.cacheword;
 
 import android.util.Base64;
-import android.util.Log;
-
-import java.nio.CharBuffer;
 
 import javax.crypto.SecretKey;
 

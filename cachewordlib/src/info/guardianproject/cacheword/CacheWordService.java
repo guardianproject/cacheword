@@ -8,8 +8,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -131,17 +129,6 @@ public class CacheWordService extends Service {
             goBackground();
         resetTimeout();
         LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
-    }
-
-    private boolean initializeSecretStorage() {
-        // TODO(abel): init secrets properly
-
-        SharedPreferences prefs = getSharedPreferences(Constants.SHARED_PREFS,
-                Constants.SHARED_PREFS_PRIVATE_MODE);
-        Editor editor = prefs.edit();
-        editor.putString(Constants.SHARED_PREFS_SECRETS, "dummy value");
-        editor.putBoolean(Constants.SHARED_PREFS_INITIALIZED, true);
-        return editor.commit();
     }
 
     private void expirePassphrase() {
