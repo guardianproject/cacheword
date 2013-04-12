@@ -87,9 +87,9 @@ public class Wiper {
     /**
      * Convert a CharBuffer into a UTF-8 encoded ByteBuffer
      */
-    public static ByteBuffer utf8ToBytes(CharBuffer cb) {
-        return Utf8CharSet.encode(cb);
-    }
+//    public static ByteBuffer utf8ToBytes(CharBuffer cb) {
+//        return Utf8CharSet.encode(cb);
+//    }
 
     /**
      * Securely convert a char[] to a UTF-8 encoded byte[]. All intermediate
@@ -97,13 +97,13 @@ public class Wiper {
      *
      * @return a new byte array containing the encoded characters
      */
-    public static byte[] utf8charsToBytes(char[] chars) {
-        ByteBuffer bb = utf8ToBytes(CharBuffer.wrap(chars));
-        byte[] result = new byte[bb.limit()];
-        System.arraycopy(bb.array(), 0, result, 0, bb.limit());
-        wipe(bb.array());
-        return result;
-    }
+//    public static byte[] utf8charsToBytes(char[] chars) {
+//        ByteBuffer bb = utf8ToBytes(CharBuffer.wrap(chars));
+//        byte[] result = new byte[bb.limit()];
+//        System.arraycopy(bb.array(), 0, result, 0, bb.limit());
+//        wipe(bb.array());
+//        return result;
+//    }
 
     /**
      * Securely convert a UTF-8 encoded byte[] to a char[] All intermediate
@@ -111,12 +111,12 @@ public class Wiper {
      *
      * @return a new char array containing the decoded characters
      */
-    public static char[] bytesToUtf8Chars(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        CharBuffer cb = Utf8CharSet.decode(bb);
-        char[] result = new char[cb.limit()];
-        System.arraycopy(cb.array(), 0, result, 0, cb.limit());
-        wipe(cb.array());
-        return result;
-    }
+//    public static char[] bytesToUtf8Chars(byte[] bytes) {
+//        ByteBuffer bb = ByteBuffer.wrap(bytes);
+//        CharBuffer cb = Utf8CharSet.decode(bb);
+//        char[] result = new char[cb.limit()];
+//        System.arraycopy(cb.array(), 0, result, 0, cb.limit());
+//        wipe(cb.array());
+//        return result;
+//    }
 }
