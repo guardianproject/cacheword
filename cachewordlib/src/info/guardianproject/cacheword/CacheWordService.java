@@ -191,7 +191,7 @@ public class CacheWordService extends Service {
     private Notification buildNotification() {
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(this);
-        b.setSmallIcon(R.drawable.ic_menu_key);
+        b.setSmallIcon(R.drawable.cacheword_notification_icon);
         b.setContentTitle(getText(R.string.cacheword_notification_cached_title));
         b.setContentText(getText(R.string.cacheword_notification_cached_message));
         b.setTicker(getText(R.string.cacheword_notification_cached));
