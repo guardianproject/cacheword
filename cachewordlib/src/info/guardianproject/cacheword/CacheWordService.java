@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -22,7 +23,6 @@ public class CacheWordService extends Service {
     private final IBinder mBinder = new CacheWordBinder();
 
     private ICachedSecrets mSecrets;
-    private int mTimeoutMinutes = Constants.DEFAULT_TIMEOUT_MINUTES;
 
     private PendingIntent mTimeoutIntent;
     private Intent mBroadcastIntent = new Intent(Constants.INTENT_NEW_SECRETS);
@@ -85,14 +85,29 @@ public class CacheWordService extends Service {
         handleNewSecrets();
     }
 
+    /**
+     * Retrieve the current timeout setting
+     * @return the timeout in minutes
+     */
     public synchronized int getTimeoutMinutes() {
-        return mTimeoutMinutes;
+        int timeout = getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(Constants.SHARED_PREFS_TIMEOUT, -255);
+        if( timeout == -255)
+            return getResources().getInteger(R.integer.cacheword_timeout_minutes_default);
+        return timeout;
     }
 
+    /**
+     * Sets the timeout, if a timeout is running it will be restarted with the
+     * new timeout value.
+     * @param minutes
+     */
     public synchronized void setTimeoutMinutes(int minutes) {
-        if(minutes != mTimeoutMinutes) {
-            mTimeoutMinutes = minutes;
+        if(minutes >= 0 && minutes != getTimeoutMinutes()) {
+            Editor ed = getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
+            ed.putInt(Constants.SHARED_PREFS_TIMEOUT, minutes);
+            ed.commit();
             resetTimeout();
+            Log.d(TAG, "setTimeoutMinutes() minutes=" + minutes);
         }
     }
 
@@ -106,11 +121,13 @@ public class CacheWordService extends Service {
 
     public synchronized void attachSubscriber() {
         mSubscriberCount++;
+        Log.d(TAG, "attachSubscriber(): " + mSubscriberCount);
         resetTimeout();
     }
 
     public synchronized void detachSubscriber() {
         mSubscriberCount--;
+        Log.d(TAG, "detachSubscriber(): " + mSubscriberCount);
         resetTimeout();
     }
 
@@ -156,7 +173,7 @@ public class CacheWordService extends Service {
         int timeoutMinutes = getTimeoutMinutes();
         boolean timeoutEnabled = timeoutMinutes > 0;
 
-        Log.d(TAG, "timeout enabled: " + timeoutEnabled);
+        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", minutes="+timeoutMinutes);
         Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
 
         if (timeoutEnabled && mSubscriberCount == 0) {

@@ -142,6 +142,18 @@ public class CacheWordHandler {
         return mCacheWordService.isLocked();
     }
 
+    public void setTimeoutMinutes(int minutes) throws IllegalStateException {
+        if(!isCacheWordConnected())
+            throw new IllegalStateException("CacheWord not connected");
+        mCacheWordService.setTimeoutMinutes(minutes);
+    }
+    public int getTimeoutMinutes() throws IllegalStateException {
+        if(!isCacheWordConnected())
+            throw new IllegalStateException("CacheWord not connected");
+        return mCacheWordService.getTimeoutMinutes();
+    }
+
+
     // / private helpers
     // /////////////////////////////////////////
 
@@ -186,6 +198,7 @@ public class CacheWordHandler {
     private boolean isPrepared() {
         return isCacheWordConnected() && isCacheWordInitialized();
     }
+
 
     private BroadcastReceiver mCacheWordReceiver = new BroadcastReceiver() {
         @Override

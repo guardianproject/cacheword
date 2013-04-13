@@ -203,6 +203,17 @@ class YourClass implements ICacheWordSubscriber
 }
 ```
 
+### Configuration
+
+Configuration is entirely optional as sane defaults are provided for every
+option.
+
+For compile time configuration options, define the resources in XML (see
+[`res/values/cacheword.xml`](cachewordlib/res/values/cacheword.xml) for the
+available options).
+
+Runtime configuration options can be set via the preferences.
+
 ### SQLCipher Support
 
 If you use SQLCipher for encrypted database storage you should use CacheWord's
