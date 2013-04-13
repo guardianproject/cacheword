@@ -59,9 +59,9 @@ public class CacheWordHandler {
          * starting - ensures the cacheword service will outlive the activity
          * binding  - allows us to notify  the service of active subscribers
          */
+        if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE))
+            checkCacheWordState();
         mContext.startService(cacheWordIntent);
-        mContext.bindService(cacheWordIntent, mCacheWordServiceConnection,
-                Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -170,7 +170,7 @@ public class CacheWordHandler {
             Log.d(TAG, "checkCacheWordState: STATE_UNINITIALIZED");
         } else if (isCacheWordConnected() && mCacheWordService.isLocked()) {
             newState = Constants.STATE_LOCKED;
-            Log.d(TAG, "checkCacheWordState: STATE_LOCKED");
+            Log.d(TAG, "checkCacheWordState: STATE_LOCKED, but isCacheWordConnected()=="+isCacheWordConnected());
         } else {
             newState = Constants.STATE_UNLOCKED;
             Log.d(TAG, "checkCacheWordState: STATE_UNLOCKED");

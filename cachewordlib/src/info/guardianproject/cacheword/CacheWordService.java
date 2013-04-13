@@ -22,7 +22,7 @@ public class CacheWordService extends Service {
 
     private final IBinder mBinder = new CacheWordBinder();
 
-    private ICachedSecrets mSecrets;
+    private ICachedSecrets mSecrets = null;
 
     private PendingIntent mTimeoutIntent;
     private Intent mBroadcastIntent = new Intent(Constants.INTENT_NEW_SECRETS);
@@ -31,31 +31,52 @@ public class CacheWordService extends Service {
     private boolean mIsForegrounded = false;
 
     @Override
-    public void onStart(Intent intent, int startId) {
-        if (intent == null)
-            return;
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            Log.d(TAG, "onStart: null intent");
+            return START_NOT_STICKY;
+        }
 
         String action = intent.getAction();
-        if (action == null)
-            return;
+        if (action == null) {
+            Log.d(TAG, "onStart: null action");
+            return START_NOT_STICKY;
+        }
 
-        Log.d(TAG, "started with intent " + action);
+        Log.d(TAG, "onStart: with intent " + action);
 
         if (action.equals(Constants.INTENT_PASS_EXPIRED)) {
             expirePassphrase();
         }
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate");
         super.onCreate();
+
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.d(TAG, "onTaskRemoved()");
+        if(!mIsForegrounded) {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.cancel(Constants.SERVICE_BACKGROUND_ID);
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if( mSecrets != null )
+        if( mSecrets != null ) {
+            Log.d(TAG, "onDestroy() killed secrets");
             mSecrets.destroy();
+            mSecrets = null;
+        } else {
+            Log.d(TAG, "onDestroy() secrets already null");
+        }
     }
 
     @Override
@@ -167,6 +188,7 @@ public class CacheWordService extends Service {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.cancel(Constants.SERVICE_BACKGROUND_ID);
         }
+        stopSelf();
     }
 
     private void resetTimeout() {
