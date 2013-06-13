@@ -29,18 +29,10 @@ public class CacheWordHandler {
     /**
      * @param context must implement the ICacheWordSubscriber interface
      */
-    public CacheWordHandler(Context context) {
+    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
         mContext = context;
-
-        try {
-            // shame we have to do this at runtime.
-            // must ponder a way to enforce this relationship at compile time
-            mSubscriber = (ICacheWordSubscriber) context;
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException(
-                    "CacheWordHandler passed invalid Activity. Expects class that implements ICacheWordSubscriber");
-        }
-
+        mSubscriber = subscriber;
+        
         LocalBroadcastManager.getInstance(mContext).registerReceiver(
                 mCacheWordReceiver,
                 new IntentFilter(Constants.INTENT_NEW_SECRETS));
@@ -61,6 +53,7 @@ public class CacheWordHandler {
          */
         if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE))
             checkCacheWordState();
+       
         mContext.startService(cacheWordIntent);
     }
 

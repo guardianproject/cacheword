@@ -4,8 +4,8 @@ import android.content.Context;
 
 public class CacheWordActivityHandler extends CacheWordHandler {
 
-    public CacheWordActivityHandler(Context context) {
-        super(context);
+    public CacheWordActivityHandler(Context context, ICacheWordSubscriber sub) {
+        super(context, sub);
     }
 
     /**
