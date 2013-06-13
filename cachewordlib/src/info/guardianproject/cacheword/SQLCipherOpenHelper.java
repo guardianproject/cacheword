@@ -82,7 +82,7 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * @param raw_key a 32 byte array
      * @return the encoded key
      */
-    private static String encodeRawKey(byte[] raw_key) {
+    public static String encodeRawKey(byte[] raw_key) {
         if( raw_key.length != 32 ) throw new IllegalArgumentException("provided key not 32 bytes (256 bits) wide");
 
         final String kPrefix;
