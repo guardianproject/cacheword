@@ -2,14 +2,17 @@ CacheWord
 =========
 
 CacheWord is an Android library project for passphrase caching and management.
-It helps app developers securely generate, store, and access secrets derived from a user's passphrase.
+It helps app developers securely generate, store, and access secrets derived
+from a user's passphrase.
 
 **CacheWord is still under development. Proceed with caution**
 
 Broadly speaking this library assists developers with two related problems:
 
-1. Secrets Management: how the secret key material for your app is generated, stored, and accessed
-2. Passphrase Caching: store the passphrase in memory to avoid constantly prompting the user
+1. Secrets Management: how the secret key material for your app is generated,
+   stored, and accessed
+2. Passphrase Caching: store the passphrase in memory to avoid constantly
+   prompting the user
 
 CacheWord manages key derivation, verification, persistence, passphrase
 resetting, and caching secret key material in memory.
@@ -234,6 +237,15 @@ used by other libraries like [SQLCipher][sqlcipher] or [IOCipher][iocipher]
 In this case the user's password is used to encrypt (after being hashed of
 course) the generated encryption key, and is never written to disk.
 
+# Issues & Support
+
+Bug? Please report any issues at [our project issue tracker][issues], no
+account required!
+
+Question? Find us on IRC or our mailing list.
+
+* IRC: #guardianproject @ freenode
+* Mailing List: [guardian-dev](https://lists.mayfirst.org/mailman/listinfo/guardian-dev)
 
 # Library Development
 
@@ -246,3 +258,4 @@ See [SECURITY.md](SECURITY.md)
 [notecipher]: https://github.com/guardianproject/notepadbot/tree/cacheword
 [sqlcipher]: http://sqlcipher.net/sqlcipher-for-android/
 [iocipher]: https://guardianproject.info/code/IOCipher
+[issues]: https://dev.guardianproject.info/projects/cacheword/issues/new
