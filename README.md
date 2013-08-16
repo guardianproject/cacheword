@@ -217,6 +217,12 @@ available options).
 
 Runtime configuration options can be set via the preferences.
 
+Configurable options are:
+
+* Whether to show a persistent unlocked notification
+* Every aspect of the notification (title, message, icon, etc)
+* Timeout length after your app leaves the foreground
+
 ### SQLCipher Support
 
 If you use SQLCipher for encrypted database storage you should use CacheWord's

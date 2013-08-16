@@ -17,6 +17,7 @@ public class Constants {
     public static final String SHARED_PREFS_SECRETS = "encrypted_secrets";
     public static final String SHARED_PREFS_FOREGROUND = "foreground";
     public static final String SHARED_PREFS_TIMEOUT = "cacheword_timeout";
+    public static final String SHARED_PREFS_USE_NOTIFICATION = "enable_notification";
 
     public static final int SERVICE_FOREGROUND_ID = 81231;
     public static final int SERVICE_BACKGROUND_ID = 13218;

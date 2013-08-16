@@ -109,6 +109,10 @@ public class CacheWordService extends Service {
 
     /**
      * Retrieve the current timeout setting
+     * The default value can be changed by copying res/values/cacheword.xml to your project
+     * and editing it.
+     *
+     * The value is stored in  SharedPreferences, so it will persist.
      * @return the timeout in minutes
      */
     public synchronized int getTimeoutMinutes() {
@@ -121,6 +125,10 @@ public class CacheWordService extends Service {
     /**
      * Sets the timeout, if a timeout is running it will be restarted with the
      * new timeout value.
+     * The default value can be changed by copying res/values/cacheword.xml to your project
+     * and editing it.
+     *
+     * The value is stored in  SharedPreferences, so it will persist.
      * @param minutes
      */
     public synchronized void setTimeoutMinutes(int minutes) {
@@ -130,6 +138,38 @@ public class CacheWordService extends Service {
             ed.commit();
             resetTimeout();
             Log.d(TAG, "setTimeoutMinutes() minutes=" + minutes);
+        }
+    }
+
+    /**
+     * Retrieve whether a notification is shown when CacheWord is unlocked
+     * The default value can be changed by copying res/values/cacheword.xml to your project
+     * and editing it.
+     *
+     * The value is stored in  SharedPreferences, so it will persist.
+     * @return true if the notification is enabled
+     */
+    public synchronized boolean getNotificationEnabled() {
+        boolean use_notification = getResources().getBoolean(R.bool.cacheword_use_notification_default);
+        use_notification = getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_USE_NOTIFICATION, use_notification);
+        return use_notification;
+    }
+
+    /**
+     * Set whether to show a notification when CacheWord is unlocked.
+     * The default value can be changed by copying res/values/cacheword.xml to your project
+     * and editing it.
+     *
+     * The value is stored in  SharedPreferences, so it will persist.
+     * @param enabled
+     */
+    public synchronized void setEnableNotification(boolean enabled) {
+        if(enabled!= getNotificationEnabled()) {
+            Editor ed = getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
+            ed.putBoolean(Constants.SHARED_PREFS_USE_NOTIFICATION, enabled);
+            ed.commit();
+            resetTimeout();
+            Log.d(TAG, "setEnableNotification() enabled=" + enabled);
         }
     }
 
@@ -267,8 +307,10 @@ public class CacheWordService extends Service {
             mIsForegrounded = false;
         }
 
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(Constants.SERVICE_BACKGROUND_ID, buildNotification());
+        if( getNotificationEnabled() ) {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.notify(Constants.SERVICE_BACKGROUND_ID, buildNotification());
+        }
 
     }
 
