@@ -22,6 +22,8 @@ public class Constants {
     public static final int SERVICE_FOREGROUND_ID = 81231;
     public static final int SERVICE_BACKGROUND_ID = 13218;
 
+    public final static int VERSION_ZERO = 0;
+
     public static final int STATE_UNKNOWN = -1;
     public static final int STATE_UNINITIALIZED = 0;
     public static final int STATE_LOCKED = 1;
@@ -29,10 +31,11 @@ public class Constants {
 
     // Crypto vars
 
-    public static final int SALT_LENGTH = 16;
-    public static final int AES_KEY_LENGTH = 256;
-    public static final int GCM_IV_LENGTH = 12; // 96 bits
+    public static final int SALT_LENGTH       = 16;
+    public static final int AES_KEY_LENGTH    = 256;
+    public static final int GCM_IV_LENGTH     = 12; // 96 bits
+    public static final int VERSION_LENGTH    = 4; // length of integer in the JVM
     public static final int PBKDF2_ITER_COUNT = 100;
-    public static final int PBKDF2_KEY_LEN = 128;
+    public static final int PBKDF2_KEY_LEN    = 128;
 
 }

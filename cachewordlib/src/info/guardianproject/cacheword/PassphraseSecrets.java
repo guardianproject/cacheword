@@ -63,7 +63,7 @@ public class PassphraseSecrets implements ICachedSecrets {
             x_passphraseKey           = hashPassphrase(x_passphrase, salt);
             SecretKey secretKey       = generateSecretKey();
             byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, secretKey.getEncoded());
-            SerializedSecrets ss      = new SerializedSecrets(salt, iv, encryptedSecretKey);
+            SerializedSecretsV1 ss    = new SerializedSecretsV1(Constants.VERSION_ZERO, salt, iv, encryptedSecretKey);
             byte[] preparedSecret     = ss.concatenate();
             boolean saved             = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
 
@@ -83,13 +83,14 @@ public class PassphraseSecrets implements ICachedSecrets {
             throws GeneralSecurityException {
         byte[] x_rawSecretKey = null;
         try {
-            byte[] preparedSecret = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
-            SerializedSecrets ss  = new SerializedSecrets(preparedSecret);
+            byte[] preparedSecret  = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
+            SerializedSecretsV1 ss = new SerializedSecretsV1(preparedSecret);
             ss.parse();
 
             byte[] salt                   = ss.salt;
             byte[] iv                     = ss.iv;
             byte[] ciphertext             = ss.ciphertext;
+//            int    version                = ss.version; // TODO unused for now
             SecretKeySpec x_passphraseKey = hashPassphrase(x_passphrase, salt);
             x_rawSecretKey                = decryptSecretKey(x_passphraseKey, iv, ciphertext);
 
@@ -196,27 +197,30 @@ public class PassphraseSecrets implements ICachedSecrets {
      *
      * This class does not handle sensitive data.
      */
-    private static class SerializedSecrets {
+    private static class SerializedSecretsV1 {
+        public int version;
         public byte[] salt;
         public byte[] iv;
         public byte[] ciphertext;
         public byte[] serialized;
 
-        public SerializedSecrets(byte[] salt, byte[] iv, byte[] ciphertext) {
+        public SerializedSecretsV1(int version, byte[] salt, byte[] iv, byte[] ciphertext) {
+            this.version = version;
             this.salt = salt;
             this.iv = iv;
             this.ciphertext = ciphertext;
         }
 
-        public SerializedSecrets(byte[] serialized) {
+        public SerializedSecretsV1(byte[] serialized) {
             this.serialized = serialized;
         }
 
         public void parse() {
             salt = new byte[Constants.SALT_LENGTH];
             iv = new byte[Constants.GCM_IV_LENGTH];
-            ciphertext = new byte[serialized.length - Constants.SALT_LENGTH - Constants.GCM_IV_LENGTH];
+            ciphertext = new byte[serialized.length - Constants.SALT_LENGTH - Constants.GCM_IV_LENGTH - Constants.VERSION_LENGTH];
             ByteBuffer bb = ByteBuffer.wrap(serialized);
+            bb.getInt(version);
             bb.get(salt);
             bb.get(iv);
             bb.get(ciphertext);
@@ -225,6 +229,7 @@ public class PassphraseSecrets implements ICachedSecrets {
         public byte[] concatenate() {
             serialized = new byte[salt.length + iv.length + ciphertext.length];
             ByteBuffer bb = ByteBuffer.wrap(serialized);
+            bb.putInt(version);
             bb.put(salt);
             bb.put(iv);
             bb.put(ciphertext);
