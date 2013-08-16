@@ -8,7 +8,10 @@ import android.util.Base64;
 
 public class SecretsManager {
 
+    private static boolean prngFixesApplied = false;
+
     public static boolean isInitialized(Context ctx) {
+        possiblyApplyPRNGFixes(ctx);
         return getPrefs(ctx).getBoolean(Constants.SHARED_PREFS_INITIALIZED, false);
     }
 
@@ -29,6 +32,13 @@ public class SecretsManager {
         Editor e = getPrefs(ctx).edit();
         e.putBoolean(Constants.SHARED_PREFS_INITIALIZED, initialized);
         return e.commit();
+    }
+
+    private static void possiblyApplyPRNGFixes(Context ctx) {
+        if( !prngFixesApplied && ctx.getResources().getBoolean(R.bool.cacheword_apply_android_securerandom_fixes) ) {
+            PRNGFixes.apply();
+            prngFixesApplied = true;
+        }
     }
 
     private static SharedPreferences getPrefs(Context ctx) {

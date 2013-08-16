@@ -33,10 +33,6 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class PassphraseSecrets implements ICachedSecrets {
 
-    static {
-        PRNGFixes.apply();
-    }
-
     private static final String TAG = "PassphraseSecrets";
     private final SecretKey mSecretKey;
 
