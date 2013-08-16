@@ -193,7 +193,7 @@ public class CacheWordService extends Service {
 
     private void resetTimeout() {
         int timeoutMinutes = getTimeoutMinutes();
-        boolean timeoutEnabled = timeoutMinutes > 0;
+        boolean timeoutEnabled = timeoutMinutes >= 0;
 
         Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", minutes="+timeoutMinutes);
         Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
@@ -211,6 +211,11 @@ public class CacheWordService extends Service {
      * @param interval in milliseconds
      */
     private void startTimeout(long interval) {
+        if( interval <= 0 ) {
+            Log.d(TAG, "immediate timeout");
+            expirePassphrase();
+            return;
+        }
         Log.d(TAG, "starting timeout: " + interval);
 
         if (mTimeoutIntent == null) {
@@ -268,6 +273,7 @@ public class CacheWordService extends Service {
 
     public class CacheWordBinder extends Binder implements ICacheWordBinder {
 
+        @Override
         public CacheWordService getService() {
             Log.d("CacheWordBinder", "giving service");
             return CacheWordService.this;
