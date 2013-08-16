@@ -218,16 +218,16 @@ public class PassphraseSecrets implements ICachedSecrets {
         public void parse() {
             salt = new byte[Constants.SALT_LENGTH];
             iv = new byte[Constants.GCM_IV_LENGTH];
-            ciphertext = new byte[serialized.length - Constants.SALT_LENGTH - Constants.GCM_IV_LENGTH - Constants.VERSION_LENGTH];
+            ciphertext = new byte[serialized.length - (Constants.SALT_LENGTH + Constants.GCM_IV_LENGTH + Constants.VERSION_LENGTH)];
             ByteBuffer bb = ByteBuffer.wrap(serialized);
-            bb.getInt(version);
+            version = bb.getInt();
             bb.get(salt);
             bb.get(iv);
             bb.get(ciphertext);
         }
 
         public byte[] concatenate() {
-            serialized = new byte[salt.length + iv.length + ciphertext.length];
+            serialized = new byte[Constants.VERSION_LENGTH + Constants.SALT_LENGTH + Constants.GCM_IV_LENGTH + ciphertext.length];
             ByteBuffer bb = ByteBuffer.wrap(serialized);
             bb.putInt(version);
             bb.put(salt);
