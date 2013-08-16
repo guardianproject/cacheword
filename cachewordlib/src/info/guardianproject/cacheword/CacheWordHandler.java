@@ -26,6 +26,11 @@ public class CacheWordHandler {
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
 
+    // we use this boolean to help prevent a race condition
+    // where we a request connection to the service
+    // but then are told to disconnect, before the connection completes
+    private boolean mConnected = false;
+
     /**
      * @param context must implement the ICacheWordSubscriber interface
      */
@@ -44,6 +49,9 @@ public class CacheWordHandler {
      * CacheWord events.
      */
     public void connectToService() {
+        if( isCacheWordConnected() )
+            return;
+
         Intent cacheWordIntent = CacheWordService
                 .getBlankServiceIntent(mContext.getApplicationContext());
         /* We start AND bind the service
@@ -51,8 +59,12 @@ public class CacheWordHandler {
          * starting - ensures the cacheword service will outlive the activity
          * binding  - allows us to notify  the service of active subscribers
          */
-        if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE))
+        synchronized (this) {
+            mConnected = true;
+        }
+        if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
             checkCacheWordState();
+        }
 
         mContext.startService(cacheWordIntent);
     }
@@ -61,11 +73,14 @@ public class CacheWordHandler {
      * Disconnect from the CacheWord service. No further CacheWord events will be received.
      */
     public void disconnect() {
-        if (mCacheWordService != null) {
+        synchronized (this) {
+            mConnected = false;
+        }
+        if( mCacheWordService != null ) {
             mCacheWordService.detachSubscriber();
-            mContext.unbindService(mCacheWordServiceConnection);
             mCacheWordService = null;
         }
+        mContext.unbindService(mCacheWordServiceConnection);
     }
 
     /**
@@ -182,6 +197,10 @@ public class CacheWordHandler {
         }
     }
 
+    /**
+     *
+     * @return true if cacheword is connected and available for calling
+     */
     private boolean isCacheWordConnected() {
         return mCacheWordService != null;
     }
@@ -199,7 +218,7 @@ public class CacheWordHandler {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_NEW_SECRETS)) {
-                if( mCacheWordService != null ) {
+                if( isCacheWordConnected() ) {
                     checkCacheWordState();
                 }
             }
@@ -213,15 +232,23 @@ public class CacheWordHandler {
             ICacheWordBinder cwBinder = (ICacheWordBinder) binder;
             if (cwBinder != null) {
                 Log.d(TAG, "Connected to CacheWordService");
-                mCacheWordService = cwBinder.getService();
-                mCacheWordService.attachSubscriber();
-                checkCacheWordState();
+                synchronized (CacheWordHandler.this) {
+                    if( mConnected ) {
+                        mCacheWordService = cwBinder.getService();
+                        mCacheWordService.attachSubscriber();
+                        checkCacheWordState();
+                    } else {
+                        // race condition hit
+                        mContext.unbindService(mCacheWordServiceConnection);
+                    }
+                }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "onServiceDisonnected");
+            mContext.unbindService(mCacheWordServiceConnection);
             mCacheWordService = null;
             // calling detachSubscriber() here doesn't work
             // because the service connection has already been lost

@@ -83,6 +83,7 @@ public class CacheWordService extends Service {
     public boolean onUnbind(Intent intent) {
         // note: this method is called when ALL clients
         // have unbound, and not per-client.
+        resetTimeout();
         return super.onUnbind(intent);
     }
     @Override
