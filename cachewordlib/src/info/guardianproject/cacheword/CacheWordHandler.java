@@ -32,7 +32,7 @@ public class CacheWordHandler {
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
         mContext = context;
         mSubscriber = subscriber;
-        
+
         LocalBroadcastManager.getInstance(mContext).registerReceiver(
                 mCacheWordReceiver,
                 new IntentFilter(Constants.INTENT_NEW_SECRETS));
@@ -53,7 +53,7 @@ public class CacheWordHandler {
          */
         if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE))
             checkCacheWordState();
-       
+
         mContext.startService(cacheWordIntent);
     }
 
@@ -64,6 +64,7 @@ public class CacheWordHandler {
         if (mCacheWordService != null) {
             mCacheWordService.detachSubscriber();
             mContext.unbindService(mCacheWordServiceConnection);
+            mCacheWordService = null;
         }
     }
 
@@ -177,6 +178,7 @@ public class CacheWordHandler {
             mSubscriber.onCacheWordOpened();
         } else {
             Log.e(TAG, "Unknown CacheWord state entered!");
+
         }
     }
 
@@ -197,8 +199,9 @@ public class CacheWordHandler {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_NEW_SECRETS)) {
-                Log.d(TAG, "New secrets received");
-                checkCacheWordState();
+                if( mCacheWordService != null ) {
+                    checkCacheWordState();
+                }
             }
         }
     };
@@ -218,9 +221,8 @@ public class CacheWordHandler {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mCacheWordServiceConnection = null;
+            Log.d(TAG, "onServiceDisonnected");
             mCacheWordService = null;
-            checkCacheWordState();
             // calling detachSubscriber() here doesn't work
             // because the service connection has already been lost
         }
