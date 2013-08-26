@@ -31,6 +31,15 @@ public class CacheWordHandler {
     // but then are told to disconnect, before the connection completes
     private boolean mConnected = false;
 
+    // we need to actually track if we're bound or not,
+    // regardless of what the client things (that's what mConnected is for)
+    // so that we don't call unBind when not connected, doing so causes
+    // crashes like:
+    //  java.lang.IllegalArgumentException:
+    //     Service not registered: info.guardianproject.cacheword.CacheWordHandler
+    private boolean mBound = false;
+
+
     /**
      * @param context must implement the ICacheWordSubscriber interface
      */
@@ -63,6 +72,7 @@ public class CacheWordHandler {
             mConnected = true;
         }
         if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
+            mBound = true;
             checkCacheWordState();
         }
 
@@ -80,7 +90,10 @@ public class CacheWordHandler {
             mCacheWordService.detachSubscriber();
             mCacheWordService = null;
         }
-        mContext.unbindService(mCacheWordServiceConnection);
+        if( mBound ) {
+            mContext.unbindService(mCacheWordServiceConnection);
+            mBound = false;
+        }
     }
 
     /**
@@ -239,7 +252,10 @@ public class CacheWordHandler {
                         checkCacheWordState();
                     } else {
                         // race condition hit
-                        mContext.unbindService(mCacheWordServiceConnection);
+                        if( mBound ) {
+                            mContext.unbindService(mCacheWordServiceConnection);
+                            mBound = false;
+                        }
                     }
                 }
             }
@@ -248,7 +264,10 @@ public class CacheWordHandler {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "onServiceDisonnected");
-            mContext.unbindService(mCacheWordServiceConnection);
+            if( mBound ) {
+                mContext.unbindService(mCacheWordServiceConnection);
+                mBound = false;
+            }
             mCacheWordService = null;
             // calling detachSubscriber() here doesn't work
             // because the service connection has already been lost
