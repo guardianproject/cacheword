@@ -207,7 +207,8 @@ public class CacheWordService extends Service {
         else
             goBackground();
         resetTimeout();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
+        if(mSubscriberCount > 0)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
     }
 
     private void expirePassphrase() {
@@ -220,7 +221,8 @@ public class CacheWordService extends Service {
             }
         }
 
-        LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
+        if(mSubscriberCount > 0)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
 
         if( mIsForegrounded ) {
             stopForeground(true);
@@ -239,7 +241,7 @@ public class CacheWordService extends Service {
         Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", minutes="+timeoutMinutes);
         Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
 
-        if (timeoutEnabled && mSubscriberCount == 0) {
+        if (timeoutEnabled && mSubscriberCount <= 0) {
             startTimeout(timeoutMinutes * 60 * 1000);
         } else {
             Log.d(TAG, "disabled timeout alarm");
