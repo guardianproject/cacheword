@@ -116,9 +116,8 @@ public class CacheWordService extends Service {
      * @return the timeout in minutes
      */
     public synchronized int getTimeoutMinutes() {
-        int timeout = getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(Constants.SHARED_PREFS_TIMEOUT, -255);
-        if( timeout == -255)
-            return getResources().getInteger(R.integer.cacheword_timeout_minutes_default);
+    	int defTimeout = getResources().getInteger(R.integer.cacheword_timeout_minutes_default);
+        int timeout = getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(Constants.SHARED_PREFS_TIMEOUT, defTimeout);
         return timeout;
     }
 
@@ -138,6 +137,38 @@ public class CacheWordService extends Service {
             ed.commit();
             resetTimeout();
             Log.d(TAG, "setTimeoutMinutes() minutes=" + minutes);
+        }
+    }
+    
+    /**
+     * Retrieve whether the notification shown when CacheWord is unlocked 
+     * should vibrate device or not.
+     * The default value can be changed by copying res/values/cacheword.xml to your project
+     * and editing it.
+     *
+     * The value is stored in  SharedPreferences, so it will persist.
+     * @return true if vibration is allowed, false otherwise
+     */
+    public synchronized boolean getVibrateSetting() {
+    	boolean defValue = getResources().getBoolean(R.bool.cacheword_vibrate_default);
+        return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_VIBRATE, defValue);
+    }
+
+    /**
+     * Set whether the notification shown when CacheWord is unlocked 
+     * should vibrate device or not.
+     * The default value can be changed by copying res/values/cacheword.xml to your project
+     * and editing it.
+     *
+     * The value is stored in  SharedPreferences, so it will persist.
+     * @param vibrate
+     */
+    public synchronized void setVibrateSetting(boolean vibrate) {
+        if(vibrate != getVibrateSetting()) {
+            Editor ed = getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
+            ed.putBoolean(Constants.SHARED_PREFS_VIBRATE, vibrate);
+            ed.commit();
+            Log.d(TAG, "setVibrateSetting() vibrate = " + vibrate);
         }
     }
 
@@ -282,7 +313,8 @@ public class CacheWordService extends Service {
         b.setContentTitle(getText(R.string.cacheword_notification_cached_title));
         b.setContentText(getText(R.string.cacheword_notification_cached_message));
         b.setTicker(getText(R.string.cacheword_notification_cached));
-        b.setDefaults(Notification.DEFAULT_VIBRATE);
+        if(getVibrateSetting())
+        	b.setDefaults(Notification.DEFAULT_VIBRATE);
         b.setWhen(System.currentTimeMillis());
         b.setOngoing(true);
         Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());

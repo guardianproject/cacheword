@@ -175,6 +175,16 @@ public class CacheWordHandler {
         return mCacheWordService.getTimeoutMinutes();
     }
 
+    public void setVibrateSetting(boolean vibrate) throws IllegalStateException {
+        if(!isCacheWordConnected())
+            throw new IllegalStateException("CacheWord not connected");
+        mCacheWordService.setVibrateSetting(vibrate);
+    }
+    public boolean getVibrateSetting() throws IllegalStateException {
+        if(!isCacheWordConnected())
+            throw new IllegalStateException("CacheWord not connected");
+        return mCacheWordService.getVibrateSetting();
+    }
 
     // / private helpers
     // /////////////////////////////////////////
