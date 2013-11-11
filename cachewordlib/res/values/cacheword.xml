@@ -34,10 +34,12 @@
 
      -->
     <bool name="cacheword_apply_android_securerandom_fixes">true</bool>
-    
+
     <!--
           Vibrate: Whether to vibrate phone when password is cached or not.
                    This is the default setting, and can be changed at runtime via a preference
+                   Don't forget to add the vibrate permission!
+                    <uses-permission android:name="android.permission.VIBRATE" />
     -->
     <bool name="cacheword_vibrate_default">true</bool>
 </resources>

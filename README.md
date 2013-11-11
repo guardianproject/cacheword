@@ -222,6 +222,7 @@ Configurable options are:
 * Whether to show a persistent unlocked notification
 * Every aspect of the notification (title, message, icon, etc)
 * Timeout length after your app leaves the foreground
+* Vibration on successful unlock
 
 ### SQLCipher Support
 
