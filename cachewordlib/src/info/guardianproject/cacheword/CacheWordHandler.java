@@ -1,6 +1,7 @@
 
 package info.guardianproject.cacheword;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +26,7 @@ public class CacheWordHandler {
     private Context mContext;
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
+    private CacheWordSettings mSettings;
 
     // Tracking service connection state is a bit of a mess.
     // There are three tricky situations:
@@ -58,31 +60,52 @@ public class CacheWordHandler {
     }
 
     /**
+     * Initializes the CacheWordHandler with the default CacheWordSettings
+     * @see CacheWordHandler(Context context, CacheWordSettings settings)
+     * @param context
+     */
+    public CacheWordHandler(Context context) {
+        this(context, (ICacheWordSubscriber) context, null);
+    }
+    /**
+     * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects.
+     * Uses default CacheWordSettings
+     */
+    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
+        this(context, subscriber, null);
+    }
+
+    /**
      * Initializes the CacheWordHandler. Use this form when your Context
      * (e.g, the Activity) also implements the ICacheWordSubscriber interface.
      * Context MUST impement ICacheWordSubscriber, else IllegalArgumentException will be thrown at runtime
      * @param context must implement the ICacheWordSubscriber interface
+     * @param settings the settings for CacheWord
      */
-    public CacheWordHandler(Context context) {
+    public CacheWordHandler(Context context, CacheWordSettings settings) {
 
         try {
             // shame we have to do this at runtime.
             // must ponder a way to enforce this relationship at compile time
             mSubscriber = (ICacheWordSubscriber) context;
             mContext = context;
+            mSettings = settings;
         } catch (ClassCastException e) {
             throw new IllegalArgumentException(
                     "CacheWordHandler passed invalid Activity. Expects class that implements ICacheWordSubscriber");
         }
     }
 
-
     /**
      * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects
+     * @param context your application's  or activity's context
+     * @param subscriber the object to notify of CW events
+     * @param settings the settings for CacheWord
      */
-    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
+    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber, CacheWordSettings settings) {
         mContext = context;
         mSubscriber = subscriber;
+        mSettings = settings;
     }
 
     /**
@@ -199,23 +222,30 @@ public class CacheWordHandler {
     public void setTimeoutMinutes(int minutes) throws IllegalStateException {
         if(!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        mCacheWordService.setTimeoutMinutes(minutes);
+        mCacheWordService.settings().setTimeoutMinutes(minutes);
     }
     public int getTimeoutMinutes() throws IllegalStateException {
         if(!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        return mCacheWordService.getTimeoutMinutes();
+        return mCacheWordService.settings().getTimeoutMinutes();
     }
 
     public void setVibrateSetting(boolean vibrate) throws IllegalStateException {
         if(!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        mCacheWordService.setVibrateSetting(vibrate);
+        mCacheWordService.settings().setVibrateSetting(vibrate);
     }
     public boolean getVibrateSetting() throws IllegalStateException {
         if(!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        return mCacheWordService.getVibrateSetting();
+        return mCacheWordService.settings().getVibrateSetting();
+    }
+
+    public void setNotificationIntent(PendingIntent intent) {
+        if(!isCacheWordConnected())
+            throw new IllegalStateException("CacheWord not connected");
+
+        mCacheWordService.settings().setNotificationIntent(intent);
     }
 
     // / private helpers
@@ -303,6 +333,8 @@ public class CacheWordHandler {
                         mCacheWordService = cwBinder.getService();
                         registerBroadcastReceiver();
                         mCacheWordService.attachSubscriber();
+                        if(mSettings != null)
+                            mCacheWordService.setSettings(mSettings);
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
                         mBoundState = BindState.BIND_COMPLETED;
                         checkCacheWordState();

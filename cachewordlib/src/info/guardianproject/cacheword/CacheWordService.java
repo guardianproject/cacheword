@@ -8,7 +8,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences.Editor;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -16,7 +15,10 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-public class CacheWordService extends Service {
+import java.util.Observable;
+import java.util.Observer;
+
+public class CacheWordService extends Service implements Observer {
 
     private final static String TAG = "CacheWordService";
 
@@ -29,6 +31,8 @@ public class CacheWordService extends Service {
 
     private int mSubscriberCount = 0;
     private boolean mIsForegrounded = false;
+
+    private CacheWordSettings mSettings = null;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -55,7 +59,8 @@ public class CacheWordService extends Service {
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
-
+        mSettings = new CacheWordSettings(this);
+        mSettings.addObserver(this);
     }
 
     @Override
@@ -104,104 +109,15 @@ public class CacheWordService extends Service {
         Log.d(TAG, "setCachedSecrets()");
         mSecrets = secrets;
 
-        handleNewSecrets();
+        handleNewSecrets(true);
     }
 
-    /**
-     * Retrieve the current timeout setting
-     * The default value can be changed by copying res/values/cacheword.xml to your project
-     * and editing it.
-     *
-     * The value is stored in  SharedPreferences, so it will persist.
-     * @return the timeout in minutes
-     */
-    public synchronized int getTimeoutMinutes() {
-    	int defTimeout = getResources().getInteger(R.integer.cacheword_timeout_minutes_default);
-        int timeout = getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(Constants.SHARED_PREFS_TIMEOUT, defTimeout);
-        return timeout;
+    public CacheWordSettings settings() {
+        return mSettings;
     }
 
-    /**
-     * Sets the timeout, if a timeout is running it will be restarted with the
-     * new timeout value.
-     * The default value can be changed by copying res/values/cacheword.xml to your project
-     * and editing it.
-     *
-     * The value is stored in  SharedPreferences, so it will persist.
-     * @param minutes
-     */
-    public synchronized void setTimeoutMinutes(int minutes) {
-        if(minutes >= 0 && minutes != getTimeoutMinutes()) {
-            Editor ed = getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
-            ed.putInt(Constants.SHARED_PREFS_TIMEOUT, minutes);
-            ed.commit();
-            resetTimeout();
-            Log.d(TAG, "setTimeoutMinutes() minutes=" + minutes);
-        }
-    }
-    
-    /**
-     * Retrieve whether the notification shown when CacheWord is unlocked 
-     * should vibrate device or not.
-     * The default value can be changed by copying res/values/cacheword.xml to your project
-     * and editing it.
-     *
-     * The value is stored in  SharedPreferences, so it will persist.
-     * @return true if vibration is allowed, false otherwise
-     */
-    public synchronized boolean getVibrateSetting() {
-    	boolean defValue = getResources().getBoolean(R.bool.cacheword_vibrate_default);
-        return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_VIBRATE, defValue);
-    }
-
-    /**
-     * Set whether the notification shown when CacheWord is unlocked 
-     * should vibrate device or not.
-     * The default value can be changed by copying res/values/cacheword.xml to your project
-     * and editing it.
-     *
-     * The value is stored in  SharedPreferences, so it will persist.
-     * @param vibrate
-     */
-    public synchronized void setVibrateSetting(boolean vibrate) {
-        if(vibrate != getVibrateSetting()) {
-            Editor ed = getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
-            ed.putBoolean(Constants.SHARED_PREFS_VIBRATE, vibrate);
-            ed.commit();
-            Log.d(TAG, "setVibrateSetting() vibrate = " + vibrate);
-        }
-    }
-
-    /**
-     * Retrieve whether a notification is shown when CacheWord is unlocked
-     * The default value can be changed by copying res/values/cacheword.xml to your project
-     * and editing it.
-     *
-     * The value is stored in  SharedPreferences, so it will persist.
-     * @return true if the notification is enabled
-     */
-    public synchronized boolean getNotificationEnabled() {
-        boolean use_notification = getResources().getBoolean(R.bool.cacheword_use_notification_default);
-        use_notification = getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_USE_NOTIFICATION, use_notification);
-        return use_notification;
-    }
-
-    /**
-     * Set whether to show a notification when CacheWord is unlocked.
-     * The default value can be changed by copying res/values/cacheword.xml to your project
-     * and editing it.
-     *
-     * The value is stored in  SharedPreferences, so it will persist.
-     * @param enabled
-     */
-    public synchronized void setEnableNotification(boolean enabled) {
-        if(enabled!= getNotificationEnabled()) {
-            Editor ed = getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
-            ed.putBoolean(Constants.SHARED_PREFS_USE_NOTIFICATION, enabled);
-            ed.commit();
-            resetTimeout();
-            Log.d(TAG, "setEnableNotification() enabled=" + enabled);
-        }
+    public void setSettings(CacheWordSettings settings) {
+        mSettings.updateWith(settings);
     }
 
     public synchronized boolean isLocked() {
@@ -227,7 +143,7 @@ public class CacheWordService extends Service {
     // / private methods
     // ////////////////////////////////////
 
-    private void handleNewSecrets() {
+    private void handleNewSecrets(boolean notify) {
 
         if (!SecretsManager.isInitialized(this)) {
             return;
@@ -238,7 +154,8 @@ public class CacheWordService extends Service {
         else
             goBackground();
         resetTimeout();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
+        if(notify)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
     }
 
     private void expirePassphrase() {
@@ -264,7 +181,7 @@ public class CacheWordService extends Service {
     }
 
     private void resetTimeout() {
-        int timeoutMinutes = getTimeoutMinutes();
+        int timeoutMinutes = mSettings.getTimeoutMinutes();
         boolean timeoutEnabled = timeoutMinutes >= 0;
 
         Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", minutes="+timeoutMinutes);
@@ -311,14 +228,20 @@ public class CacheWordService extends Service {
         b.setContentTitle(getText(R.string.cacheword_notification_cached_title));
         b.setContentText(getText(R.string.cacheword_notification_cached_message));
         b.setTicker(getText(R.string.cacheword_notification_cached));
-        if(getVibrateSetting())
+        if(mSettings.getVibrateSetting())
         	b.setDefaults(Notification.DEFAULT_VIBRATE);
         b.setWhen(System.currentTimeMillis());
         b.setOngoing(true);
-        Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
-        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
-        b.setContentIntent(PendingIntent.getService(getApplicationContext(), 0,
-            notificationIntent, 0));
+
+        PendingIntent i = null;
+        if( mSettings.getNotificationIntent() != null ) {
+            i = mSettings.getNotificationIntent();
+        } else {
+            Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
+            notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+            i = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
+        }
+        b.setContentIntent(i);
 
         return b.build();
     }
@@ -339,7 +262,7 @@ public class CacheWordService extends Service {
             mIsForegrounded = false;
         }
 
-        if( getNotificationEnabled() ) {
+        if( mSettings.getNotificationEnabled() ) {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.notify(Constants.SERVICE_BACKGROUND_ID, buildNotification());
         }
@@ -369,5 +292,14 @@ public class CacheWordService extends Service {
 
     private boolean shouldForeground() {
         return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_FOREGROUND, false);
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        if(observable == mSettings) {
+            resetTimeout();
+            //update backgrounding & notification without alerting the  subscribers
+            handleNewSecrets(false);
+        }
     }
 }

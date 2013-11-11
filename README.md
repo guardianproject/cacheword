@@ -26,7 +26,6 @@ resetting, and caching secret key material in memory.
 * Manual clearing: the user can forcibly lock the application
 * Uses Android's Keystore on 4.x if available - *Not Yet Implemented*
 
-
 CacheWord requires at least SDK version 2.3.3
 
 # Usage
