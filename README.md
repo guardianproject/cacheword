@@ -29,14 +29,6 @@ resetting, and caching secret key material in memory.
 
 CacheWord requires at least SDK version 2.3.3
 
-#### Why?
-
-Once the user has input her password into your application, what does your app
-do with it? Do you just drop it in a static variable or in a singleton and let
-the various bits of your app access it willy nilly?
-
-TODO write more here
-
 # Usage
 
 ## Setup
@@ -48,7 +40,12 @@ Then add it as a library project to your project in eclipse.
 
     Project Properties > Android > (Library) Add
 
-TODO: non-eclipse instructions
+**(Ant) Add the library project to your project.properties**
+
+You need to run `android update project -p .` inside the
+`CacheWord/cachewordlib` folder, then add the path to your `project.properties`
+file.  For more information please see the [Android developer guide][libguide] for
+referencing library projects.
 
 **Edit your `AndroidManifest.xml`**
 
@@ -60,8 +57,8 @@ Add the following to between the `<application>....</application>` tags
 
 ### Dependencies
 
-* Android support library v4 (`android-support-v4.jar`)
-* [SQLCipher for Android][sqlcipher]
+* Android support library v4 (`android-support-v4.jar`; included)
+* [SQLCipher for Android][sqlcipher] (included)
 
 CacheWord provides a support class for SQLCipher for Android. You probably want
 to use this.
@@ -269,3 +266,4 @@ See [SECURITY.md](SECURITY.md)
 [sqlcipher]: http://sqlcipher.net/sqlcipher-for-android/
 [iocipher]: https://guardianproject.info/code/IOCipher
 [issues]: https://dev.guardianproject.info/projects/cacheword/issues/new
+[libguide]: http://developer.android.com/guide/developing/projects/projects-cmdline.html#ReferencingLibraryProject
