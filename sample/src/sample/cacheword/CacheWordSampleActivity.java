@@ -15,14 +15,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.security.GeneralSecurityException;
-
-import javax.crypto.SecretKey;
-
 import info.guardianproject.cacheword.CacheWordActivityHandler;
 import info.guardianproject.cacheword.ICacheWordSubscriber;
 import info.guardianproject.cacheword.PassphraseSecrets;
 import sample.cacheword.R.id;
+
+import java.security.GeneralSecurityException;
+
+import javax.crypto.SecretKey;
 
 /**
  * A sample activity demonstrating how to use CacheWord. <br>
@@ -136,10 +136,12 @@ public class CacheWordSampleActivity extends Activity implements
                             char[] passwd = passphrase.toCharArray();
                             PassphraseSecrets secrets;
                             try {
-                                secrets = PassphraseSecrets.fetchSecrets(CacheWordSampleActivity.this, passwd);
+                                secrets = PassphraseSecrets.fetchSecrets(
+                                        CacheWordSampleActivity.this, passwd);
                                 mCacheWord.setCachedSecrets(secrets);
                             } catch (GeneralSecurityException e) {
-                                // Invalid password or the secret key has been tampered with
+                                // Invalid password or the secret key has been
+                                // tampered with
                                 // TODO(abel) handle bad password in sample app
                                 Log.e(TAG, "invalid password or secrets has been tampered with");
                                 Log.e(TAG, e.getClass().getName() + " : " + e.getMessage());
@@ -215,7 +217,8 @@ public class CacheWordSampleActivity extends Activity implements
             public void onClick(DialogInterface dialog, int which) {
                 String passphrase = input.getText().toString();
 
-                mCacheWord.setCachedSecrets(PassphraseSecrets.initializeSecrets(CacheWordSampleActivity.this, passphrase.toCharArray()));
+                mCacheWord.setCachedSecrets(PassphraseSecrets.initializeSecrets(
+                        CacheWordSampleActivity.this, passphrase.toCharArray()));
             }
         });
         builder.setNegativeButton("Cancel",
