@@ -57,9 +57,28 @@ public class CacheWordHandler {
 
     }
 
+    /**
+     * Initializes the CacheWordHandler. Use this form when your Context
+     * (e.g, the Activity) also implements the ICacheWordSubscriber interface.
+     * Context MUST impement ICacheWordSubscriber, else IllegalArgumentException will be thrown at runtime
+     * @param context must implement the ICacheWordSubscriber interface
+     */
+    public CacheWordHandler(Context context) {
+
+        try {
+            // shame we have to do this at runtime.
+            // must ponder a way to enforce this relationship at compile time
+            mSubscriber = (ICacheWordSubscriber) context;
+            mContext = context;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(
+                    "CacheWordHandler passed invalid Activity. Expects class that implements ICacheWordSubscriber");
+        }
+    }
+
 
     /**
-     * @param context must implement the ICacheWordSubscriber interface
+     * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects
      */
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
         mContext = context;
