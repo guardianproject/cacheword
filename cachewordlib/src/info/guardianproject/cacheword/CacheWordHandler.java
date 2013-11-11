@@ -64,10 +64,6 @@ public class CacheWordHandler {
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
         mContext = context;
         mSubscriber = subscriber;
-
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(
-                mCacheWordReceiver,
-                new IntentFilter(Constants.INTENT_NEW_SECRETS));
     }
 
     /**
@@ -108,6 +104,7 @@ public class CacheWordHandler {
                 }
                 mContext.unbindService(mCacheWordServiceConnection);
                 mBoundState = BindState.BIND_NULL;
+                unregisterBroadcastRecevier();
             }
         }
     }
@@ -205,6 +202,17 @@ public class CacheWordHandler {
     // / private helpers
     // /////////////////////////////////////////
 
+    private void registerBroadcastReceiver() {
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(
+                mCacheWordReceiver,
+                new IntentFilter(Constants.INTENT_NEW_SECRETS));
+    }
+
+    private void unregisterBroadcastRecevier() {
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mCacheWordReceiver);
+
+    }
+
     private void checkCacheWordState() {
         // this is ugly as all hell
 
@@ -274,6 +282,7 @@ public class CacheWordHandler {
                 synchronized (CacheWordHandler.this) {
                     if( mConnectionState == ServiceConnectionState.CONNECTION_INPROGRESS ) {
                         mCacheWordService = cwBinder.getService();
+                        registerBroadcastReceiver();
                         mCacheWordService.attachSubscriber();
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
                         mBoundState = BindState.BIND_COMPLETED;
@@ -296,6 +305,7 @@ public class CacheWordHandler {
                 if( mBoundState != BindState.BIND_NULL ) {
                     mContext.unbindService(mCacheWordServiceConnection);
                     mBoundState = BindState.BIND_NULL;
+                    unregisterBroadcastRecevier();
                 }
                 mCacheWordService = null;
             }
