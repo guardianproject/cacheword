@@ -26,18 +26,36 @@ public class CacheWordHandler {
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
 
-    // we use this boolean to help prevent a race condition
-    // where we a request connection to the service
-    // but then are told to disconnect, before the connection completes
-    private boolean mConnected = false;
+    // Tracking service connection state is a bit of a mess.
+    // There are three tricky situations:
+    //   1. We call bindService() which returns successfully, but we are told to disconnect
+    //      before the connection completes (onServiceConnected() is called).
+    //      This can occur when the activity opens and closes quickly.
+    //   2. We  shouldn't call unbind() if we didn't bind successfully.
+    //      Doing so produces Service not registered: info.guardianproject.cacheword.CacheWordHandler
+    //   3. Conversely, We MUST call unbind() if bindService() was called
+    //      Failing to do so results in Activity FOOBAR has leaked ServiceConnection
+    // We must track the connection state separately from the bound state.
 
-    // we need to actually track if we're bound or not,
-    // regardless of what the client things (that's what mConnected is for)
-    // so that we don't call unBind when not connected, doing so causes
-    // crashes like:
-    //  java.lang.IllegalArgumentException:
-    //     Service not registered: info.guardianproject.cacheword.CacheWordHandler
-    private boolean mBound = false;
+    // We use this flag to help prevent a race condition described in (1).
+    private ServiceConnectionState mConnectionState = ServiceConnectionState.CONNECTION_NULL;
+
+    // We use this flag to determine whether or not unbind() should be called
+    // as described in #2 and #3
+    private BindState mBoundState = BindState.BIND_NULL;
+
+    enum ServiceConnectionState {
+        CONNECTION_NULL,
+        CONNECTION_INPROGRESS,
+        CONNECTION_CANCELED,
+        CONNECTION_ACTIVE
+    }
+    enum BindState {
+        BIND_NULL,
+        BIND_REQUESTED,
+        BIND_COMPLETED
+
+    }
 
 
     /**
@@ -57,7 +75,7 @@ public class CacheWordHandler {
      * Once connected, the attached Context will begin receiving
      * CacheWord events.
      */
-    public void connectToService() {
+    public synchronized void connectToService() {
         if( isCacheWordConnected() )
             return;
 
@@ -68,15 +86,12 @@ public class CacheWordHandler {
          * starting - ensures the cacheword service will outlive the activity
          * binding  - allows us to notify  the service of active subscribers
          */
-        synchronized (this) {
-            mConnected = true;
-        }
-        if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
-            mBound = true;
-            checkCacheWordState();
-        }
-
         mContext.startService(cacheWordIntent);
+        if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
+            mBoundState = BindState.BIND_REQUESTED;
+        }
+        mConnectionState = ServiceConnectionState.CONNECTION_INPROGRESS;
+
     }
 
     /**
@@ -84,15 +99,16 @@ public class CacheWordHandler {
      */
     public void disconnect() {
         synchronized (this) {
-            mConnected = false;
-        }
-        if( mCacheWordService != null ) {
-            mCacheWordService.detachSubscriber();
-            mCacheWordService = null;
-        }
-        if( mBound ) {
-            mContext.unbindService(mCacheWordServiceConnection);
-            mBound = false;
+            mConnectionState = ServiceConnectionState.CONNECTION_CANCELED;
+
+            if( mBoundState == BindState.BIND_COMPLETED ) {
+                if( mCacheWordService != null ) {
+                    mCacheWordService.detachSubscriber();
+                    mCacheWordService = null;
+                }
+                mContext.unbindService(mCacheWordServiceConnection);
+                mBoundState = BindState.BIND_NULL;
+            }
         }
     }
 
@@ -254,17 +270,19 @@ public class CacheWordHandler {
         public void onServiceConnected(ComponentName name, IBinder binder) {
             ICacheWordBinder cwBinder = (ICacheWordBinder) binder;
             if (cwBinder != null) {
-                Log.d(TAG, "Connected to CacheWordService");
+                Log.d(TAG, "onServiceConnected");
                 synchronized (CacheWordHandler.this) {
-                    if( mConnected ) {
+                    if( mConnectionState == ServiceConnectionState.CONNECTION_INPROGRESS ) {
                         mCacheWordService = cwBinder.getService();
                         mCacheWordService.attachSubscriber();
+                        mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
+                        mBoundState = BindState.BIND_COMPLETED;
                         checkCacheWordState();
-                    } else {
+                    } else if( mConnectionState == ServiceConnectionState.CONNECTION_CANCELED ) {
                         // race condition hit
-                        if( mBound ) {
+                        if( mBoundState != BindState.BIND_NULL ) {
                             mContext.unbindService(mCacheWordServiceConnection);
-                            mBound = false;
+                            mBoundState = BindState.BIND_NULL;
                         }
                     }
                 }
@@ -274,13 +292,14 @@ public class CacheWordHandler {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "onServiceDisonnected");
-            if( mBound ) {
-                mContext.unbindService(mCacheWordServiceConnection);
-                mBound = false;
+            synchronized (CacheWordHandler.this) {
+                if( mBoundState != BindState.BIND_NULL ) {
+                    mContext.unbindService(mCacheWordServiceConnection);
+                    mBoundState = BindState.BIND_NULL;
+                }
+                mCacheWordService = null;
             }
-            mCacheWordService = null;
-            // calling detachSubscriber() here doesn't work
-            // because the service connection has already been lost
+
         }
 
     };
