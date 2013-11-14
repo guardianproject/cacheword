@@ -78,11 +78,10 @@ secrets managed by CacheWord. Such components may be:
 * IOCipher Virtual File System
 * etc.
 
-For each of these interested components you *must* implement three things
+For each of these interested components you *must* implement two things
 
 1. Implement the `ICacheWordSubscriber` interface
 2. Instantiate a `CacheWordHandler` to assist the component
-3. Call `connect()` and `disconnect()` as appropriate
 
 **TIP**: Activities should implement `CacheWordActivityHandler` and propagate
 the lifecycle methods `onPause` and `onResume` instead of calling [dis]connect().
@@ -163,7 +162,20 @@ public class MyActivity extends Activity implements ICacheWordSubscriber
 
 ```
 
-### 2. Instantiate CacheWordHandler
+### 2. Instantiate CacheWordHandler and propagate lifecycle Changes
+
+`CacheWordHandler` is the class instantiated by any object interested in
+receiving CacheWord events. It does the heavy lifting of starting, connecting,
+and communicating with the `CacheWordService`. Each object that wants to be aware
+of CacheWord events should instantiate its own `CacheWordHandler`.
+
+It is your object's responsibility to call
+`CacheWordHandler.connectToService()` and `CacheWordHandler.disconnect()` when
+your object wants to register and unregister from event notifications.
+
+Disconnecting is important, because CacheWord maintains a list of connected
+clients and will not initiate the automatic timeout until all the connected
+clients have disconnected.
 
 ```java
 
@@ -172,24 +184,43 @@ class YourClass implements ICacheWordSubscriber
         ...
         private CacheWordHandler mCacheWord;
         ...
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
+        public YourClass() {
             ...
-            mCacheWord = new CacheWordHandler(this);
+            mCacheWord = new CacheWordHandler(mContext, this);
+            mCacheWord.connectToService()
             ...
+        }
+
+        // Called when your object no longer wants to be notified of CacheWord events
+        public goodbyeYourClass() {
+            mCacheWord.disconnect()
         }
         ...
 }
 ```
 
-### 3. Propagate Lifecycle changes
+
+#### Activity's and CacheWordActivityHandler
+
+Most of the time it is `Activity` classes that need to instantiate
+`CacheWordHandler`, so for this use case there is a convenient class called
+`CacheWordActivityHandler`. Instead of calling `connectToService` and
+`disconnect()`, you simply need to propagate the Android lifecycle changes
+`onPause()` and `onResume()`.
 
 ```java
-class YourClass implements ICacheWordSubscriber
+class YourActivity extends Activity implements ICacheWordSubscriber
 {
         ...
         private CacheWordActivityHandler mCacheWord;
         ...
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            ...
+            mCacheWord = new CacheWordActivityHandler(this);
+            ...
+        }
+
         @Override
         protected void onResume() {
             super.onStart();
@@ -214,22 +245,29 @@ For compile time configuration options, define the resources in XML (see
 [`res/values/cacheword.xml`](cachewordlib/res/values/cacheword.xml) for the
 available options).
 
-Runtime configuration options can be set via the preferences.
+To configure the XML resources, simply copy cacheword.xml into your own
+`res/values` directory and edit the settings as you like.
+
+Runtime configuration options can be set via the CacheWordSettings object.
 
 Configurable options are:
 
 * Whether to show a persistent unlocked notification
-* Every aspect of the notification (title, message, icon, etc)
+* Display options for the notification (title, message, icon, etc)
+* Intent executed when the notification is clicked
 * Timeout length after your app leaves the foreground
 * Vibration on successful unlock
 
-### SQLCipher Support
+### SQLCipher & IOCipher Support
 
 If you use SQLCipher for encrypted database storage you should use CacheWord's
-`SQLCipherOpenHelper` 
-
-See the [cacheword branch][notecipher] in the NoteCipher application for an
+`SQLCipherOpenHelper`. See the [NoteCipher application][notecipher] for an
 example of how to use it.
+
+Likewise if you use IOCipher for encrypted file storage you should use CacheWord's `IOCipherHelper`.
+
+TODO: make example of IOCipherHelper
+
 
 ### What Are These Cached Secrets?
 
@@ -261,7 +299,7 @@ See [HACKING.md](HACKING.md)
 
 See [SECURITY.md](SECURITY.md)
 
-[notecipher]: https://github.com/guardianproject/notepadbot/tree/cacheword
+[notecipher]: https://github.com/guardianproject/notepadbot/
 [sqlcipher]: http://sqlcipher.net/sqlcipher-for-android/
 [iocipher]: https://guardianproject.info/code/IOCipher
 [issues]: https://dev.guardianproject.info/projects/cacheword/issues/new
