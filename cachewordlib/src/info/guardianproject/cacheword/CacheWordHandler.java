@@ -196,6 +196,7 @@ public class CacheWordHandler {
             ps = PassphraseSecrets.fetchSecrets(mContext, passphrase);
         } else {
             ps = PassphraseSecrets.initializeSecrets(mContext, passphrase);
+            if( ps == null ) throw new GeneralSecurityException("initializeSecrets could not save the secrets.");
         }
         setCachedSecrets(ps);
     }
