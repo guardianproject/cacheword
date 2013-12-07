@@ -91,6 +91,7 @@ public class PassphraseSecrets implements ICachedSecrets {
     public static PassphraseSecrets fetchSecrets(Context ctx, char[] x_passphrase)
             throws GeneralSecurityException {
         byte[] x_rawSecretKey = null;
+        SecretKeySpec x_passphraseKey = null;
         try {
             byte[] preparedSecret  = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
             SerializedSecretsV1 ss = new SerializedSecretsV1(preparedSecret);
@@ -100,13 +101,14 @@ public class PassphraseSecrets implements ICachedSecrets {
             byte[] iv                     = ss.iv;
             byte[] ciphertext             = ss.ciphertext;
 //            int    version                = ss.version; // TODO unused for now
-            SecretKeySpec x_passphraseKey = hashPassphrase(x_passphrase, salt);
+            x_passphraseKey = hashPassphrase(x_passphrase, salt);
             x_rawSecretKey                = decryptSecretKey(x_passphraseKey, iv, ciphertext);
 
             return new PassphraseSecrets(x_rawSecretKey);
         } finally {
             Wiper.wipe(x_passphrase);
             Wiper.wipe(x_rawSecretKey);
+            Wiper.wipe(x_passphraseKey);
         }
     }
 
