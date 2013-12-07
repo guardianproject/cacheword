@@ -51,6 +51,13 @@ public class PassphraseSecrets implements ICachedSecrets {
         return mSecretKey;
     }
 
+    /**
+     * Generates a ranndom AES key, and encrypts it with a PBE key derived from x_passphrase. The resulting
+     * ciphertext is saved to disk with PassphraseSecrets.encryptAndSave
+     * @param ctx
+     * @param x_passphrase
+     * @return
+     */
     public static PassphraseSecrets initializeSecrets(Context ctx, char[] x_passphrase) {
         try {
             SecretKey secretKey = generateSecretKey();
@@ -67,6 +74,14 @@ public class PassphraseSecrets implements ICachedSecrets {
         }
     }
 
+    /**
+     * Attempts to decrypt the stored secrets with x_passphrase. If successful, returns a PassphraseSecrets
+     * initialized with the secret key.
+     * @param ctx
+     * @param x_passphrase
+     * @return
+     * @throws GeneralSecurityException
+     */
     public static PassphraseSecrets fetchSecrets(Context ctx, char[] x_passphrase)
             throws GeneralSecurityException {
         byte[] x_rawSecretKey = null;
@@ -89,6 +104,14 @@ public class PassphraseSecrets implements ICachedSecrets {
         }
     }
 
+    /**
+     * Re-encrypts the secret key in current_secrets with a new derived key from x_new_passphrase. The resulting
+     * ciphertext is saved to disk with PassphraseSecrets.encryptAndSave
+     * @param ctx
+     * @param current_secrets NOT WIPED
+     * @param x_new_passphrase WIPED
+     * @return
+     */
     public static PassphraseSecrets changePassphrase(Context ctx, PassphraseSecrets current_secrets, char[] x_new_passphrase ) {
         byte[] x_rawSecretKey = null;
         try {
@@ -107,6 +130,17 @@ public class PassphraseSecrets implements ICachedSecrets {
     }
 
     //used by initialization and change password routines
+
+    /**
+     * Derives an encryption key from x_passphrase, then uses this derived key to encrypt x_plaintext.
+     * The resulting cipher text, plus meta data (version, salt, iv, @see SerializedSecretsV1) is saved to
+     * disk in SharedPreferences.
+     * @param ctx
+     * @param x_passphrase the passphrase used to PBE on plaintext to NOT WIPED
+     * @param x_plaintext the plaintext to encrypt NOT WIPED
+     * @return
+     * @throws GeneralSecurityException
+     */
     private static boolean encryptAndSave(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
         SecretKeySpec x_passphraseKey = null;
         try {
