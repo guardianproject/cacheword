@@ -193,7 +193,7 @@ public class PassphraseSecrets implements ICachedSecrets {
      *
      * This class does not handle sensitive data.
      */
-    private static class SerializedSecretsV1 {
+    public static class SerializedSecretsV1 {
         public int version;
         public byte[] salt;
         public byte[] iv;
