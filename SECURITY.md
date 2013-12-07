@@ -74,12 +74,12 @@ To initialize the secret we do the following:
 1. Run the password through PBKDF2 with a random 16 byte salt
 2. Generate a random 256 bit AES key with a random 96 bit IV
 3. Use the derived key to encrypt the generated key in GCM mode
-4. Write the ciphertext, iv, and salt to disk ([SharedPreferences][sharedprefs])
+4. Write the ciphertext, iv, salt, and a version tag to disk ([SharedPreferences][sharedprefs])
 
 Password verification and decryption of the AES key follows the same procedure:
 
-1. Read the ciphertext, iv, and salt from disk
-2. Run the password through PBKDF2 with a the salt
+1. Read the ciphertext, iv, salt, and version tag from disk
+2. Run the password through PBKDF2 with the salt
 3. Attempt to decrypt the ciphertext with the derived key and read iv
 
 If the GCM operation succeeds, the password is verified and the encryption key
