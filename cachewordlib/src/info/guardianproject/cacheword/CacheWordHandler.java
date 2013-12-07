@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 /**
@@ -197,6 +198,25 @@ public class CacheWordHandler {
             ps = PassphraseSecrets.initializeSecrets(mContext, passphrase);
         }
         setCachedSecrets(ps);
+    }
+
+    /**
+     * Changes the passphrase used to encrypt the derived encryption keys.
+     * Since the derived encryption key stays the same, this can safely be called even when the secrets are in use.
+     *
+     * Only works if you're using the PassphraseSecrets implementation. (i.e., Are you using setPassphrase() or setCachedSecrets()?)
+     * @param current_secrets the current secrets you're using
+     * @param new_passphrase the new passphrase to encrypt the old secrets with
+     * @return null on error or current_secrets on success
+     * @throws IOException
+     */
+    public PassphraseSecrets changePassphrase(PassphraseSecrets current_secrets, char[] new_passphrase) throws IOException {
+        if(!SecretsManager.isInitialized(mContext)) {
+            throw new IllegalStateException("CacheWord is not initialized. Passphrase can't be changed");
+        }
+        PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(mContext, current_secrets, new_passphrase);
+        if( new_secrets != null ) return new_secrets;
+        else throw new IOException("changePassphrase could not save the secrets");
     }
 
     /**
