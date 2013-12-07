@@ -18,7 +18,11 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * The simplest of cases where the application's only secret is the user's
+ * Represents a single 256 AES secret encrypted with a key derived from the user's passphrase.
+ * This class handles the PBE key derivation, secret key generation, encryption, and persistence.
+ * It also provides a means for fetching (decrypting) the secrets and changing the passphrase.
+ *
+ * This is the simplest of cases where the application's only secret is the user's
  * passphrase. We do not want to store the passphrase, nor a hash of the
  * passphrase on disk.
  *
@@ -29,6 +33,8 @@ import javax.crypto.spec.SecretKeySpec;
  * <li>3. Use the derived key to encrypt the AES key in GCM mode
  * <li>4. Write the ciphertext, iv, and salt to disk
  * </ol>
+ *
+ * The exact data written to disk is represented by the SerializedSecretsV1 class.
  *
  */
 public class PassphraseSecrets implements ICachedSecrets {
