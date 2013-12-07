@@ -97,6 +97,10 @@ public class PassphraseSecrets implements ICachedSecrets {
         }
     }
 
+    public static PassphraseSecrets changePassphrase(Context ctx, PassphraseSecrets current_secrets, char[] new_passphrase ) {
+        return current_secrets;
+    }
+
     // used by initialization and verification routines
 
     /**
