@@ -28,7 +28,7 @@ public class PassphraseSecretsTest extends AndroidTestCase {
 
     public void testInitializeAndFetch() {
         String passphrase_str = "hunter2";
-        char[] pass = "hunter2".toCharArray();
+        char[] pass = passphrase_str.toCharArray();
 
         PassphraseSecrets original_secrets = PassphraseSecrets
                 .initializeSecrets(getContext(), pass);
@@ -54,7 +54,13 @@ public class PassphraseSecretsTest extends AndroidTestCase {
 
     public void testChangePassword() {
         String passphrase_str = "hunter2";
-        char[] pass = "hunter2".toCharArray();
+
+
+        String passphrase_str_new = "purplepipers";
+
+
+
+        char[] pass = passphrase_str.toCharArray();
         PassphraseSecrets original_secrets = PassphraseSecrets
                 .initializeSecrets(getContext(), pass);
 
@@ -62,19 +68,40 @@ public class PassphraseSecretsTest extends AndroidTestCase {
 
         byte[] original_ciphertext  = SecretsManager.getBytes(getContext(), Constants.SHARED_PREFS_SECRETS);
 
-
-        String passphrase_str_new = "purplepipers";
-        char[] pass_new = passphrase_str.toCharArray();
-
+        char[] pass_new = passphrase_str_new.toCharArray();
         PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(getContext(), original_secrets, pass_new);
-        byte[] new_ciphertext  = SecretsManager.getBytes(getContext(), Constants.SHARED_PREFS_SECRETS);
 
         assertNotNull(new_secrets);
+
         // The underlying AES secret key should still be the same
         assertTrue(Arrays.equals(new_secrets.getSecretKey().getEncoded(),
                 original_secrets.getSecretKey().getEncoded()));
 
+        // fetching with the old passphrase should fail
+        try {
+            pass = passphrase_str.toCharArray();
+            PassphraseSecrets.fetchSecrets(getContext(), pass);
+            fail("fetchSecrets should fail with the old passphrase");
+        } catch (GeneralSecurityException e) {
+            // pass
+        }
+
+        // fetch the secrets from disk and verify the AES secret key is still the same
+        PassphraseSecrets fetched_secrets = null;
+        try {
+            pass_new = passphrase_str_new.toCharArray();
+            fetched_secrets = PassphraseSecrets.fetchSecrets(getContext(), pass_new);
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+
+        assertTrue(Arrays.equals(fetched_secrets.getSecretKey().getEncoded(),
+                original_secrets.getSecretKey().getEncoded()));
+
+
         // but the ciphertext should be different
+        byte[] new_ciphertext  = SecretsManager.getBytes(getContext(), Constants.SHARED_PREFS_SECRETS);
         assertFalse(Arrays.equals(new_ciphertext, original_ciphertext));
 
         // verify this in depth

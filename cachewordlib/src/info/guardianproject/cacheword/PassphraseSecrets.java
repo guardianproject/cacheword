@@ -52,26 +52,18 @@ public class PassphraseSecrets implements ICachedSecrets {
     }
 
     public static PassphraseSecrets initializeSecrets(Context ctx, char[] x_passphrase) {
-        SecretKeySpec x_passphraseKey = null;
         try {
-            byte[] salt               = generateSalt(Constants.SALT_LENGTH);
-            byte[] iv                 = generateIv(Constants.GCM_IV_LENGTH);
-            x_passphraseKey           = hashPassphrase(x_passphrase, salt);
-            SecretKey secretKey       = generateSecretKey();
-            byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, secretKey.getEncoded());
-            SerializedSecretsV1 ss    = new SerializedSecretsV1(Constants.VERSION_ZERO, salt, iv, encryptedSecretKey);
-            byte[] preparedSecret     = ss.concatenate();
-            boolean saved             = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
-
+            SecretKey secretKey = generateSecretKey();
+            boolean saved       = encryptAndSave(ctx, x_passphrase, secretKey.getEncoded());
             SecretsManager.setInitialized(ctx, saved);
 
-            return new PassphraseSecrets(secretKey);
+            if( saved ) return new PassphraseSecrets(secretKey);
+            else        return null;
         } catch (GeneralSecurityException e ) {
             Log.e(TAG, "initializeSecrets failed: " +e.getClass().getName() + " : " + e.getMessage());
             return null;
         } finally {
             Wiper.wipe(x_passphrase);
-            Wiper.wipe(x_passphraseKey);
         }
     }
 
@@ -97,8 +89,39 @@ public class PassphraseSecrets implements ICachedSecrets {
         }
     }
 
-    public static PassphraseSecrets changePassphrase(Context ctx, PassphraseSecrets current_secrets, char[] new_passphrase ) {
-        return current_secrets;
+    public static PassphraseSecrets changePassphrase(Context ctx, PassphraseSecrets current_secrets, char[] x_new_passphrase ) {
+        byte[] x_rawSecretKey = null;
+        try {
+            x_rawSecretKey      = current_secrets.getSecretKey().getEncoded();
+            boolean saved       = encryptAndSave(ctx, x_new_passphrase, x_rawSecretKey);
+
+            if (saved) return current_secrets;
+            else       return null;
+        } catch (GeneralSecurityException e) {
+            Log.e(TAG, "changePassphrase failed: " +e.getClass().getName() + " : " + e.getMessage());
+            return null;
+        } finally {
+            Wiper.wipe(x_new_passphrase);
+            Wiper.wipe(x_rawSecretKey);
+        }
+    }
+
+    //used by initialization and change password routines
+    private static boolean encryptAndSave(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
+        SecretKeySpec x_passphraseKey = null;
+        try {
+            byte[] salt               = generateSalt(Constants.SALT_LENGTH);
+            byte[] iv                 = generateIv(Constants.GCM_IV_LENGTH);
+            x_passphraseKey           = hashPassphrase(x_passphrase, salt);
+            byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, x_plaintext);
+            SerializedSecretsV1 ss    = new SerializedSecretsV1(Constants.VERSION_ZERO, salt, iv, encryptedSecretKey);
+            byte[] preparedSecret     = ss.concatenate();
+            boolean saved             = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
+
+            return saved;
+        } finally {
+            Wiper.wipe(x_passphraseKey);
+        }
     }
 
     // used by initialization and verification routines
