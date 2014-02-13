@@ -126,7 +126,7 @@ public class CacheWordHandler {
          * binding  - allows us to notify  the service of active subscribers
          */
         mContext.startService(cacheWordIntent);
-        if( !mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
+        if( mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
             mBoundState = BindState.BIND_REQUESTED;
         }
         mConnectionState = ServiceConnectionState.CONNECTION_INPROGRESS;
