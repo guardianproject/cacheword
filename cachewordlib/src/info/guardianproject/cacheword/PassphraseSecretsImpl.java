@@ -90,7 +90,7 @@ public class PassphraseSecretsImpl {
             throws GeneralSecurityException {
         PBEKeySpec x_spec = null;
         try {
-            x_spec                   = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN_BITS);
+            x_spec                   = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT_MIN, Constants.PBKDF2_KEY_LEN_BITS);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
             return new SecretKeySpec(factory.generateSecret(x_spec).getEncoded(), "AES");

@@ -88,7 +88,7 @@ public class WiperTest extends TestCase {
         char[] password = "thisisapassword".toCharArray();
         byte[] salt = new byte[Constants.PBKDF2_SALT_LEN_BYTES];
         SecureRandom.getInstance("SHA1PRNG").nextBytes(salt);
-        PBEKeySpec x_spec = new PBEKeySpec(password, salt, Constants.PBKDF2_ITER_COUNT,
+        PBEKeySpec x_spec = new PBEKeySpec(password, salt, Constants.PBKDF2_ITER_COUNT_MIN,
                 Constants.PBKDF2_KEY_LEN_BITS);
         assertTrue(Arrays.equals(password, x_spec.getPassword()));
 
