@@ -86,10 +86,10 @@ public class WiperTest extends TestCase {
 
     public void testWipePBEKeySpec() throws NoSuchAlgorithmException {
         char[] password = "thisisapassword".toCharArray();
-        byte[] salt = new byte[Constants.SALT_LENGTH];
+        byte[] salt = new byte[Constants.PBKDF2_SALT_LEN_BYTES];
         SecureRandom.getInstance("SHA1PRNG").nextBytes(salt);
         PBEKeySpec x_spec = new PBEKeySpec(password, salt, Constants.PBKDF2_ITER_COUNT,
-                Constants.PBKDF2_KEY_LEN);
+                Constants.PBKDF2_KEY_LEN_BITS);
         assertTrue(Arrays.equals(password, x_spec.getPassword()));
 
         Wiper.wipe(x_spec);

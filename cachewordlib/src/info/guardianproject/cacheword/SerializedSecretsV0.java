@@ -28,9 +28,9 @@ public class SerializedSecretsV0 {
     }
 
     public void parse() {
-        salt = new byte[Constants.SALT_LENGTH];
-        iv = new byte[Constants.GCM_IV_LENGTH];
-        ciphertext = new byte[serialized.length - (Constants.SALT_LENGTH + Constants.GCM_IV_LENGTH + Constants.VERSION_LENGTH)];
+        salt = new byte[Constants.PBKDF2_SALT_LEN_BYTES];
+        iv = new byte[Constants.GCM_IV_LEN_BYTES];
+        ciphertext = new byte[serialized.length - (Constants.PBKDF2_SALT_LEN_BYTES + Constants.GCM_IV_LEN_BYTES + Constants.VERSION_LENGTH)];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
         version = bb.getInt();
         bb.get(salt);
@@ -39,7 +39,7 @@ public class SerializedSecretsV0 {
     }
 
     public byte[] concatenate() {
-        serialized = new byte[Constants.VERSION_LENGTH + Constants.SALT_LENGTH + Constants.GCM_IV_LENGTH + ciphertext.length];
+        serialized = new byte[Constants.VERSION_LENGTH + Constants.PBKDF2_SALT_LEN_BYTES + Constants.GCM_IV_LEN_BYTES + ciphertext.length];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
         bb.putInt(version);
         bb.put(salt);

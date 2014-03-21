@@ -33,8 +33,8 @@ public class PassphraseSecretsImpl {
     public byte[] encryptWithPassphrase(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
         SecretKeySpec x_passphraseKey = null;
         try {
-            byte[] salt               = generateSalt(Constants.SALT_LENGTH);
-            byte[] iv                 = generateIv(Constants.GCM_IV_LENGTH);
+            byte[] salt               = generateSalt(Constants.PBKDF2_SALT_LEN_BYTES);
+            byte[] iv                 = generateIv(Constants.GCM_IV_LEN_BYTES);
             x_passphraseKey           = hashPassphrase(x_passphrase, salt);
             byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, x_plaintext);
             SerializedSecretsV0 ss    = new SerializedSecretsV0(Constants.VERSION_ZERO, salt, iv, encryptedSecretKey);
@@ -84,7 +84,7 @@ public class PassphraseSecretsImpl {
             throws GeneralSecurityException {
         PBEKeySpec x_spec = null;
         try {
-            x_spec                   = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN);
+            x_spec                   = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT, Constants.PBKDF2_KEY_LEN_BITS);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
             return new SecretKeySpec(factory.generateSecret(x_spec).getEncoded(), "AES");
@@ -152,7 +152,7 @@ public class PassphraseSecretsImpl {
         try {
 
             KeyGenerator generator = KeyGenerator.getInstance("AES");
-            generator.init(Constants.AES_KEY_LENGTH);
+            generator.init(Constants.AES_KEY_LEN_BITS);
 
             return generator.generateKey();
 

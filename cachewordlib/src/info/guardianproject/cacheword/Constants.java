@@ -34,11 +34,11 @@ public class Constants {
 
     // Crypto vars
 
-    public static final int SALT_LENGTH       = 16;
-    public static final int AES_KEY_LENGTH    = 256;
-    public static final int GCM_IV_LENGTH     = 12; // 96 bits
-    public static final int VERSION_LENGTH    = 4; // length of integer in the JVM
-    public static final int PBKDF2_ITER_COUNT = 100;
-    public static final int PBKDF2_KEY_LEN    = 128;
+    public static final int PBKDF2_SALT_LEN_BYTES   = 16;  // bytes, 128 bits
+    public static final int AES_KEY_LEN_BITS        = 256; // bits
+    public static final int GCM_IV_LEN_BYTES        = 12;  // 96 bits
+    public static final int VERSION_LENGTH          = 4;   // length of integer in the JVM
+    public static final int PBKDF2_KEY_LEN_BITS     = 128; // bits
+    public static final int PBKDF2_ITER_COUNT       = 100;
 
 }
