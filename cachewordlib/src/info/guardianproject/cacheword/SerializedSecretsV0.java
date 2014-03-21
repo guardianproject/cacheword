@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 /**
  * A ciphertext bundle
  * Encapsulates a ciphertext and associated non-sensitive metadata
- * required to decrypt it by convienently handling all array manipulation.
+ * required to decrypt it by conveniently handling all array manipulation.
  *
  * This class does not handle sensitive data.
  */
