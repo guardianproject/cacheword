@@ -5,6 +5,7 @@ import android.content.Context;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -15,6 +16,11 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class PassphraseSecretsImpl {
+
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
+
 
     private static final String TAG = "PassphraseSecretsImpl";
 
