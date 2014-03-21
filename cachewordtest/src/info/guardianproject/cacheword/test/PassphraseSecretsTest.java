@@ -64,9 +64,12 @@ public class PassphraseSecretsTest extends AndroidTestCase {
         PassphraseSecrets original_secrets = PassphraseSecrets
                 .initializeSecrets(getContext(), pass);
 
+        assertNotNull(original_secrets);
+
         assertTrue(SecretsManager.isInitialized(getContext()));
 
         byte[] original_ciphertext  = SecretsManager.getBytes(getContext(), Constants.SHARED_PREFS_SECRETS);
+        assertNotNull(original_ciphertext);
 
         char[] pass_new = passphrase_str_new.toCharArray();
         PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(getContext(), original_secrets, pass_new);
