@@ -9,44 +9,54 @@ import java.nio.ByteBuffer;
  *
  * This class does not handle sensitive data.
  */
-public class SerializedSecretsV0 {
+public class SerializedSecretsV1 {
     public int version;
+    public int iterations;
     public byte[] salt;
     public byte[] iv;
     public byte[] ciphertext;
     public byte[] serialized;
 
-    public SerializedSecretsV0(int version, byte[] salt, byte[] iv, byte[] ciphertext) {
+    public SerializedSecretsV1(int version, int iterations, byte[] salt, byte[] iv, byte[] ciphertext) {
         this.version = version;
+        this.iterations = iterations;
         this.salt = salt;
         this.iv = iv;
         this.ciphertext = ciphertext;
     }
 
-    public SerializedSecretsV0(byte[] serialized) {
+    public SerializedSecretsV1(byte[] serialized) {
         this.serialized = serialized;
     }
 
     public void parse() {
         salt = new byte[Constants.PBKDF2_SALT_LEN_BYTES];
         iv = new byte[Constants.GCM_IV_LEN_BYTES];
-        ciphertext = new byte[serialized.length - (Constants.PBKDF2_SALT_LEN_BYTES + Constants.GCM_IV_LEN_BYTES + Constants.INT_LENGTH)];
+        ciphertext = new byte[serialized.length - constants_length()];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
+
         version = bb.getInt();
+        iterations = bb.getInt();
         bb.get(salt);
         bb.get(iv);
         bb.get(ciphertext);
     }
 
     public byte[] concatenate() {
-        serialized = new byte[Constants.INT_LENGTH + Constants.PBKDF2_SALT_LEN_BYTES + Constants.GCM_IV_LEN_BYTES + ciphertext.length];
+        serialized = new byte[ constants_length() + ciphertext.length];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
         bb.putInt(version);
+        bb.putInt(iterations);
         bb.put(salt);
         bb.put(iv);
         bb.put(ciphertext);
         serialized = bb.array();
         return serialized;
+    }
+
+    public static int constants_length() {
+        int bytes = Constants.INT_LENGTH*2 + Constants.PBKDF2_SALT_LEN_BYTES + Constants.GCM_IV_LEN_BYTES;
+        return bytes;
     }
 
 }
