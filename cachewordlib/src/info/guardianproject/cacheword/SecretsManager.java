@@ -6,7 +6,13 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Base64;
 
+import java.security.Security;
+
 public class SecretsManager {
+
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
 
     private static boolean prngFixesApplied = false;
 
