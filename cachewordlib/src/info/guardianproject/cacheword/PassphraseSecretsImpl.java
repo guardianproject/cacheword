@@ -36,7 +36,7 @@ public class PassphraseSecretsImpl {
      * @return
      * @throws GeneralSecurityException
      */
-    public byte[] encryptWithPassphrase(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
+    public SerializedSecretsV0 encryptWithPassphrase(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
         SecretKeySpec x_passphraseKey = null;
         try {
             byte[] salt               = generateSalt(Constants.PBKDF2_SALT_LEN_BYTES);
@@ -44,7 +44,7 @@ public class PassphraseSecretsImpl {
             x_passphraseKey           = hashPassphrase(x_passphrase, salt);
             byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, x_plaintext);
             SerializedSecretsV0 ss    = new SerializedSecretsV0(Constants.VERSION_ZERO, salt, iv, encryptedSecretKey);
-            return ss.concatenate();
+            return ss;
         } finally {
             Wiper.wipe(x_passphraseKey);
         }
@@ -56,12 +56,11 @@ public class PassphraseSecretsImpl {
      * @return the plaintext
      * @throws GeneralSecurityException
      */
-    public byte[] decryptWithPassphrase(char[] x_passphrase, byte[] secret) throws GeneralSecurityException {
+    public byte[] decryptWithPassphrase(char[] x_passphrase, SerializedSecretsV0 ss) throws GeneralSecurityException {
         byte[] x_plaintext            = null;
         SecretKeySpec x_passphraseKey = null;
 
         try {
-            SerializedSecretsV0 ss        = new SerializedSecretsV0(secret);
             ss.parse();
 
             byte[] salt                   = ss.salt;

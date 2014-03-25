@@ -85,10 +85,11 @@ public class PassphraseSecrets implements ICachedSecrets {
             throws GeneralSecurityException {
         PassphraseSecretsImpl crypto  = new PassphraseSecretsImpl();
         byte[] preparedSecret         = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
+        SerializedSecretsV0 ss        = new SerializedSecretsV0(preparedSecret);
         byte[] x_rawSecretKey         = null;
 
         try {
-            x_rawSecretKey = crypto.decryptWithPassphrase(x_passphrase, preparedSecret);
+            x_rawSecretKey = crypto.decryptWithPassphrase(x_passphrase, ss);
 
             return new PassphraseSecrets(x_rawSecretKey);
         } finally {
@@ -131,7 +132,8 @@ public class PassphraseSecrets implements ICachedSecrets {
      */
     private static boolean encryptAndSave(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
         PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
-        byte[] preparedSecret        = crypto.encryptWithPassphrase(ctx, x_passphrase, x_plaintext);
+        SerializedSecretsV0 ss       = crypto.encryptWithPassphrase(ctx, x_passphrase, x_plaintext);
+        byte[] preparedSecret        = ss.concatenate();
         boolean saved                = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
 
         return saved;
