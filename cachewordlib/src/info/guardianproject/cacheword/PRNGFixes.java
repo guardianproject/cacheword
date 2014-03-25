@@ -1,5 +1,9 @@
 package info.guardianproject.cacheword;
 
+import android.os.Build;
+import android.os.Process;
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,10 +18,6 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.SecureRandomSpi;
 import java.security.Security;
-
-import android.os.Build;
-import android.os.Process;
-import android.util.Log;
 
 /**
  * Fixes for the output of the default PRNG having low entropy.
@@ -134,6 +134,7 @@ public final class PRNGFixes {
      * {@code Provider} of {@code SecureRandom} engines which pass through
      * all requests to the Linux PRNG.
      */
+    @SuppressWarnings("serial")
     private static class LinuxPRNGSecureRandomProvider extends Provider {
 
         public LinuxPRNGSecureRandomProvider() {
@@ -154,6 +155,7 @@ public final class PRNGFixes {
      * {@link SecureRandomSpi} which passes all requests to the Linux PRNG
      * ({@code /dev/urandom}).
      */
+    @SuppressWarnings("serial")
     public static class LinuxPRNGSecureRandom extends SecureRandomSpi {
 
         /*

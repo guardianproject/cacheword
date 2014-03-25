@@ -1,5 +1,6 @@
 package info.guardianproject.cacheword;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import java.security.GeneralSecurityException;
@@ -22,6 +23,7 @@ public class PassphraseSecretsImpl {
     }
 
 
+    @SuppressWarnings("unused")
     private static final String TAG = "PassphraseSecretsImpl";
 
     //used by initialization and change password routines
@@ -139,6 +141,7 @@ public class PassphraseSecretsImpl {
         return cipher.doFinal(data);
     }
 
+    @SuppressLint("TrulyRandom")
     public byte[] generateIv(int length) throws NoSuchAlgorithmException {
         byte[] iv = new byte[length];
         SecureRandom.getInstance("SHA1PRNG").nextBytes(iv);
