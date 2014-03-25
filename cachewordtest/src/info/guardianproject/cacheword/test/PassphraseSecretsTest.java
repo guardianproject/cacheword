@@ -2,13 +2,16 @@
 package info.guardianproject.cacheword.test;
 
 import android.test.AndroidTestCase;
+import android.util.Base64;
 import android.util.Log;
 
 import info.guardianproject.cacheword.Constants;
 import info.guardianproject.cacheword.PassphraseSecrets;
 import info.guardianproject.cacheword.PassphraseSecretsImpl;
 import info.guardianproject.cacheword.SecretsManager;
+import info.guardianproject.cacheword.SerializedSecretsLoader;
 import info.guardianproject.cacheword.SerializedSecretsV0;
+import info.guardianproject.cacheword.SerializedSecretsV1;
 
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -56,11 +59,7 @@ public class PassphraseSecretsTest extends AndroidTestCase {
 
     public void testChangePassword() {
         String passphrase_str = "hunter2";
-
-
         String passphrase_str_new = "purplepipers";
-
-
 
         char[] pass = passphrase_str.toCharArray();
         PassphraseSecrets original_secrets = PassphraseSecrets
@@ -121,6 +120,36 @@ public class PassphraseSecretsTest extends AndroidTestCase {
         assertFalse(Arrays.equals(ss_first.salt, ss_second.salt));
         assertFalse(Arrays.equals(ss_first.ciphertext, ss_second.ciphertext));
 
+    }
+
+    public void testVersion0Migration() {
+        // a string exported from version 0 with pass 'purplepipers'
+        String encoded = "AAAAABGEgBW8ATWLekRtu1ODaQswXZ2Tr0hfzl9rSz+kRAA8fu5pjKXPaKcT18zS7xPKV4z4DG5W49wV6bPaGTdP7Co3srPmEPPcAATECMY=";
+
+        byte[] decoded  = Base64.decode(encoded, Base64.DEFAULT);
+
+        SerializedSecretsV0 ss0 = new SerializedSecretsV0(decoded);
+        ss0.parse();
+        assertEquals(Constants.VERSION_ZERO, ss0.version);
+
+        SerializedSecretsLoader loader = new SerializedSecretsLoader();
+        assertEquals(Constants.VERSION_ZERO, loader.getVersion(decoded));
+
+        SerializedSecretsV1 ss1 = loader.loadSecrets(decoded);
+        assertEquals(100, ss1.pbkdf_iter_count);
+
+        SecretsManager.saveBytes(getContext(), Constants.SHARED_PREFS_SECRETS, ss1.concatenate());
+        PassphraseSecrets fetched_secrets = null;
+
+        try {
+            char[] pass_new = "purplepipers".toCharArray();
+            fetched_secrets = PassphraseSecrets.fetchSecrets(getContext(), pass_new);
+            assertNotNull(fetched_secrets);
+            assertNotNull(fetched_secrets.getSecretKey());
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
 }
