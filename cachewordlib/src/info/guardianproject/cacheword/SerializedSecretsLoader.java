@@ -8,12 +8,6 @@ import java.nio.ByteBuffer;
  */
 public class SerializedSecretsLoader {
 
-    int m_pbkdf2_iter_count;
-
-    public SerializedSecretsLoader(int iter_count) {
-        m_pbkdf2_iter_count = iter_count;
-    }
-
     public SerializedSecretsV1 loadSecrets(byte[] secrets) {
 
         try {

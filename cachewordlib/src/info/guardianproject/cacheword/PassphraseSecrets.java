@@ -84,15 +84,23 @@ public class PassphraseSecrets implements ICachedSecrets {
     public static PassphraseSecrets fetchSecrets(Context ctx, char[] x_passphrase)
             throws GeneralSecurityException {
         byte[] preparedSecret         = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
-        int pbkdf2_iter_count         = getPBKDF2MinimumIterationCount(ctx);
-        SerializedSecretsV1 ss        = new SerializedSecretsLoader(pbkdf2_iter_count).loadSecrets(preparedSecret);
+        SerializedSecretsV1 ss        = new SerializedSecretsLoader().loadSecrets(preparedSecret);
         byte[] x_rawSecretKey         = null;
 
         try {
             PassphraseSecretsImpl crypto  = new PassphraseSecretsImpl();
             x_rawSecretKey                = crypto.decryptWithPassphrase(x_passphrase, ss);
+            PassphraseSecrets ps          = new PassphraseSecrets(x_rawSecretKey);
 
-            return new PassphraseSecrets(x_rawSecretKey);
+            // check for insecure iteration counts and upgrade if necessary
+            // we do this by "changing" the passphrase to the same passphrase
+            // since changePassphrase calls calibrateKDF()
+            if( ss.pbkdf_iter_count < getPBKDF2MinimumIterationCount(ctx) ) {
+                ps = changePassphrase(ctx, ps, x_passphrase);
+                if ( ps == null )
+                    throw new GeneralSecurityException("Upgrading iteration count failed during save");
+            }
+            return ps;
         } finally {
             Wiper.wipe(x_passphrase);
             Wiper.wipe(x_rawSecretKey);
@@ -133,7 +141,7 @@ public class PassphraseSecrets implements ICachedSecrets {
      */
     private static boolean encryptAndSave(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
         PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
-        int pbkdf2_iter_count        = getPBKDF2MinimumIterationCount(ctx); // TODO (abel) add adaptive/config option here
+        int pbkdf2_iter_count        = calibrateKDF(ctx);
         SerializedSecretsV1 ss       = crypto.encryptWithPassphrase(ctx, x_passphrase, x_plaintext, pbkdf2_iter_count);
         byte[] preparedSecret        = ss.concatenate();
         boolean saved                = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
@@ -150,6 +158,24 @@ public class PassphraseSecrets implements ICachedSecrets {
     private static boolean getPBKDF2AutoCalibrationEnabled(Context ctx) {
         boolean calibrate = ctx.getResources().getBoolean(R.bool.cacheword_pbkdf2_auto_calibrate);
         return calibrate;
+    }
+
+    /**
+     * returns the number of iterations to use
+     * @throws GeneralSecurityException
+     */
+    private static int calibrateKDF(Context ctx) throws GeneralSecurityException {
+        int minimum = getPBKDF2MinimumIterationCount(ctx);
+        if( getPBKDF2AutoCalibrationEnabled(ctx) ) {
+            KDFIterationCalibrator calibrator = new KDFIterationCalibrator(Constants.PBKDF2_ITER_SAMPLES);
+            int calculated = calibrator.chooseIterationCount(1000);
+            int iterations = Math.max(minimum, calculated);
+            Log.d(TAG, "calibrateKDF() selected: " + iterations);
+            return iterations;
+        } else {
+            // if auto calibration isn't enabled we use the minimum
+            return minimum;
+        }
     }
 
     @Override

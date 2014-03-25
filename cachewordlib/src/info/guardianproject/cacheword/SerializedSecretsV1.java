@@ -27,6 +27,7 @@ public class SerializedSecretsV1 {
 
     public SerializedSecretsV1(byte[] serialized) {
         this.serialized = serialized;
+        parse();
     }
 
     public void parse() {

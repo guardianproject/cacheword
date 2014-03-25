@@ -42,5 +42,6 @@ public class Constants {
     public static final int INT_LENGTH              = 4;   // length of integer in the JVM
     public static final int PBKDF2_KEY_LEN_BITS     = 128; // bits
     public static final int PBKDF2_ITER_SAMPLES     = 30;  // number of samples to run for the adaptive iteration calibration
+    public static final int PBKDF2_TARGET_MILLIS    = 1000; // the number of milliseconds to target w/ pbkdf2 iterations
 
 }
