@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  */
 public class SerializedSecretsV1 {
     public int version;
-    public int iterations;
+    public int pbkdf_iter_count;
     public byte[] salt;
     public byte[] iv;
     public byte[] ciphertext;
@@ -19,7 +19,7 @@ public class SerializedSecretsV1 {
 
     public SerializedSecretsV1(int version, int iterations, byte[] salt, byte[] iv, byte[] ciphertext) {
         this.version = version;
-        this.iterations = iterations;
+        this.pbkdf_iter_count = iterations;
         this.salt = salt;
         this.iv = iv;
         this.ciphertext = ciphertext;
@@ -36,7 +36,7 @@ public class SerializedSecretsV1 {
         ByteBuffer bb = ByteBuffer.wrap(serialized);
 
         version = bb.getInt();
-        iterations = bb.getInt();
+        pbkdf_iter_count = bb.getInt();
         bb.get(salt);
         bb.get(iv);
         bb.get(ciphertext);
@@ -46,7 +46,7 @@ public class SerializedSecretsV1 {
         serialized = new byte[ constants_length() + ciphertext.length];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
         bb.putInt(version);
-        bb.putInt(iterations);
+        bb.putInt(pbkdf_iter_count);
         bb.put(salt);
         bb.put(iv);
         bb.put(ciphertext);

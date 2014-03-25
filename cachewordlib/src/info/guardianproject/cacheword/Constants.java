@@ -26,6 +26,8 @@ public class Constants {
     public static final int SERVICE_BACKGROUND_ID = 13218;
 
     public final static int VERSION_ZERO = 0;
+    public final static int VERSION_ONE = 1;
+    public final static int VERSION_MAX = VERSION_ONE;
 
     public static final int STATE_UNKNOWN = -1;
     public static final int STATE_UNINITIALIZED = 0;
