@@ -57,10 +57,11 @@ public class KDFIterationCalibratorTest extends AndroidTestCase {
         KDFIterationCalibrator calibrator = new KDFIterationCalibrator(Constants.PBKDF2_ITER_SAMPLES);
         char[] passphrase = "password".toCharArray();
         byte[] salt = crypto.generateSalt(Constants.PBKDF2_SALT_LEN_BYTES);
+        int iterations = 1000;
 
-        byte[] val1 = crypto.hashPassphrase(passphrase, salt).getEncoded();
-        byte[] val2 = calibrator.pbkdf2_jce(passphrase, salt, Constants.PBKDF2_ITER_COUNT_MIN);
-        byte[] val3 = calibrator.pbkdf2_bouncy(passphrase, salt, Constants.PBKDF2_ITER_COUNT_MIN);
+        byte[] val1 = crypto.hashPassphrase(passphrase, salt, iterations).getEncoded();
+        byte[] val2 = calibrator.pbkdf2_jce(passphrase, salt, iterations);
+        byte[] val3 = calibrator.pbkdf2_bouncy(passphrase, salt, iterations);
 
         assertEquals(val1.length, val2.length);
         assertEquals(val1.length, val3.length);
