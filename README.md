@@ -257,6 +257,7 @@ Configurable options are:
 * Intent executed when the notification is clicked
 * Timeout length after your app leaves the foreground
 * Vibration on successful unlock
+* PBKDF2 Calibration settings and minimum iteration count
 
 ### SQLCipher & IOCipher Support
 
