@@ -36,14 +36,14 @@ public class PassphraseSecretsImpl {
      * @return
      * @throws GeneralSecurityException
      */
-    public SerializedSecretsV0 encryptWithPassphrase(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
+    public SerializedSecretsV1 encryptWithPassphrase(Context ctx, char[] x_passphrase, byte[] x_plaintext, int pbkdf2_iter_count) throws GeneralSecurityException {
         SecretKeySpec x_passphraseKey = null;
         try {
             byte[] salt               = generateSalt(Constants.PBKDF2_SALT_LEN_BYTES);
             byte[] iv                 = generateIv(Constants.GCM_IV_LEN_BYTES);
-            x_passphraseKey           = hashPassphrase(x_passphrase, salt);
+            x_passphraseKey           = hashPassphrase(x_passphrase, salt, pbkdf2_iter_count);
             byte[] encryptedSecretKey = encryptSecretKey(x_passphraseKey, iv, x_plaintext);
-            SerializedSecretsV0 ss    = new SerializedSecretsV0(Constants.VERSION_ZERO, salt, iv, encryptedSecretKey);
+            SerializedSecretsV1 ss    = new SerializedSecretsV1(Constants.VERSION_ONE, pbkdf2_iter_count, salt, iv, encryptedSecretKey);
             return ss;
         } finally {
             Wiper.wipe(x_passphraseKey);
@@ -56,7 +56,7 @@ public class PassphraseSecretsImpl {
      * @return the plaintext
      * @throws GeneralSecurityException
      */
-    public byte[] decryptWithPassphrase(char[] x_passphrase, SerializedSecretsV0 ss) throws GeneralSecurityException {
+    public byte[] decryptWithPassphrase(char[] x_passphrase, SerializedSecretsV1 ss) throws GeneralSecurityException {
         byte[] x_plaintext            = null;
         SecretKeySpec x_passphraseKey = null;
 
@@ -66,7 +66,8 @@ public class PassphraseSecretsImpl {
             byte[] salt                   = ss.salt;
             byte[] iv                     = ss.iv;
             byte[] ciphertext             = ss.ciphertext;
-            x_passphraseKey               = hashPassphrase(x_passphrase, salt);
+            int    iterations             = ss.pbkdf_iter_count;
+            x_passphraseKey               = hashPassphrase(x_passphrase, salt, iterations);
             x_plaintext                   = decryptWithKey(x_passphraseKey, iv, ciphertext);
 
             return x_plaintext;
@@ -85,11 +86,11 @@ public class PassphraseSecretsImpl {
      * @return the AES SecretKeySpec containing the hashed password
      * @throws GeneralSecurityException
      */
-    public SecretKeySpec hashPassphrase(char[] x_password, byte[] salt)
+    public SecretKeySpec hashPassphrase(char[] x_password, byte[] salt, int pbkdf2_iter_count)
             throws GeneralSecurityException {
         PBEKeySpec x_spec = null;
         try {
-            x_spec                   = new PBEKeySpec(x_password, salt, Constants.PBKDF2_ITER_COUNT_MIN, Constants.PBKDF2_KEY_LEN_BITS);
+            x_spec                   = new PBEKeySpec(x_password, salt, pbkdf2_iter_count, Constants.PBKDF2_KEY_LEN_BITS);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
             return new SecretKeySpec(factory.generateSecret(x_spec).getEncoded(), "AES");
