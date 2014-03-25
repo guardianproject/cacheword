@@ -84,7 +84,8 @@ public class PassphraseSecrets implements ICachedSecrets {
     public static PassphraseSecrets fetchSecrets(Context ctx, char[] x_passphrase)
             throws GeneralSecurityException {
         byte[] preparedSecret         = SecretsManager.getBytes(ctx, Constants.SHARED_PREFS_SECRETS);
-        SerializedSecretsV1 ss        = new SerializedSecretsLoader(Constants.PBKDF2_ITER_COUNT_MIN).loadSecrets(preparedSecret);
+        int pbkdf2_iter_count         = getPBKDF2MinimumIterationCount(ctx);
+        SerializedSecretsV1 ss        = new SerializedSecretsLoader(pbkdf2_iter_count).loadSecrets(preparedSecret);
         byte[] x_rawSecretKey         = null;
 
         try {
@@ -132,7 +133,7 @@ public class PassphraseSecrets implements ICachedSecrets {
      */
     private static boolean encryptAndSave(Context ctx, char[] x_passphrase, byte[] x_plaintext) throws GeneralSecurityException {
         PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
-        int pbkdf2_iter_count        = Constants.PBKDF2_ITER_COUNT_MIN; // TODO (abel) add adaptive/config option here
+        int pbkdf2_iter_count        = getPBKDF2MinimumIterationCount(ctx); // TODO (abel) add adaptive/config option here
         SerializedSecretsV1 ss       = crypto.encryptWithPassphrase(ctx, x_passphrase, x_plaintext, pbkdf2_iter_count);
         byte[] preparedSecret        = ss.concatenate();
         boolean saved                = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS, preparedSecret);
@@ -141,6 +142,15 @@ public class PassphraseSecrets implements ICachedSecrets {
     }
 
 
+    private static int getPBKDF2MinimumIterationCount(Context ctx) {
+        int iter_count = ctx.getResources().getInteger(R.integer.cacheword_pbkdf2_minimum_iteration_count);
+        return iter_count;
+    }
+
+    private static boolean getPBKDF2AutoCalibrationEnabled(Context ctx) {
+        boolean calibrate = ctx.getResources().getBoolean(R.bool.cacheword_pbkdf2_auto_calibrate);
+        return calibrate;
+    }
 
     @Override
     public void destroy() {

@@ -36,13 +36,11 @@ public class Constants {
 
     // Crypto constants
 
-
     public static final int PBKDF2_SALT_LEN_BYTES   = 16;  // bytes, 128 bits
     public static final int AES_KEY_LEN_BITS        = 256; // bits
     public static final int GCM_IV_LEN_BYTES        = 12;  // 96 bits
     public static final int INT_LENGTH              = 4;   // length of integer in the JVM
     public static final int PBKDF2_KEY_LEN_BITS     = 128; // bits
-    public static final int PBKDF2_ITER_COUNT_MIN   = 1000; // minimum number of iterations allowed
     public static final int PBKDF2_ITER_SAMPLES     = 30;  // number of samples to run for the adaptive iteration calibration
 
 }

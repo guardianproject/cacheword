@@ -135,7 +135,6 @@ public class CacheWordSettings extends Observable {
         }
     }
 
-
     /**
      * The default intent is null, which causes the application to lock when the user taps the notification.
      * @return
