@@ -57,12 +57,12 @@ Add the following to between the `<application>....</application>` tags
 ### Dependencies
 
 * Android support library v4 (`android-support-v4.jar`; included)
-* [SQLCipher for Android >= v3.x][sqlcipher] (included)
+* [SQLCipher for Android >= v3.0.2][sqlcipher] (included)
 
 CacheWord provides a support class for SQLCipher for Android. You probably want
 to use this.
 
-Download the [SQLCipher for Android v3.x release][sqlcipher] and copy the `libs/`
+Download the [SQLCipher for Android v3.0.2 release][sqlcipher] and copy the `libs/`
 and `assets/` dir into your Android project dir.
 
 ## Integration
