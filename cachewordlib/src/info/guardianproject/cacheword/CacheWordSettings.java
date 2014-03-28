@@ -27,11 +27,11 @@ public class CacheWordSettings extends Observable {
      * and editing it.
      *
      * The value is stored in  SharedPreferences, so it will persist.
-     * @return the timeout in minutes
+     * @return the timeout in seconds
      */
-    public synchronized int getTimeoutMinutes() {
-        int defTimeout = mContext.getResources().getInteger(R.integer.cacheword_timeout_minutes_default);
-        int timeout = mContext.getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(Constants.SHARED_PREFS_TIMEOUT, defTimeout);
+    public synchronized int getTimeoutSeconds() {
+        int defTimeout = mContext.getResources().getInteger(R.integer.cacheword_timeout_seconds_default);
+        int timeout = mContext.getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(Constants.SHARED_PREFS_TIMEOUT_SECONDS, defTimeout);
         return timeout;
     }
 
@@ -42,14 +42,14 @@ public class CacheWordSettings extends Observable {
      * and editing it.
      *
      * The value is stored in  SharedPreferences, so it will persist.
-     * @param minutes
+     * @param seconds
      */
-    public synchronized void setTimeoutMinutes(int minutes) {
-        if(minutes >= 0 && minutes != getTimeoutMinutes()) {
+    public synchronized void setTimeoutSeconds(int seconds) {
+        if(seconds >= 0 && seconds != getTimeoutSeconds()) {
             Editor ed = mContext.getSharedPreferences(Constants.SHARED_PREFS, 0).edit();
-            ed.putInt(Constants.SHARED_PREFS_TIMEOUT, minutes);
+            ed.putInt(Constants.SHARED_PREFS_TIMEOUT_SECONDS, seconds);
             ed.commit();
-            Log.d(TAG, "setTimeoutMinutes() minutes=" + minutes);
+            Log.d(TAG, "setTimeoutSeconds() seconds=" + seconds);
             notifyObservers();
         }
     }
@@ -144,7 +144,7 @@ public class CacheWordSettings extends Observable {
     }
 
     public void updateWith(CacheWordSettings other) {
-        setTimeoutMinutes(other.getTimeoutMinutes());
+        setTimeoutSeconds(other.getTimeoutSeconds());
         setVibrateSetting(other.getVibrateSetting());
         setEnableNotification(other.getNotificationEnabled());
         setNotificationIntent(other.getNotificationIntent());

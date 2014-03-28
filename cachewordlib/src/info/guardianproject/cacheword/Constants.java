@@ -16,7 +16,7 @@ public class Constants {
     public static final String SHARED_PREFS_INITIALIZED = "initialized";
     public static final String SHARED_PREFS_SECRETS = "encrypted_secrets";
     public static final String SHARED_PREFS_FOREGROUND = "foreground";
-    public static final String SHARED_PREFS_TIMEOUT = "cacheword_timeout";
+    public static final String SHARED_PREFS_TIMEOUT_SECONDS = "cacheword_timeout_seconds";
     public static final String SHARED_PREFS_USE_NOTIFICATION = "enable_notification";
     public static final String SHARED_PREFS_VIBRATE = "cacheword_vibrate";
 

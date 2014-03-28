@@ -181,14 +181,14 @@ public class CacheWordService extends Service implements Observer {
     }
 
     private void resetTimeout() {
-        int timeoutMinutes = mSettings.getTimeoutMinutes();
-        boolean timeoutEnabled = timeoutMinutes >= 0;
+        int timeoutSeconds = mSettings.getTimeoutSeconds();
+        boolean timeoutEnabled = timeoutSeconds >= 0;
 
-        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", minutes="+timeoutMinutes);
+        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", seconds="+timeoutSeconds);
         Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
 
         if (timeoutEnabled && mSubscriberCount == 0) {
-            startTimeout(timeoutMinutes * 60 * 1000);
+            startTimeout(timeoutSeconds * 1000);
         } else {
             Log.d(TAG, "disabled timeout alarm");
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -197,15 +197,15 @@ public class CacheWordService extends Service implements Observer {
     }
 
     /**
-     * @param interval in milliseconds
+     * @param milliseconds timeout interval in milliseconds
      */
-    private void startTimeout(long interval) {
-        if( interval <= 0 ) {
+    private void startTimeout(long milliseconds) {
+        if( milliseconds <= 0 ) {
             Log.d(TAG, "immediate timeout");
             expirePassphrase();
             return;
         }
-        Log.d(TAG, "starting timeout: " + interval);
+        Log.d(TAG, "starting timeout: " + milliseconds);
 
         if (mTimeoutIntent == null) {
             Intent passExpiredIntent = CacheWordService
@@ -217,7 +217,7 @@ public class CacheWordService extends Service implements Observer {
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + interval, mTimeoutIntent);
+                SystemClock.elapsedRealtime() + milliseconds, mTimeoutIntent);
 
     }
 

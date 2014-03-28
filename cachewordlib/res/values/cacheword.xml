@@ -18,7 +18,7 @@
                    A value of 0 represents instant timeout
                    A value < 0  represents no timeout (or infinite timeout)
     -->
-    <integer name="cacheword_timeout_minutes_default">5</integer>
+    <integer name="cacheword_timeout_seconds_default">300</integer>
 
     <!--
     In August 2013 a severe bug was found in Android's SecureRandom implementation. This affected all

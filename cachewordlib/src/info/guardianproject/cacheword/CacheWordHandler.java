@@ -240,15 +240,15 @@ public class CacheWordHandler {
         return mCacheWordService.isLocked();
     }
 
-    public void setTimeoutMinutes(int minutes) throws IllegalStateException {
+    public void setTimeoutSeconds(int seconds) throws IllegalStateException {
         if(!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        mCacheWordService.settings().setTimeoutMinutes(minutes);
+        mCacheWordService.settings().setTimeoutSeconds(seconds);
     }
-    public int getTimeoutMinutes() throws IllegalStateException {
+    public int getTimeoutSeconds() throws IllegalStateException {
         if(!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        return mCacheWordService.settings().getTimeoutMinutes();
+        return mCacheWordService.settings().getTimeoutSeconds();
     }
 
     public void setVibrateSetting(boolean vibrate) throws IllegalStateException {
