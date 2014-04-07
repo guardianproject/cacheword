@@ -2,6 +2,8 @@ package info.guardianproject.cacheword;
 
 import android.app.PendingIntent;
 import android.content.Context;
+
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
@@ -19,6 +21,37 @@ public class CacheWordSettings extends Observable {
      */
     public CacheWordSettings(Context context) {
         mContext = context;
+        loadDefaults();
+    }
+
+    /**
+     * Load the default settings from XML and save them in Shared Prefs
+     */
+    private void loadDefaults() {
+        SharedPreferences prefs = mContext.getSharedPreferences(Constants.SHARED_PREFS, 0);
+        Editor ed = prefs.edit();
+
+        if( !prefs.contains(Constants.SHARED_PREFS_TIMEOUT_SECONDS) ) {
+            // timeout
+            int def_timeout = mContext.getResources().getInteger(R.integer.cacheword_timeout_seconds_default);
+            ed.putInt(Constants.SHARED_PREFS_TIMEOUT_SECONDS, def_timeout);
+        }
+
+
+        if( !prefs.contains(Constants.SHARED_PREFS_VIBRATE) ) {
+            // vibrate setting
+            boolean def_vibrate = mContext.getResources().getBoolean(R.bool.cacheword_vibrate_default);
+            ed.putBoolean(Constants.SHARED_PREFS_VIBRATE, def_vibrate);
+        }
+
+
+        if( !prefs.contains(Constants.SHARED_PREFS_USE_NOTIFICATION) ) {
+            // notification
+            boolean def_notification = mContext.getResources().getBoolean(R.bool.cacheword_use_notification_default);
+            ed.putBoolean(Constants.SHARED_PREFS_USE_NOTIFICATION, def_notification);
+        }
+
+        ed.commit();
     }
 
     /**
