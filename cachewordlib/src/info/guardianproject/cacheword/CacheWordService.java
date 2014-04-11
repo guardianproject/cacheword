@@ -50,6 +50,7 @@ public class CacheWordService extends Service implements Observer {
         Log.d(TAG, "onStart: with intent " + action);
 
         if (action.equals(Constants.INTENT_PASS_EXPIRED)) {
+            Log.d(TAG, "onStart: LOCK COMMAND received..locking");
             expirePassphrase();
         }
         return START_NOT_STICKY;
@@ -235,9 +236,11 @@ public class CacheWordService extends Service implements Observer {
 
         PendingIntent i = null;
         if( mSettings.getNotificationIntent() != null ) {
+            Log.d(TAG, "non-default NotificationItent found!");
             i = mSettings.getNotificationIntent();
         } else {
             Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
+            Log.d(TAG, "using default NotificationItent (lock app)");
             notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
             i = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
         }

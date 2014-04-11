@@ -159,6 +159,8 @@ public class CacheWordSettings extends Observable {
      * @param intent the pending intent to execute
      */
     public synchronized void setNotificationIntent(PendingIntent intent) {
+        final boolean isnull = intent==null;
+        Log.d(TAG, "setNotificationIntent, intent is null? " + isnull);
         // only change the intent if, it is actually changing.
         // which is when the current one is null, and the new one isn't, or
         // when the new intent != the old intent
