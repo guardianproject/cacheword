@@ -236,7 +236,9 @@ class YourActivity extends Activity implements ICacheWordSubscriber
 }
 ```
 
-### Configuration
+## Common Usage Questions
+
+### How do I configure CacheWord?
 
 Configuration is entirely optional as sane defaults are provided for every
 option.
@@ -259,7 +261,7 @@ Configurable options are:
 * Vibration on successful unlock
 * PBKDF2 Calibration settings and minimum iteration count
 
-### SQLCipher & IOCipher Support
+### How do I use CW with SQLCipher & IOCipher?
 
 If you use SQLCipher for encrypted database storage you should use CacheWord's
 `SQLCipherOpenHelper`. See the [NoteCipher application][notecipher] for an
@@ -281,6 +283,42 @@ used by other libraries like [SQLCipher][sqlcipher] or [IOCipher][iocipher]
 
 In this case the user's password is used to encrypt (after being hashed of
 course) the generated encryption key, and is never written to disk.
+
+### How does CacheWord work with background services?
+
+Many apps will perform operations in the background that require access to
+sensitive data, even though the user may not be actively using the app. These
+services will require access to the cached secrets in order to write to the
+database, update internal structure, etc.
+
+For example, a chat application will run a service in the background to check
+for new messages on the wire, and then write them to the database.
+
+Since the background service needs access to the cached secrets, the app must
+remain unlocked. If the configured timeout occurs, the CacheWord will lock, and
+the background service will be unable to do its job.
+
+If the user closes the app, they may well expect it to be locked, after all
+they aren't using it and they want to protect their data, but, in the case of
+the messenger app, they will still want to be notified when a new message arrives.
+
+The results in inconsistent expectations, you can't lock the app without
+shutting down the background service, but you need the background service
+running to provide some basic functionality.
+
+How this is handled in your app depends on what your background service is
+doing.
+
+If the user expects your app to do something in the background and notify them,
+then you will need to disable the auto-timeout in CacheWord. Likewise, if the
+user locks the app, they should be aware that they will be disabling any
+background functionality.
+
+You might be tempted to cache the secrets yourself, in an global variable or
+singleton, so that your app can appear to be locked (the user has to enter a
+passphrase), but the background service can still work. *This is a bad idea!*
+By doing this you lose the secure memory handling CacheWord employs, and negate
+much of the benefit derived from using CW.
 
 # Issues & Support
 
