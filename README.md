@@ -28,9 +28,20 @@ resetting, and caching secret key material in memory.
 
 CacheWord requires at least SDK version 2.2 (API level 8)
 
-# Usage
+# Table of Contents
 
-## Setup
+* [Setup](#setup)
+  * [Dependencies](#dependencies)
+* [Integration](#integration)
+  1. [Implementing ICacheWordSubscriber ](#1-implementing-icachewordsubscriber)
+  2. [Instantiate CacheWordHandler and propagate lifecycle Changes](#2-instantiate-cachewordhandler-and-propagate-lifecycle-changes)
+* [Common Usage Questions](#common-usage-questions)
+  * [How do I configure CacheWord?](#how-do-i-configure-cacheword)
+  * [How do I use CW with SQLCipher & IOCipher?](#how-do-i-use-cw-with-sqlcipher--iocipher)
+  * [What are these cached secrets?](#what-are-these-cached-secrets)
+  * [How does CacheWord work with background services?](#how-does-cacheword-work-with-background-services)
+
+# Setup
 
 **(Eclipse) Import into your workspace**
 
@@ -54,7 +65,7 @@ Add the following to between the `<application>....</application>` tags
 <service android:name="info.guardianproject.cacheword.CacheWordService" android:enabled="true" android:exported="false" />
 ```
 
-### Dependencies
+## Dependencies
 
 * Android support library v4 (`android-support-v4.jar`; included)
 * [SQLCipher for Android >= v3.0.2][sqlcipher] (included)
@@ -65,7 +76,7 @@ to use this.
 Download the [SQLCipher for Android v3.0.2 release][sqlcipher] and copy the `libs/`
 and `assets/` dir into your Android project dir.
 
-## Integration
+# Integration
 
 A CacheWordSubscriber is any component in your application interested in the
 secrets managed by CacheWord. Such components may be:
@@ -200,7 +211,7 @@ class YourClass implements ICacheWordSubscriber
 ```
 
 
-#### Activity's and CacheWordActivityHandler
+### Activity's and CacheWordActivityHandler
 
 Most of the time it is `Activity` classes that need to instantiate
 `CacheWordHandler`, so for this use case there is a convenient class called
@@ -236,7 +247,7 @@ class YourActivity extends Activity implements ICacheWordSubscriber
 }
 ```
 
-## Common Usage Questions
+# Common Usage Questions
 
 ### How do I configure CacheWord?
 
@@ -270,7 +281,6 @@ example of how to use it.
 Likewise if you use IOCipher for encrypted file storage you should use CacheWord's `IOCipherHelper`.
 
 TODO: make example of IOCipherHelper
-
 
 ### What Are These Cached Secrets?
 
