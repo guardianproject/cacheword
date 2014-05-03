@@ -24,6 +24,7 @@ import java.security.GeneralSecurityException;
 public class CacheWordHandler {
     private static final String TAG = "CacheWordHandler";
 
+    private boolean mAttachSubscriber = true;
     private Context mContext;
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
@@ -108,6 +109,22 @@ public class CacheWordHandler {
         mSubscriber = subscriber;
         mSettings = settings;
     }
+    
+    /**
+     * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects
+     * @param context your application's  or activity's context
+     * @param subscriber the object to notify of CW events
+     * @param settings the settings for CacheWord
+     * @param increase subscriber count, disabling timeout when connected or not, default is normally true
+     */    
+    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber, CacheWordSettings settings, boolean attachSubscriber) {
+        mContext = context;
+        mSubscriber = subscriber;
+        mSettings = settings;
+        mAttachSubscriber = attachSubscriber; 
+    }
+    
+    
 
     /**
      * Connect to the CacheWord service, starting it if necessary.
@@ -353,7 +370,8 @@ public class CacheWordHandler {
                     if( mConnectionState == ServiceConnectionState.CONNECTION_INPROGRESS ) {
                         mCacheWordService = cwBinder.getService();
                         registerBroadcastReceiver();
-                        mCacheWordService.attachSubscriber();
+                        if (mAttachSubscriber)
+                        	mCacheWordService.attachSubscriber();
                         if(mSettings != null)
                             mCacheWordService.setSettings(mSettings);
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
