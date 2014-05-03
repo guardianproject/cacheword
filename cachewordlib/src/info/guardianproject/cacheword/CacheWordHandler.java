@@ -24,7 +24,6 @@ import java.security.GeneralSecurityException;
 public class CacheWordHandler {
     private static final String TAG = "CacheWordHandler";
 
-    private boolean mAttachSubscriber = true;
     private Context mContext;
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
@@ -111,22 +110,6 @@ public class CacheWordHandler {
     }
     
     /**
-     * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects
-     * @param context your application's  or activity's context
-     * @param subscriber the object to notify of CW events
-     * @param settings the settings for CacheWord
-     * @param increase subscriber count, disabling timeout when connected or not, default is normally true
-     */    
-    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber, CacheWordSettings settings, boolean attachSubscriber) {
-        mContext = context;
-        mSubscriber = subscriber;
-        mSettings = settings;
-        mAttachSubscriber = attachSubscriber; 
-    }
-    
-    
-
-    /**
      * Connect to the CacheWord service, starting it if necessary.
      * Once connected, the attached Context will begin receiving
      * CacheWord events.
@@ -150,6 +133,26 @@ public class CacheWordHandler {
 
     }
 
+    
+    
+    /**
+     * Detach but don't disconnect from the CacheWord service. Continue receiving CacheWord events.
+     */
+    public void detach() {
+        if( mCacheWordService != null ) {
+        	mCacheWordService.detachSubscriber();
+        }    
+    }
+
+    /**
+     * Reattach to the CacheWord service. 
+     */
+    public void reattach() {
+    	if( mCacheWordService != null ) {
+        	mCacheWordService.attachSubscriber();         
+        }
+    }
+        
     /**
      * Disconnect from the CacheWord service. No further CacheWord events will be received.
      */
@@ -159,7 +162,7 @@ public class CacheWordHandler {
 
             if( mBoundState == BindState.BIND_COMPLETED ) {
                 if( mCacheWordService != null ) {
-                    mCacheWordService.detachSubscriber();
+                	mCacheWordService.detachSubscriber();
                     mCacheWordService = null;
                 }
                 mContext.unbindService(mCacheWordServiceConnection);
@@ -370,8 +373,7 @@ public class CacheWordHandler {
                     if( mConnectionState == ServiceConnectionState.CONNECTION_INPROGRESS ) {
                         mCacheWordService = cwBinder.getService();
                         registerBroadcastReceiver();
-                        if (mAttachSubscriber)
-                        	mCacheWordService.attachSubscriber();
+                        mCacheWordService.attachSubscriber();
                         if(mSettings != null)
                             mCacheWordService.setSettings(mSettings);
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
