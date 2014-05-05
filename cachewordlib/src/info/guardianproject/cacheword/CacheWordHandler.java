@@ -108,7 +108,7 @@ public class CacheWordHandler {
         mSubscriber = subscriber;
         mSettings = settings;
     }
-
+    
     /**
      * Connect to the CacheWord service, starting it if necessary.
      * Once connected, the attached Context will begin receiving
@@ -133,6 +133,26 @@ public class CacheWordHandler {
 
     }
 
+    
+    
+    /**
+     * Detach but don't disconnect from the CacheWord service. Continue receiving CacheWord events.
+     */
+    public void detach() {
+        if( mCacheWordService != null ) {
+        	mCacheWordService.detachSubscriber();
+        }    
+    }
+
+    /**
+     * Reattach to the CacheWord service. 
+     */
+    public void reattach() {
+    	if( mCacheWordService != null ) {
+        	mCacheWordService.attachSubscriber();         
+        }
+    }
+        
     /**
      * Disconnect from the CacheWord service. No further CacheWord events will be received.
      */
@@ -142,7 +162,7 @@ public class CacheWordHandler {
 
             if( mBoundState == BindState.BIND_COMPLETED ) {
                 if( mCacheWordService != null ) {
-                    mCacheWordService.detachSubscriber();
+                	mCacheWordService.detachSubscriber();
                     mCacheWordService = null;
                 }
                 mContext.unbindService(mCacheWordServiceConnection);
