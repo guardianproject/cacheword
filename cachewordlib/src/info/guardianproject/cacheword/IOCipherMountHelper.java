@@ -40,7 +40,7 @@ public class IOCipherMountHelper {
         mMountPoint = path;
         try {
             mVFS = new VirtualFileSystem(mMountPoint);
-            mVFS.mount(SQLCipherOpenHelper.encodeRawKey(mHandler.getEncryptionKey()));
+            mVFS.mount(SQLCipherOpenHelper.encodeRawKeyToStr(mHandler.getEncryptionKey()));
         } catch (Exception e) {
             mMounted = false;
             Log.e(TAG, "mounting IOCipher failed at " + path );
