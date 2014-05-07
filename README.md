@@ -330,6 +330,13 @@ passphrase), but the background service can still work. *This is a bad idea!*
 By doing this you lose the secure memory handling CacheWord employs, and negate
 much of the benefit derived from using CW.
 
+The `CacheWordHandler.detach()` and `reattach()` methods are available, which
+will allow your background service to receive CW events but not be counted
+among the connected clients when the automatic lock timeout occurs. In other
+words, the background service won't prevent the lock timeout from happening if
+it is still running. Your service should properly handle Lock events, even if
+it is in the middle of a running operation.
+
 # Issues & Support
 
 Bug? Please report any issues at [our project issue tracker][issues], no
