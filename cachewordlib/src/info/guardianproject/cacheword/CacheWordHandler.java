@@ -345,6 +345,10 @@ public class CacheWordHandler {
     private boolean isCacheWordInitialized() {
         return SecretsManager.isInitialized(mContext);
     }
+    
+    public void deinitialize() {
+	    SecretsManager.setInitialized(mContext, false);
+    }
 
     private boolean isPrepared() {
         return isCacheWordConnected() && isCacheWordInitialized();
