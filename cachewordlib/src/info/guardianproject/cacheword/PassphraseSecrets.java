@@ -53,9 +53,6 @@ public class PassphraseSecrets implements ICachedSecrets {
      * Generates a random AES key and encrypts it with a PBKDF2 key derived from x_passphrase. The resulting
      * ciphertext is saved to disk. All sensitive variables are wiped.
      *
-     * Warning: Long running function! If PBKDF2 auto calibration is enabled (see config), this function
-     *          will take at least 30 seconds to run as it calibrates the KDF. Best to run it in a thread.
-     *
      * @param ctx
      * @param x_passphrase
      * @return
@@ -80,10 +77,6 @@ public class PassphraseSecrets implements ICachedSecrets {
     /**
      * Attempts to decrypt the stored secrets with x_passphrase. If successful, returns a PassphraseSecrets
      * initialized with the secret key.
-     *
-     * Warning: Long running function! If PBKDF2 auto calibration is enabled (see config), and the current
-     *          iteration count is less than the minimum (which could happen after an upgrade) this function
-     *          will take at least 30 seconds to run as it calibrates the KDF. Best to run it in a thread.
      * @param ctx
      * @param x_passphrase WIPED
      * @return
@@ -118,10 +111,6 @@ public class PassphraseSecrets implements ICachedSecrets {
     /**
      * Re-encrypts the secret key in current_secrets with a new derived key from x_new_passphrase. The resulting
      * ciphertext is saved to disk.
-     *
-     * Warning: Long running function! If PBKDF2 auto calibration is enabled (see config), this function
-     *          will take at least 30 seconds to run as it calibrates the KDF. Best to run it in a thread.
-     *
      * @param ctx
      * @param current_secrets NOT WIPED
      * @param x_new_passphrase WIPED

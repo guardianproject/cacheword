@@ -12,6 +12,7 @@ import net.sqlcipher.database.SQLiteOpenHelper;
 import org.apache.commons.codec.binary.Hex;
 
 import java.lang.reflect.Method;
+import java.nio.CharBuffer;
 
 /**
  * A helper class to manage database creation and version management. You create
@@ -91,7 +92,7 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * @param raw_key a 32 byte array
      * @return the encoded key
      */
-    public static String encodeRawKey(byte[] raw_key) {
+    public static char[] encodeRawKey(byte[] raw_key) {
         if (raw_key.length != 32)
             throw new IllegalArgumentException("provided key not 32 bytes (256 bits) wide");
 
@@ -107,12 +108,25 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
             kPrefix = "x''";
             kSuffix = "''";
         }
-
         final char[] key_chars = Hex.encodeHex(raw_key);
         if (key_chars.length != 64)
             throw new IllegalStateException("encoded key is not 64 bytes wide");
 
-        return kPrefix + new String(key_chars) + kSuffix;
+        char[] kPrefix_c = kPrefix.toCharArray();
+        char[] kSuffix_c = kSuffix.toCharArray();
+        CharBuffer cb = CharBuffer.allocate(kPrefix_c.length + kSuffix_c.length + key_chars.length);
+        cb.put(kPrefix_c);
+        cb.put(key_chars);
+        cb.put(kSuffix_c);
+
+        return cb.array();
+    }
+
+    /**
+     * @see encodeRawKey
+     */
+    public static String encodeRawKeyToStr(byte[] raw_key) {
+        return encodeRawKey(raw_key).toString();
     }
 
     /*

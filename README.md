@@ -28,9 +28,20 @@ resetting, and caching secret key material in memory.
 
 CacheWord requires at least SDK version 2.2 (API level 8)
 
-# Usage
+# Table of Contents
 
-## Setup
+* [Setup](#setup)
+  * [Dependencies](#dependencies)
+* [Integration](#integration)
+  1. [Implementing ICacheWordSubscriber ](#1-implementing-icachewordsubscriber)
+  2. [Instantiate CacheWordHandler and propagate lifecycle Changes](#2-instantiate-cachewordhandler-and-propagate-lifecycle-changes)
+* [Common Usage Questions](#common-usage-questions)
+  * [How do I configure CacheWord?](#how-do-i-configure-cacheword)
+  * [How do I use CW with SQLCipher & IOCipher?](#how-do-i-use-cw-with-sqlcipher--iocipher)
+  * [What are these cached secrets?](#what-are-these-cached-secrets)
+  * [How does CacheWord work with background services?](#how-does-cacheword-work-with-background-services)
+
+# Setup
 
 **(Eclipse) Import into your workspace**
 
@@ -54,7 +65,7 @@ Add the following to between the `<application>....</application>` tags
 <service android:name="info.guardianproject.cacheword.CacheWordService" android:enabled="true" android:exported="false" />
 ```
 
-### Dependencies
+## Dependencies
 
 * Android support library v4 (`android-support-v4.jar`; included)
 * [SQLCipher for Android >= v3.0.2][sqlcipher] (included)
@@ -65,7 +76,7 @@ to use this.
 Download the [SQLCipher for Android v3.0.2 release][sqlcipher] and copy the `libs/`
 and `assets/` dir into your Android project dir.
 
-## Integration
+# Integration
 
 A CacheWordSubscriber is any component in your application interested in the
 secrets managed by CacheWord. Such components may be:
@@ -200,7 +211,7 @@ class YourClass implements ICacheWordSubscriber
 ```
 
 
-#### Activity's and CacheWordActivityHandler
+### Activity's and CacheWordActivityHandler
 
 Most of the time it is `Activity` classes that need to instantiate
 `CacheWordHandler`, so for this use case there is a convenient class called
@@ -236,7 +247,9 @@ class YourActivity extends Activity implements ICacheWordSubscriber
 }
 ```
 
-### Configuration
+# Common Usage Questions
+
+### How do I configure CacheWord?
 
 Configuration is entirely optional as sane defaults are provided for every
 option.
@@ -259,7 +272,7 @@ Configurable options are:
 * Vibration on successful unlock
 * PBKDF2 Calibration settings and minimum iteration count
 
-### SQLCipher & IOCipher Support
+### How do I use CW with SQLCipher & IOCipher?
 
 If you use SQLCipher for encrypted database storage you should use CacheWord's
 `SQLCipherOpenHelper`. See the [NoteCipher application][notecipher] for an
@@ -268,7 +281,6 @@ example of how to use it.
 Likewise if you use IOCipher for encrypted file storage you should use CacheWord's `IOCipherHelper`.
 
 TODO: make example of IOCipherHelper
-
 
 ### What Are These Cached Secrets?
 
@@ -281,6 +293,49 @@ used by other libraries like [SQLCipher][sqlcipher] or [IOCipher][iocipher]
 
 In this case the user's password is used to encrypt (after being hashed of
 course) the generated encryption key, and is never written to disk.
+
+### How does CacheWord work with background services?
+
+Many apps will perform operations in the background that require access to
+sensitive data, even though the user may not be actively using the app. These
+services will require access to the cached secrets in order to write to the
+database, update internal structure, etc.
+
+For example, a chat application will run a service in the background to check
+for new messages on the wire, and then write them to the database.
+
+Since the background service needs access to the cached secrets, the app must
+remain unlocked. If the configured timeout occurs, the CacheWord will lock, and
+the background service will be unable to do its job.
+
+If the user closes the app, they may well expect it to be locked, after all
+they aren't using it and they want to protect their data, but, in the case of
+the messenger app, they will still want to be notified when a new message arrives.
+
+The results in inconsistent expectations, you can't lock the app without
+shutting down the background service, but you need the background service
+running to provide some basic functionality.
+
+How this is handled in your app depends on what your background service is
+doing.
+
+If the user expects your app to do something in the background and notify them,
+then you will need to disable the auto-timeout in CacheWord. Likewise, if the
+user locks the app, they should be aware that they will be disabling any
+background functionality.
+
+You might be tempted to cache the secrets yourself, in an global variable or
+singleton, so that your app can appear to be locked (the user has to enter a
+passphrase), but the background service can still work. *This is a bad idea!*
+By doing this you lose the secure memory handling CacheWord employs, and negate
+much of the benefit derived from using CW.
+
+The `CacheWordHandler.detach()` and `reattach()` methods are available, which
+will allow your background service to receive CW events but not be counted
+among the connected clients when the automatic lock timeout occurs. In other
+words, the background service won't prevent the lock timeout from happening if
+it is still running. Your service should properly handle Lock events, even if
+it is in the middle of a running operation.
 
 # Issues & Support
 

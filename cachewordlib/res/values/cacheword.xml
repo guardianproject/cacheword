@@ -52,8 +52,7 @@
                           on the device, however this changes from device to device due to varying hardware.
 
         Auto Calibrate:   Cacheword will attempt to calculate the best iteration count for the device at
-                          runtime using an adaptive algorithim that runs for 30 seconds. You can disable this
-                          by setting this value to false.
+                          runtime using an adaptive algorithim that takes less than a second.
 
                           If auto_calibrate is set to false, then Cacheword will use the minimum value in all cases.
 
