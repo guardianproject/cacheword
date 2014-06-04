@@ -126,7 +126,7 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * @see encodeRawKey
      */
     public static String encodeRawKeyToStr(byte[] raw_key) {
-        return encodeRawKey(raw_key).toString();
+        return new String(encodeRawKey(raw_key));
     }
 
     /*
