@@ -50,7 +50,7 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * Errors such as bad permissions or a full disk may cause this operation to
      * fail, but future attempts may succeed if the problem is fixed.
      * </p>
-     *
+     * 
      * @throws SQLiteException if the database cannot be opened for writing
      * @return a read/write database object valid until {@link #close} is called
      */
@@ -69,7 +69,7 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * to {@link #getWritableDatabase} may succeed, in which case the read-only
      * database object will be closed and the read/write object will be returned
      * in the future.
-     *
+     * 
      * @throws SQLiteException if the database cannot be opened
      * @return a database object valid until {@link #getWritableDatabase} or
      *         {@link #close} is called.
@@ -87,7 +87,7 @@ public abstract class SQLCipherOpenHelper extends SQLiteOpenHelper {
      * bytes) wide. The key data will be formatted into a 64 character hex
      * string with a special prefix and suffix SQLCipher uses to distinguish raw
      * key data from a password.
-     *
+     * 
      * @link http://sqlcipher.net/sqlcipher-api/#key
      * @param raw_key a 32 byte array
      * @return the encoded key

@@ -1,13 +1,12 @@
+
 package info.guardianproject.cacheword;
 
 import java.nio.ByteBuffer;
 
 /**
- * A ciphertext bundle
- * Encapsulates a ciphertext and associated non-sensitive metadata
- * required to decrypt it by conveniently handling all array manipulation.
- *
- * This class does not handle sensitive data.
+ * A ciphertext bundle Encapsulates a ciphertext and associated non-sensitive
+ * metadata required to decrypt it by conveniently handling all array
+ * manipulation. This class does not handle sensitive data.
  */
 public class SerializedSecretsV1 {
     public int version;
@@ -17,7 +16,8 @@ public class SerializedSecretsV1 {
     public byte[] ciphertext;
     public byte[] serialized;
 
-    public SerializedSecretsV1(int version, int iterations, byte[] salt, byte[] iv, byte[] ciphertext) {
+    public SerializedSecretsV1(int version, int iterations, byte[] salt, byte[] iv,
+            byte[] ciphertext) {
         this.version = version;
         this.pbkdf_iter_count = iterations;
         this.salt = salt;
@@ -44,7 +44,7 @@ public class SerializedSecretsV1 {
     }
 
     public byte[] concatenate() {
-        serialized = new byte[ constants_length() + ciphertext.length];
+        serialized = new byte[constants_length() + ciphertext.length];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
         bb.putInt(version);
         bb.putInt(pbkdf_iter_count);
@@ -56,7 +56,8 @@ public class SerializedSecretsV1 {
     }
 
     public static int constants_length() {
-        int bytes = Constants.INT_LENGTH*2 + Constants.PBKDF2_SALT_LEN_BYTES + Constants.GCM_IV_LEN_BYTES;
+        int bytes = Constants.INT_LENGTH * 2 + Constants.PBKDF2_SALT_LEN_BYTES
+                + Constants.GCM_IV_LEN_BYTES;
         return bytes;
     }
 

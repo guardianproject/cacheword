@@ -67,7 +67,7 @@ public class CacheWordService extends Service implements Observer {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         Log.d(TAG, "onTaskRemoved()");
-        if(!mIsForegrounded) {
+        if (!mIsForegrounded) {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.cancel(Constants.SERVICE_BACKGROUND_ID);
         }
@@ -76,7 +76,7 @@ public class CacheWordService extends Service implements Observer {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if( mSecrets != null ) {
+        if (mSecrets != null) {
             Log.d(TAG, "onDestroy() killed secrets");
             mSecrets.destroy();
             mSecrets = null;
@@ -92,6 +92,7 @@ public class CacheWordService extends Service implements Observer {
         resetTimeout();
         return super.onUnbind(intent);
     }
+
     @Override
     public IBinder onBind(Intent intent) {
         // note: this method is called on the first binding
@@ -150,12 +151,12 @@ public class CacheWordService extends Service implements Observer {
             return;
         }
 
-        if( shouldForeground() )
+        if (shouldForeground())
             goForeground();
         else
             goBackground();
         resetTimeout();
-        if(notify)
+        if (notify)
             LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
     }
 
@@ -163,7 +164,7 @@ public class CacheWordService extends Service implements Observer {
         Log.d(TAG, "expirePassphrase");
 
         synchronized (this) {
-            if( mSecrets != null ) {
+            if (mSecrets != null) {
                 mSecrets.destroy();
                 mSecrets = null;
             }
@@ -171,7 +172,7 @@ public class CacheWordService extends Service implements Observer {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
 
-        if( mIsForegrounded ) {
+        if (mIsForegrounded) {
             stopForeground(true);
             mIsForegrounded = false;
         } else {
@@ -185,7 +186,7 @@ public class CacheWordService extends Service implements Observer {
         int timeoutSeconds = mSettings.getTimeoutSeconds();
         boolean timeoutEnabled = timeoutSeconds >= 0;
 
-        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", seconds="+timeoutSeconds);
+        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", seconds=" + timeoutSeconds);
         Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
 
         if (timeoutEnabled && mSubscriberCount == 0) {
@@ -201,7 +202,7 @@ public class CacheWordService extends Service implements Observer {
      * @param milliseconds timeout interval in milliseconds
      */
     private void startTimeout(long milliseconds) {
-        if( milliseconds <= 0 ) {
+        if (milliseconds <= 0) {
             Log.d(TAG, "immediate timeout");
             expirePassphrase();
             return;
@@ -229,17 +230,18 @@ public class CacheWordService extends Service implements Observer {
         b.setContentTitle(getText(R.string.cacheword_notification_cached_title));
         b.setContentText(getText(R.string.cacheword_notification_cached_message));
         b.setTicker(getText(R.string.cacheword_notification_cached));
-        if(mSettings.getVibrateSetting())
-        	b.setDefaults(Notification.DEFAULT_VIBRATE);
+        if (mSettings.getVibrateSetting())
+            b.setDefaults(Notification.DEFAULT_VIBRATE);
         b.setWhen(System.currentTimeMillis());
         b.setOngoing(true);
 
         PendingIntent i = null;
-        if( mSettings.getNotificationIntent() != null ) {
+        if (mSettings.getNotificationIntent() != null) {
             Log.d(TAG, "non-default NotificationItent found!");
             i = mSettings.getNotificationIntent();
         } else {
-            Intent notificationIntent = CacheWordService.getBlankServiceIntent(getApplicationContext());
+            Intent notificationIntent = CacheWordService
+                    .getBlankServiceIntent(getApplicationContext());
             Log.d(TAG, "using default NotificationItent (lock app)");
             notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
             i = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
@@ -260,12 +262,12 @@ public class CacheWordService extends Service implements Observer {
     private void goBackground() {
         Log.d(TAG, "goBackground()");
 
-        if(mIsForegrounded) {
+        if (mIsForegrounded) {
             stopForeground(true);
             mIsForegrounded = false;
         }
 
-        if( mSettings.getNotificationEnabled() ) {
+        if (mSettings.getNotificationEnabled()) {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.notify(Constants.SERVICE_BACKGROUND_ID, buildNotification());
         }
@@ -284,7 +286,7 @@ public class CacheWordService extends Service implements Observer {
     /**
      * Create a blank intent to start the CachewordService Blank means only the
      * Component field is set
-     *
+     * 
      * @param applicationContext
      */
     static public Intent getBlankServiceIntent(Context applicationContext) {
@@ -294,14 +296,16 @@ public class CacheWordService extends Service implements Observer {
     }
 
     private boolean shouldForeground() {
-        return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(Constants.SHARED_PREFS_FOREGROUND, false);
+        return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(
+                Constants.SHARED_PREFS_FOREGROUND, false);
     }
 
     @Override
     public void update(Observable observable, Object data) {
-        if(observable == mSettings) {
+        if (observable == mSettings) {
             resetTimeout();
-            //update backgrounding & notification without alerting the  subscribers
+            // update backgrounding & notification without alerting the
+            // subscribers
             handleNewSecrets(false);
         }
     }

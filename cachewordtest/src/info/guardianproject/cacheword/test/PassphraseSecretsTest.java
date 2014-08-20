@@ -69,11 +69,13 @@ public class PassphraseSecretsTest extends AndroidTestCase {
 
         assertTrue(SecretsManager.isInitialized(getContext()));
 
-        byte[] original_ciphertext  = SecretsManager.getBytes(getContext(), Constants.SHARED_PREFS_SECRETS);
+        byte[] original_ciphertext = SecretsManager.getBytes(getContext(),
+                Constants.SHARED_PREFS_SECRETS);
         assertNotNull(original_ciphertext);
 
         char[] pass_new = passphrase_str_new.toCharArray();
-        PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(getContext(), original_secrets, pass_new);
+        PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(getContext(),
+                original_secrets, pass_new);
 
         assertNotNull(new_secrets);
 
@@ -90,7 +92,7 @@ public class PassphraseSecretsTest extends AndroidTestCase {
             // pass
         }
 
-        // fetch the secrets from disk and verify the AES secret key is still the same
+        // fetch secrets from disk and verify the AES secret key is the same
         PassphraseSecrets fetched_secrets = null;
         try {
             pass_new = passphrase_str_new.toCharArray();
@@ -103,9 +105,9 @@ public class PassphraseSecretsTest extends AndroidTestCase {
         assertTrue(Arrays.equals(fetched_secrets.getSecretKey().getEncoded(),
                 original_secrets.getSecretKey().getEncoded()));
 
-
         // but the ciphertext should be different
-        byte[] new_ciphertext  = SecretsManager.getBytes(getContext(), Constants.SHARED_PREFS_SECRETS);
+        byte[] new_ciphertext = SecretsManager.getBytes(getContext(),
+                Constants.SHARED_PREFS_SECRETS);
         assertFalse(Arrays.equals(new_ciphertext, original_ciphertext));
 
         // verify this in depth
@@ -126,7 +128,7 @@ public class PassphraseSecretsTest extends AndroidTestCase {
         // a string exported from version 0 with pass 'purplepipers'
         String encoded = "AAAAABGEgBW8ATWLekRtu1ODaQswXZ2Tr0hfzl9rSz+kRAA8fu5pjKXPaKcT18zS7xPKV4z4DG5W49wV6bPaGTdP7Co3srPmEPPcAATECMY=";
 
-        byte[] decoded  = Base64.decode(encoded, Base64.DEFAULT);
+        byte[] decoded = Base64.decode(encoded, Base64.DEFAULT);
 
         SerializedSecretsV0 ss0 = new SerializedSecretsV0(decoded);
         ss0.parse();

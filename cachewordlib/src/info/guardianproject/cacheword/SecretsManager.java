@@ -23,7 +23,8 @@ public class SecretsManager {
 
     public static byte[] getBytes(Context ctx, String key) {
         String encoded = getPrefs(ctx).getString(key, null);
-        if( encoded == null ) return null;
+        if (encoded == null)
+            return null;
         return Base64.decode(encoded, Base64.DEFAULT);
     }
 
@@ -34,7 +35,8 @@ public class SecretsManager {
     }
 
     private static void possiblyApplyPRNGFixes(Context ctx) {
-        if( !prngFixesApplied && ctx.getResources().getBoolean(R.bool.cacheword_apply_android_securerandom_fixes) ) {
+        if (!prngFixesApplied
+                && ctx.getResources().getBoolean(R.bool.cacheword_apply_android_securerandom_fixes)) {
             PRNGFixes.apply();
             prngFixesApplied = true;
         }

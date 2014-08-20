@@ -18,8 +18,8 @@ import java.security.GeneralSecurityException;
 /**
  * This class is designed to accompany any Activity that is interested in the
  * secrets cached by CacheWord. <i>The context provided in the constructor must
- * implement the ICacheWordSubscriber interface.</i> This is so the Activity can be
- * alerted to the state change events.
+ * implement the ICacheWordSubscriber interface.</i> This is so the Activity can
+ * be alerted to the state change events.
  */
 public class CacheWordHandler {
     private static final String TAG = "CacheWordHandler";
@@ -29,18 +29,22 @@ public class CacheWordHandler {
     private ICacheWordSubscriber mSubscriber;
     private CacheWordSettings mSettings;
 
-    // Tracking service connection state is a bit of a mess.
-    // There are three tricky situations:
-    //   1. We call bindService() which returns successfully, but we are told to disconnect
-    //      before the connection completes (onServiceConnected() is called).
-    //      This can occur when the activity opens and closes quickly.
-    //   2. We  shouldn't call unbind() if we didn't bind successfully.
-    //      Doing so produces Service not registered: info.guardianproject.cacheword.CacheWordHandler
-    //   3. Conversely, We MUST call unbind() if bindService() was called
-    //      Failing to do so results in Activity FOOBAR has leaked ServiceConnection
-    // We must track the connection state separately from the bound state.
-
-    // We use this flag to help prevent a race condition described in (1).
+    /**
+     * Tracking service connection state is a bit of a mess. There are three
+     * tricky situations:
+     * <ol>
+     * <li>We call bindService() which returns successfully, but we are told to
+     * disconnect before the connection completes (onServiceConnected() is
+     * called). This can occur when the activity opens and closes quickly.</li>
+     * <li>2. We shouldn't call unbind() if we didn't bind successfully. Doing
+     * so produces Service not registered:
+     * info.guardianproject.cacheword.CacheWordHandler</li>
+     * <li>3. Conversely, We MUST call unbind() if bindService() was called
+     * Failing to do so results in Activity FOOBAR has leaked ServiceConnection
+     * We must track the connection state separately from the bound state.</li>
+     * </ol>
+     * We use this flag to help prevent a race condition described in (1).
+     */
     private ServiceConnectionState mConnectionState = ServiceConnectionState.CONNECTION_NULL;
 
     // We use this flag to determine whether or not unbind() should be called
@@ -53,6 +57,7 @@ public class CacheWordHandler {
         CONNECTION_CANCELED,
         CONNECTION_ACTIVE
     }
+
     enum BindState {
         BIND_NULL,
         BIND_REQUESTED,
@@ -62,24 +67,28 @@ public class CacheWordHandler {
 
     /**
      * Initializes the CacheWordHandler with the default CacheWordSettings
+     *
      * @see CacheWordHandler(Context context, CacheWordSettings settings)
      * @param context
      */
     public CacheWordHandler(Context context) {
         this(context, (ICacheWordSubscriber) context, null);
     }
+
     /**
-     * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects.
-     * Uses default CacheWordSettings
+     * Initializes the CacheWordHandler with distinct Context and
+     * ICacheWordSubscriber objects. Uses default CacheWordSettings
      */
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
         this(context, subscriber, null);
     }
 
     /**
-     * Initializes the CacheWordHandler. Use this form when your Context
-     * (e.g, the Activity) also implements the ICacheWordSubscriber interface.
-     * Context MUST impement ICacheWordSubscriber, else IllegalArgumentException will be thrown at runtime
+     * Initializes the CacheWordHandler. Use this form when your Context (e.g,
+     * the Activity) also implements the ICacheWordSubscriber interface. Context
+     * MUST impement ICacheWordSubscriber, else IllegalArgumentException will be
+     * thrown at runtime
+     *
      * @param context must implement the ICacheWordSubscriber interface
      * @param settings the settings for CacheWord
      */
@@ -98,35 +107,38 @@ public class CacheWordHandler {
     }
 
     /**
-     * Initializes the CacheWordHandler with distinct Context and ICacheWordSubscriber objects
-     * @param context your application's  or activity's context
+     * Initializes the CacheWordHandler with distinct Context and
+     * ICacheWordSubscriber objects
+     *
+     * @param context your application's or activity's context
      * @param subscriber the object to notify of CW events
      * @param settings the settings for CacheWord
      */
-    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber, CacheWordSettings settings) {
+    public CacheWordHandler(Context context, ICacheWordSubscriber subscriber,
+            CacheWordSettings settings) {
         mContext = context;
         mSubscriber = subscriber;
         mSettings = settings;
     }
 
     /**
-     * Connect to the CacheWord service, starting it if necessary.
-     * Once connected, the attached Context will begin receiving
-     * CacheWord events.
+     * Connect to the CacheWord service, starting it if necessary. Once
+     * connected, the attached Context will begin receiving CacheWord events.
      */
     public synchronized void connectToService() {
-        if( isCacheWordConnected() )
+        if (isCacheWordConnected())
             return;
 
         Intent cacheWordIntent = CacheWordService
                 .getBlankServiceIntent(mContext.getApplicationContext());
-        /* We start AND bind the service
-         *
-         * starting - ensures the cacheword service will outlive the activity
-         * binding  - allows us to notify  the service of active subscribers
+        /*
+         * We start AND bind the service starting - ensures the cacheword
+         * service will outlive the activity binding - allows us to notify the
+         * service of active subscribers
          */
         mContext.startService(cacheWordIntent);
-        if( mContext.bindService(cacheWordIntent, mCacheWordServiceConnection, Context.BIND_AUTO_CREATE)) {
+        if (mContext.bindService(cacheWordIntent, mCacheWordServiceConnection,
+                Context.BIND_AUTO_CREATE)) {
             mBoundState = BindState.BIND_REQUESTED;
         }
         mConnectionState = ServiceConnectionState.CONNECTION_INPROGRESS;
@@ -154,15 +166,16 @@ public class CacheWordHandler {
     }
 
     /**
-     * Disconnect from the CacheWord service. No further CacheWord events will be received.
+     * Disconnect from the CacheWord service. No further CacheWord events will
+     * be received.
      */
     public void disconnect() {
         synchronized (this) {
             mConnectionState = ServiceConnectionState.CONNECTION_CANCELED;
 
-            if( mBoundState == BindState.BIND_COMPLETED ) {
-                if( mCacheWordService != null ) {
-                	mCacheWordService.detachSubscriber();
+            if (mBoundState == BindState.BIND_COMPLETED) {
+                if (mCacheWordService != null) {
+                    mCacheWordService.detachSubscriber();
                     mCacheWordService = null;
                 }
                 mContext.unbindService(mCacheWordServiceConnection);
@@ -186,7 +199,7 @@ public class CacheWordHandler {
 
     public byte[] getEncryptionKey() {
         final ICachedSecrets s = getCachedSecrets();
-        if( s instanceof PassphraseSecrets ) {
+        if (s instanceof PassphraseSecrets) {
             return ((PassphraseSecrets) s).getSecretKey().getEncoded();
         }
         return null;
@@ -205,39 +218,48 @@ public class CacheWordHandler {
     }
 
     /**
-     * Use the basic PassphraseSecrets implementation to derive encryption keys securely.
-     * Initializes cacheword if necessary.
+     * Use the basic PassphraseSecrets implementation to derive encryption keys
+     * securely. Initializes cacheword if necessary.
+     *
      * @param passphrase
      * @throws GeneralSecurityException on invalid password
      */
     public void setPassphrase(char[] passphrase) throws GeneralSecurityException {
         final PassphraseSecrets ps;
-        if(SecretsManager.isInitialized(mContext)) {
+        if (SecretsManager.isInitialized(mContext)) {
             ps = PassphraseSecrets.fetchSecrets(mContext, passphrase);
         } else {
             ps = PassphraseSecrets.initializeSecrets(mContext, passphrase);
-            if( ps == null ) throw new GeneralSecurityException("initializeSecrets could not save the secrets.");
+            if (ps == null)
+                throw new GeneralSecurityException("initializeSecrets could not save the secrets.");
         }
         setCachedSecrets(ps);
     }
 
     /**
-     * Changes the passphrase used to encrypt the derived encryption keys.
-     * Since the derived encryption key stays the same, this can safely be called even when the secrets are in use.
+     * Changes the passphrase used to encrypt the derived encryption keys. Since
+     * the derived encryption key stays the same, this can safely be called even
+     * when the secrets are in use. Only works if you're using the
+     * PassphraseSecrets implementation. (i.e., Are you using setPassphrase() or
+     * setCachedSecrets()?)
      *
-     * Only works if you're using the PassphraseSecrets implementation. (i.e., Are you using setPassphrase() or setCachedSecrets()?)
      * @param current_secrets the current secrets you're using
      * @param new_passphrase the new passphrase to encrypt the old secrets with
      * @return null on error or current_secrets on success
      * @throws IOException
      */
-    public PassphraseSecrets changePassphrase(PassphraseSecrets current_secrets, char[] new_passphrase) throws IOException {
-        if(!SecretsManager.isInitialized(mContext)) {
-            throw new IllegalStateException("CacheWord is not initialized. Passphrase can't be changed");
+    public PassphraseSecrets changePassphrase(PassphraseSecrets current_secrets,
+            char[] new_passphrase) throws IOException {
+        if (!SecretsManager.isInitialized(mContext)) {
+            throw new IllegalStateException(
+                    "CacheWord is not initialized. Passphrase can't be changed");
         }
-        PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(mContext, current_secrets, new_passphrase);
-        if( new_secrets != null ) return new_secrets;
-        else throw new IOException("changePassphrase could not save the secrets");
+        PassphraseSecrets new_secrets = PassphraseSecrets.changePassphrase(mContext,
+                current_secrets, new_passphrase);
+        if (new_secrets != null)
+            return new_secrets;
+        else
+            throw new IOException("changePassphrase could not save the secrets");
     }
 
     /**
@@ -261,29 +283,31 @@ public class CacheWordHandler {
     }
 
     public void setTimeoutSeconds(int seconds) throws IllegalStateException {
-        if(!isCacheWordConnected())
+        if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
         mCacheWordService.settings().setTimeoutSeconds(seconds);
     }
+
     public int getTimeoutSeconds() throws IllegalStateException {
-        if(!isCacheWordConnected())
+        if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
         return mCacheWordService.settings().getTimeoutSeconds();
     }
 
     public void setVibrateSetting(boolean vibrate) throws IllegalStateException {
-        if(!isCacheWordConnected())
+        if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
         mCacheWordService.settings().setVibrateSetting(vibrate);
     }
+
     public boolean getVibrateSetting() throws IllegalStateException {
-        if(!isCacheWordConnected())
+        if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
         return mCacheWordService.settings().getVibrateSetting();
     }
 
     public void setNotificationIntent(PendingIntent intent) {
-        if(!isCacheWordConnected())
+        if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
 
         mCacheWordService.settings().setNotificationIntent(intent);
@@ -316,7 +340,8 @@ public class CacheWordHandler {
             Log.d(TAG, "checkCacheWordState: STATE_UNINITIALIZED");
         } else if (isCacheWordConnected() && mCacheWordService.isLocked()) {
             newState = Constants.STATE_LOCKED;
-            Log.d(TAG, "checkCacheWordState: STATE_LOCKED, but isCacheWordConnected()=="+isCacheWordConnected());
+            Log.d(TAG, "checkCacheWordState: STATE_LOCKED, but isCacheWordConnected()=="
+                    + isCacheWordConnected());
         } else {
             newState = Constants.STATE_UNLOCKED;
             Log.d(TAG, "checkCacheWordState: STATE_UNLOCKED");
@@ -335,7 +360,6 @@ public class CacheWordHandler {
     }
 
     /**
-     *
      * @return true if cacheword is connected and available for calling
      */
     private boolean isCacheWordConnected() {
@@ -345,21 +369,20 @@ public class CacheWordHandler {
     private boolean isCacheWordInitialized() {
         return SecretsManager.isInitialized(mContext);
     }
-    
+
     public void deinitialize() {
-	    SecretsManager.setInitialized(mContext, false);
+        SecretsManager.setInitialized(mContext, false);
     }
 
     private boolean isPrepared() {
         return isCacheWordConnected() && isCacheWordInitialized();
     }
 
-
     private BroadcastReceiver mCacheWordReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Constants.INTENT_NEW_SECRETS)) {
-                if( isCacheWordConnected() ) {
+                if (isCacheWordConnected()) {
                     checkCacheWordState();
                 }
             }
@@ -374,18 +397,18 @@ public class CacheWordHandler {
             if (cwBinder != null) {
                 Log.d(TAG, "onServiceConnected");
                 synchronized (CacheWordHandler.this) {
-                    if( mConnectionState == ServiceConnectionState.CONNECTION_INPROGRESS ) {
+                    if (mConnectionState == ServiceConnectionState.CONNECTION_INPROGRESS) {
                         mCacheWordService = cwBinder.getService();
                         registerBroadcastReceiver();
                         mCacheWordService.attachSubscriber();
-                        if(mSettings != null)
+                        if (mSettings != null)
                             mCacheWordService.setSettings(mSettings);
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
                         mBoundState = BindState.BIND_COMPLETED;
                         checkCacheWordState();
-                    } else if( mConnectionState == ServiceConnectionState.CONNECTION_CANCELED ) {
+                    } else if (mConnectionState == ServiceConnectionState.CONNECTION_CANCELED) {
                         // race condition hit
-                        if( mBoundState != BindState.BIND_NULL ) {
+                        if (mBoundState != BindState.BIND_NULL) {
                             mContext.unbindService(mCacheWordServiceConnection);
                             mBoundState = BindState.BIND_NULL;
                         }
@@ -398,7 +421,7 @@ public class CacheWordHandler {
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "onServiceDisonnected");
             synchronized (CacheWordHandler.this) {
-                if( mBoundState != BindState.BIND_NULL ) {
+                if (mBoundState != BindState.BIND_NULL) {
                     mContext.unbindService(mCacheWordServiceConnection);
                     mBoundState = BindState.BIND_NULL;
                     unregisterBroadcastRecevier();

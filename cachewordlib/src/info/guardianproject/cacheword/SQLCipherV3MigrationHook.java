@@ -16,6 +16,7 @@ public class SQLCipherV3MigrationHook implements SQLiteDatabaseHook {
     public SQLCipherV3MigrationHook(Context context) {
         mContext = context;
     }
+
     @Override
     public void preKey(SQLiteDatabase database) {
         // nop for now

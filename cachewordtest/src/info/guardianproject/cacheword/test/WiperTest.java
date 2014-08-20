@@ -97,7 +97,7 @@ public class WiperTest extends TestCase {
         try {
             assertFalse(Arrays.equals(password, x_spec.getPassword()));
             fail("PBEKeySpec.getPassword should throw an exception after being wiped");
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             // pass
         }
     }

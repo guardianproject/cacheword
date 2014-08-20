@@ -1,3 +1,4 @@
+
 package info.guardianproject.cacheword;
 
 import android.util.Log;
@@ -20,9 +21,9 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
-* Adapted from Briar Project's briar-core (relicensed with permission)
-* Copyright (C) 2013 Sublime Software Ltd
-**/
+ * Adapted from Briar Project's briar-core (relicensed with permission)
+ * Copyright (C) 2013 Sublime Software Ltd
+ **/
 public class KDFIterationCalibrator {
     private static final String TAG = "KDFIterationCalibrator";
 
@@ -30,7 +31,6 @@ public class KDFIterationCalibrator {
      * The number of iteration samples to perform during the calibration.
      */
     private int mNumberSamples = 30;
-
 
     public KDFIterationCalibrator(int number_samples) {
         mNumberSamples = number_samples;
@@ -40,9 +40,9 @@ public class KDFIterationCalibrator {
         List<Long> quickSamples = new ArrayList<Long>(mNumberSamples);
         List<Long> slowSamples = new ArrayList<Long>(mNumberSamples);
         long iterationNanos = 0, initNanos = 0;
-        while(iterationNanos <= 0 || initNanos <= 0) {
+        while (iterationNanos <= 0 || initNanos <= 0) {
             // Sample the running time with one iteration and two iterations
-            for(int i = 0; i < mNumberSamples; i++) {
+            for (int i = 0; i < mNumberSamples; i++) {
                 quickSamples.add(sampleRunningTime(1));
                 slowSamples.add(sampleRunningTime(2));
             }
@@ -52,18 +52,22 @@ public class KDFIterationCalibrator {
             iterationNanos = slowMedian - quickMedian;
             initNanos = quickMedian - iterationNanos;
             Log.i(TAG, "Init: " + initNanos + ", iteration: "
-                        + iterationNanos);
+                    + iterationNanos);
         }
         long targetNanos = targetMillis * 1000L * 1000L;
         long iterations = (targetNanos - initNanos) / iterationNanos;
         Log.i(TAG, "Target iterations: " + iterations);
-        if(iterations < 1) return 1;
-        if(iterations > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        if (iterations < 1)
+            return 1;
+        if (iterations > Integer.MAX_VALUE)
+            return Integer.MAX_VALUE;
         return (int) iterations;
     }
 
     private long sampleRunningTime(int iterations) throws GeneralSecurityException {
-        char[] password = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+        char[] password = {
+                'p', 'a', 's', 's', 'w', 'o', 'r', 'd'
+        };
 
         PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
 
@@ -75,12 +79,16 @@ public class KDFIterationCalibrator {
         return System.nanoTime() - start;
     }
 
-    public byte[] pbkdf2_jce(char[] password, byte[] salt, int iterations) throws GeneralSecurityException {
+    public byte[] pbkdf2_jce(char[] password, byte[] salt, int iterations)
+            throws GeneralSecurityException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        return factory.generateSecret(new PBEKeySpec(password, salt, iterations, Constants.PBKDF2_KEY_LEN_BITS)).getEncoded();
+        return factory.generateSecret(
+                new PBEKeySpec(password, salt, iterations, Constants.PBKDF2_KEY_LEN_BITS))
+                .getEncoded();
     }
 
-    public byte[] pbkdf2_bouncy(char[] password, byte[] salt, int iterations) throws GeneralSecurityException {
+    public byte[] pbkdf2_bouncy(char[] password, byte[] salt, int iterations)
+            throws GeneralSecurityException {
         byte[] utf8 = toUtf8ByteArray(password);
         Digest digest = new SHA1Digest();
         PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(digest);
@@ -92,9 +100,11 @@ public class KDFIterationCalibrator {
 
     private long median(List<Long> list) {
         int size = list.size();
-        if(size == 0) throw new IllegalArgumentException();
+        if (size == 0)
+            throw new IllegalArgumentException();
         Collections.sort(list);
-        if(size % 2 == 1) return list.get(size / 2);
+        if (size % 2 == 1)
+            return list.get(size / 2);
         return list.get(size / 2 - 1) + list.get(size / 2) / 2;
     }
 
@@ -107,10 +117,9 @@ public class KDFIterationCalibrator {
             out.reset();
             out.write(new byte[utf8.length]);
             return utf8;
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
 
 }

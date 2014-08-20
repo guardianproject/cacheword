@@ -1,3 +1,4 @@
+
 package info.guardianproject.cacheword;
 
 /**
@@ -10,14 +11,14 @@ public interface ICacheWordSubscriber {
      */
     public void onCacheWordUninitialized();
 
-	/**
-	 * Called when the cached secrets are wiped from memory.
-	 */
-	public void onCacheWordLocked();
+    /**
+     * Called when the cached secrets are wiped from memory.
+     */
+    public void onCacheWordLocked();
 
-	/**
-	 * Called when the secrets are available.
-	 */
-	public void onCacheWordOpened();
+    /**
+     * Called when the secrets are available.
+     */
+    public void onCacheWordOpened();
 
 }

@@ -1,3 +1,4 @@
+
 package info.guardianproject.cacheword.test;
 
 import android.test.AndroidTestCase;
@@ -9,11 +10,9 @@ import info.guardianproject.cacheword.PassphraseSecretsImpl;
 import java.security.GeneralSecurityException;
 
 /**
- * Test suite for the PBKDF iteration calibrator
- *
- * Adapted from Briar Project's briar-core (relicensed with permission)
- * Copyright (C) 2013 Sublime Software Ltd
- *
+ * Test suite for the PBKDF iteration calibrator, adapted from Briar Project's
+ * briar-core (relicensed with permission) Copyright (C) 2013 Sublime Software
+ * Ltd
  */
 public class KDFIterationCalibratorTest extends AndroidTestCase {
 
@@ -30,7 +29,8 @@ public class KDFIterationCalibratorTest extends AndroidTestCase {
     }
 
     public void testCalibration() throws GeneralSecurityException {
-        KDFIterationCalibrator calibrator = new KDFIterationCalibrator(Constants.PBKDF2_ITER_SAMPLES);
+        KDFIterationCalibrator calibrator = new KDFIterationCalibrator(
+                Constants.PBKDF2_ITER_SAMPLES);
 
         // If the target time is unachievable, one iteration should be used
         int iterations = calibrator.chooseIterationCount(0);
@@ -45,16 +45,17 @@ public class KDFIterationCalibratorTest extends AndroidTestCase {
         assertEquals(Integer.MAX_VALUE, iterations);
     }
 
-
     /**
-     * JCE can be obtuse and obscure so lets make obviously sure we're
-     * ontop of the algo we're actually using.
+     * JCE can be obtuse and obscure so lets make obviously sure we're ontop of
+     * the algo we're actually using.
+     * 
      * @throws GeneralSecurityException
      */
     public void testKDFMethodsSameness() throws GeneralSecurityException {
-        PassphraseSecretsImpl crypto  = new PassphraseSecretsImpl();
+        PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
 
-        KDFIterationCalibrator calibrator = new KDFIterationCalibrator(Constants.PBKDF2_ITER_SAMPLES);
+        KDFIterationCalibrator calibrator = new KDFIterationCalibrator(
+                Constants.PBKDF2_ITER_SAMPLES);
         char[] passphrase = "password".toCharArray();
         byte[] salt = crypto.generateSalt(Constants.PBKDF2_SALT_LEN_BYTES);
         int iterations = 1000;
