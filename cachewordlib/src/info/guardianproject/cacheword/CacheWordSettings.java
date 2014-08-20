@@ -2,7 +2,6 @@ package info.guardianproject.cacheword;
 
 import android.app.PendingIntent;
 import android.content.Context;
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;

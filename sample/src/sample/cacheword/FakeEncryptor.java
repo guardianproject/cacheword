@@ -2,9 +2,9 @@ package sample.cacheword;
 
 import android.util.Base64;
 
-import javax.crypto.SecretKey;
-
 import info.guardianproject.cacheword.Wiper;
+
+import javax.crypto.SecretKey;
 
 /**
  * This class is merely for demonstration purposes.
