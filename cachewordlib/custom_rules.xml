@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="custom_rules">
+
+  <target name="javadoc" description="Generate Javadocs" depends="-build-setup">
+    <javadoc sourcepath="${source.dir}"
+             classpath="${toString:project.all.jars.path}:${toString:project.target.class.path}"
+             destdir="${out.dir}/javadoc"
+             packagenames="info.guardianproject.cacheword.*"
+             windowtitle="${ant.project.name}"
+             linkoffline="https://developer.android.com/reference ${sdk.dir}/docs/reference"
+             linksource="true"
+             doctitle="${ant.project.name}" />
+  </target>
+
+  <target name="jar" description="JARs the Task" depends="-post-build">
+    <jar destfile="${ant.project.name}.jar"
+         includes="info/**"
+         basedir="${out.classes.absolute.dir}">
+    <manifest>
+      <attribute name="Implementation-Vendor" value="Guardian Project"/>
+      <attribute name="Implementation-Title" value="CacheWord"/>
+      <attribute name="Implementation-URL" value="https://github.com/guardianproject/cacheword"/>
+    </manifest>
+    </jar>
+  </target>
+
+</project>
