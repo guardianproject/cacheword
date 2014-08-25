@@ -42,24 +42,5 @@
                     <uses-permission android:name="android.permission.VIBRATE" />
     -->
     <bool name="cacheword_vibrate_default">true</bool>
-
-    <!--
-        Iteration Count:  the minimum iteration count value used in the PBKDF2 key hashing step.
-
-                          The larger this value the more secure the user's password will be against
-                          offline cracking attempts, but the longer the unlocking process will take.
-                          The ideal number is one which results in approximately 1 sec of unlock time
-                          on the device, however this changes from device to device due to varying hardware.
-
-        Auto Calibrate:   Cacheword will attempt to calculate the best iteration count for the device at
-                          runtime using an adaptive algorithim that takes less than a second.
-
-                          If auto_calibrate is set to false, then Cacheword will use the minimum value in all cases.
-
-                          If auto_calibrate is set to true and the detected iteration count (from an existing
-                          installation) is lower than the new minimum, a new calibration will be performed.
-     -->
-    <integer name="cacheword_pbkdf2_minimum_iteration_count">1000</integer>
-    <bool name="cacheword_pbkdf2_auto_calibrate">true</bool>
 </resources>
 

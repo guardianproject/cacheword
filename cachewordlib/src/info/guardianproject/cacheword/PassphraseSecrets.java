@@ -4,7 +4,12 @@ package info.guardianproject.cacheword;
 import android.content.Context;
 import android.util.Log;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -98,7 +103,7 @@ public class PassphraseSecrets implements ICachedSecrets {
             // check for insecure iteration counts and upgrade if necessary
             // we do this by "changing" the passphrase to the same passphrase
             // since changePassphrase calls calibrateKDF()
-            if (ss.pbkdf_iter_count < getPBKDF2MinimumIterationCount(ctx)) {
+            if (ss.pbkdf_iter_count < Constants.PBKDF2_MINIMUM_ITERATION_COUNT) {
                 ps = changePassphrase(ctx, ps, x_passphrase);
                 if (ps == null)
                     throw new GeneralSecurityException(
@@ -164,35 +169,66 @@ public class PassphraseSecrets implements ICachedSecrets {
         return saved;
     }
 
-    private static int getPBKDF2MinimumIterationCount(Context ctx) {
-        int iter_count = ctx.getResources().getInteger(
-                R.integer.cacheword_pbkdf2_minimum_iteration_count);
-        return iter_count;
-    }
-
-    private static boolean getPBKDF2AutoCalibrationEnabled(Context ctx) {
-        boolean calibrate = ctx.getResources().getBoolean(R.bool.cacheword_pbkdf2_auto_calibrate);
-        return calibrate;
-    }
-
     /**
-     * returns the number of iterations to use
-     * 
-     * @throws GeneralSecurityException
+     * returns the number of iterations to use (always a power of 2)
+     * <ul>
+     * <li>Iteration Count: the minimum iteration count value used in the PBKDF2
+     * key hashing step. The larger this value the more secure the user's
+     * password will be against offline cracking attempts, but the longer the
+     * unlocking process will take. The ideal number is one which results in
+     * approximately 1 sec of unlock time on the device, however this changes
+     * from device to device due to varying hardware.</li>
+     * <li>Auto Calibrate: Cacheword will attempt to calculate the best
+     * iteration count for the device at runtime using an adaptive algorithim
+     * that takes less than a second. If auto_calibrate is set to false, then
+     * Cacheword will use the minimum value in all cases. If auto_calibrate is
+     * set to true and the detected iteration count (from an existing
+     * installation) is lower than the new minimum, a new calibration will be
+     * performed.</li>
+     * </ul>
      */
-    private static int calibrateKDF(Context ctx) throws GeneralSecurityException {
-        int minimum = getPBKDF2MinimumIterationCount(ctx);
-        if (getPBKDF2AutoCalibrationEnabled(ctx)) {
-            KDFIterationCalibrator calibrator = new KDFIterationCalibrator(
-                    Constants.PBKDF2_ITER_SAMPLES);
-            int calculated = calibrator.chooseIterationCount(1000);
-            int iterations = Math.max(minimum, calculated);
-            Log.d(TAG, "calibrateKDF() selected: " + iterations);
-            return iterations;
-        } else {
-            // if auto calibration isn't enabled we use the minimum
-            return minimum;
+
+    private static int calibrateKDF(Context ctx) {
+        // use the SQLCipher v2.x iteration count by default
+        int iterations = 4096;
+        if (android.os.Build.CPU_ABI.equals("x86")) {
+            iterations = 40 * getBogoMips();
+        } else if (android.os.Build.CPU_ABI.equals("armeabi-v7a") ||
+                android.os.Build.CPU_ABI2.equals("armeabi-v7a")) {
+            iterations = 20 * getBogoMips();
+        } else if (android.os.Build.CPU_ABI.equals("armeabi") ||
+                android.os.Build.CPU_ABI2.equals("armeabi")) {
+            iterations = 10 * getBogoMips();
         }
+        int r = Math.max(Constants.PBKDF2_MINIMUM_ITERATION_COUNT, iterations);
+        /* round off to a power of two to ease data recovery */
+        int power = 1;
+        while (power < r)
+            power *= 2;
+        Log.d(TAG, "calibrateKDF() selected: " + iterations + "  using: " + r);
+        return r;
+    }
+
+    private static int getBogoMips() {
+        try {
+            FileReader br = new FileReader("/proc/cpuinfo");
+            char[] buffer = new char[8192];
+            br.read(buffer);
+            br.close();
+            String cpuinfo = new String(buffer);
+            Pattern p = Pattern.compile(".*[Bb][Oo][Gg][Oo][Mm][Ii][Pp][Ss]\\s*:\\s*([0-9.]+).*");
+            Matcher matcher = p.matcher(cpuinfo);
+            if (matcher.find()) {
+                return (int) Float.parseFloat(matcher.group(1));
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 500; // return some kind of low/mid range guess
     }
 
     @Override

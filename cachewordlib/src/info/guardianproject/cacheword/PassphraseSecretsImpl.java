@@ -7,7 +7,6 @@ import android.content.Context;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.Security;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -19,10 +18,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class PassphraseSecretsImpl {
 
-    static {
-        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
-    }
-
     @SuppressWarnings("unused")
     private static final String TAG = "PassphraseSecretsImpl";
 
@@ -32,7 +27,7 @@ public class PassphraseSecretsImpl {
      * Derives an encryption key from x_passphrase, then uses this derived key
      * to encrypt x_plaintext. The resulting cipher text, plus meta data
      * (version, salt, iv, @see SerializedSecretsV1) is serialized and returned.
-     * 
+     *
      * @param ctx
      * @param x_passphrase the passphrase used to PBE on plaintext to NOT WIPED
      * @param x_plaintext the plaintext to encrypt NOT WIPED
@@ -57,7 +52,7 @@ public class PassphraseSecretsImpl {
 
     /**
      * Decrypt the secret and returns the plaintext
-     * 
+     *
      * @param x_passphrase NOT WIPED
      * @return the plaintext
      * @throws GeneralSecurityException
@@ -88,7 +83,7 @@ public class PassphraseSecretsImpl {
     /**
      * Hash the password with PBKDF2 at Constants.PBKDF2_ITER_COUNT iterations
      * Does not wipe the password.
-     * 
+     *
      * @param x_password
      * @param salt
      * @return the AES SecretKeySpec containing the hashed password
@@ -112,7 +107,7 @@ public class PassphraseSecretsImpl {
 
     /**
      * Decrypt with supplied key
-     * 
+     *
      * @param x_passphraseKey NOT WIPED
      * @param iv
      * @param ciphertext
@@ -131,7 +126,7 @@ public class PassphraseSecretsImpl {
 
     /**
      * Encrypts the data with AES GSM Does not wipe the data nor the key
-     * 
+     *
      * @param x_passphraseKey
      * @param iv
      * @param data

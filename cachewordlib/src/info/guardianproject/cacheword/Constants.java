@@ -41,7 +41,6 @@ public class Constants {
     // key derivation constants
     public static final int PBKDF2_KEY_LEN_BITS     = 128; // bits
     public static final int PBKDF2_SALT_LEN_BYTES   = 16;  // bytes, 128 bits
-    public static final int PBKDF2_ITER_SAMPLES     = 30;  // number of samples to run for the adaptive iteration calibration
-    public static final int PBKDF2_TARGET_MILLIS    = 1000; // the number of milliseconds to target w/ pbkdf2 iterations
+    public static final int PBKDF2_MINIMUM_ITERATION_COUNT = 1024;
 
 }
