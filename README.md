@@ -5,7 +5,7 @@ CacheWord is an Android library project for passphrase caching and management.
 It helps app developers securely generate, store, and access secrets derived
 from a user's passphrase.
 
-**CacheWord is still under development. Proceed with caution**
+**CacheWord is still under development. Proceed with caution**
 
 Broadly speaking this library assists developers with two related problems:
 
@@ -52,10 +52,16 @@ Then add it as a library project to your project in eclipse.
 
 **(Ant) Add the library project to your project.properties**
 
-You need to run `android update project -p .` inside the
-`CacheWord/cachewordlib` folder, then add the path to your `project.properties`
-file.  For more information please see the [Android developer guide][libguide] for
-referencing library projects.
+To add this to you project, include something like this in your
+`project.properties`:
+
+```
+android.library.reference.1=../CacheWord/cachewordlib
+```
+
+To build with ant, you need to run `./setup-ant` inside the `CacheWord/`
+folder.  For more information please see the
+[Android developer guide][libguide] for referencing library projects.
 
 **Edit your `AndroidManifest.xml`**
 
@@ -355,8 +361,8 @@ See [HACKING.md](HACKING.md)
 
 See [SECURITY.md](SECURITY.md)
 
-[notecipher]: https://github.com/guardianproject/notepadbot/
-[sqlcipher]: http://sqlcipher.net/sqlcipher-for-android/
+[notecipher]: https://github.com/guardianproject/notecipher/
+[sqlcipher]: https://www.zetetic.net/sqlcipher/open-source
 [iocipher]: https://guardianproject.info/code/IOCipher
 [issues]: https://dev.guardianproject.info/projects/cacheword/issues/new
 [libguide]: http://developer.android.com/guide/developing/projects/projects-cmdline.html#ReferencingLibraryProject
