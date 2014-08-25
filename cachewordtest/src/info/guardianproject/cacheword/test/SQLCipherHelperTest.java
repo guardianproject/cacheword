@@ -100,6 +100,7 @@ public class SQLCipherHelperTest extends ServiceTestCase<CacheWordService> {
                 DatabaseHelper db_helper = new DatabaseHelper(mHandler, getContext());
                 SQLiteDatabase db = db_helper.getWritableDatabase();
                 fail("onCacheWordLocked: Shouldn't be able to open locked database");
+                db.close(); // silence unused warning
             } catch (SQLException e) {
                 // pass
             }

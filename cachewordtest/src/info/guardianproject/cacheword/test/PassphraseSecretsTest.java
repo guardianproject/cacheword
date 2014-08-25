@@ -7,7 +7,6 @@ import android.util.Log;
 
 import info.guardianproject.cacheword.Constants;
 import info.guardianproject.cacheword.PassphraseSecrets;
-import info.guardianproject.cacheword.PassphraseSecretsImpl;
 import info.guardianproject.cacheword.SecretsManager;
 import info.guardianproject.cacheword.SerializedSecretsLoader;
 import info.guardianproject.cacheword.SerializedSecretsV0;
@@ -31,7 +30,6 @@ public class PassphraseSecretsTest extends AndroidTestCase {
     }
 
     public void testInitializeAndFetch() {
-        PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
         String passphrase_str = "hunter2";
         char[] pass = passphrase_str.toCharArray();
 
