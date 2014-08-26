@@ -65,11 +65,17 @@ folder.  For more information please see the
 
 **Edit your `AndroidManifest.xml`**
 
-Add the following to between the `<application>....</application>` tags
+You can use the the "manifest merging" feature of recent Android ADT releases
+to get the required meta data into your project.  That is done by adding this
+to your project's `project.properties`:
 
-```xml
-<service android:name="info.guardianproject.cacheword.CacheWordService" android:enabled="true" android:exported="false" />
 ```
+manifestmerger.enabled=true
+```
+
+Otherwise, you can manually add the metadata by copying and pasting the
+relevant bits from `cachewordlib/AndroidManifest.xml`.
+
 
 ## Dependencies
 
