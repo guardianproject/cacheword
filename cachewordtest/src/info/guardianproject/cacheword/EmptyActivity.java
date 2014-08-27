@@ -1,5 +1,5 @@
 
-package info.guardianproject.cacheword.test;
+package info.guardianproject.cacheword;
 
 import android.app.Activity;
 

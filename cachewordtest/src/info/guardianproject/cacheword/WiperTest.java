@@ -1,5 +1,5 @@
 
-package info.guardianproject.cacheword.test;
+package info.guardianproject.cacheword;
 
 import info.guardianproject.cacheword.Constants;
 import info.guardianproject.cacheword.Wiper;

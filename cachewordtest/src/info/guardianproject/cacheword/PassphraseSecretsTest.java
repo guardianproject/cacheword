@@ -1,5 +1,5 @@
 
-package info.guardianproject.cacheword.test;
+package info.guardianproject.cacheword;
 
 import android.test.AndroidTestCase;
 import android.util.Base64;
