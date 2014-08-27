@@ -46,6 +46,7 @@ public class PassphraseSecrets implements ICachedSecrets {
 
     /**
      * Retrieve the AES secret key
+     * @return instance of {@link SecretKey}
      */
     public SecretKey getSecretKey() {
         return mSecretKey;
@@ -55,10 +56,10 @@ public class PassphraseSecrets implements ICachedSecrets {
      * Generates a random AES key and encrypts it with a PBKDF2 key derived from
      * x_passphrase. The resulting ciphertext is saved to disk. All sensitive
      * variables are wiped.
-     * 
+     *
      * @param ctx
      * @param x_passphrase
-     * @return
+     * @return instance of {@link PassphraseSecrets}
      */
     public static PassphraseSecrets initializeSecrets(Context ctx, char[] x_passphrase) {
         PassphraseSecretsImpl crypto = new PassphraseSecretsImpl();
@@ -83,10 +84,10 @@ public class PassphraseSecrets implements ICachedSecrets {
     /**
      * Attempts to decrypt the stored secrets with x_passphrase. If successful,
      * returns a PassphraseSecrets initialized with the secret key.
-     * 
+     *
      * @param ctx
      * @param x_passphrase WIPED
-     * @return
+     * @return instance of {@link PassphraseSecrets}
      * @throws GeneralSecurityException
      */
     public static PassphraseSecrets fetchSecrets(Context ctx, char[] x_passphrase)
@@ -119,11 +120,11 @@ public class PassphraseSecrets implements ICachedSecrets {
     /**
      * Re-encrypts the secret key in current_secrets with a new derived key from
      * x_new_passphrase. The resulting ciphertext is saved to disk.
-     * 
+     *
      * @param ctx
      * @param current_secrets NOT WIPED
      * @param x_new_passphrase WIPED
-     * @return
+     * @return instance of {@link PassphraseSecrets}
      */
     public static PassphraseSecrets changePassphrase(Context ctx,
             PassphraseSecrets current_secrets, char[] x_new_passphrase) {
@@ -149,11 +150,11 @@ public class PassphraseSecrets implements ICachedSecrets {
     /**
      * Encrypts the plaintext with the passphrase and saves the ciphertext
      * bundle to disk.
-     * 
+     *
      * @param ctx
      * @param x_passphrase the passphrase used to PBE on plaintext to NOT WIPED
      * @param x_plaintext the plaintext to encrypt NOT WIPED
-     * @return
+     * @return instance of {@link PassphraseSecrets}
      * @throws GeneralSecurityException
      */
     private static boolean encryptAndSave(Context ctx, char[] x_passphrase, byte[] x_plaintext)

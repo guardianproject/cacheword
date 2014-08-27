@@ -31,7 +31,7 @@ public class PassphraseSecretsImpl {
      * @param ctx
      * @param x_passphrase the passphrase used to PBE on plaintext to NOT WIPED
      * @param x_plaintext the plaintext to encrypt NOT WIPED
-     * @return
+     * @return instance of {@link SerializedSecretsV1}
      * @throws GeneralSecurityException
      */
     public SerializedSecretsV1 encryptWithPassphrase(Context ctx, char[] x_passphrase,

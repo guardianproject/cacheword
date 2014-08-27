@@ -17,7 +17,7 @@ public class CacheWordSettings extends Observable {
 
     /**
      * Creates a CacheWordSettings object with all the default settings
-     * 
+     *
      * @param context your app's context, used to read SharedPreferences
      */
     public CacheWordSettings(Context context) {
@@ -60,7 +60,7 @@ public class CacheWordSettings extends Observable {
      * Retrieve the current timeout setting The default value can be changed by
      * copying res/values/cacheword.xml to your project and editing it. The
      * value is stored in SharedPreferences, so it will persist.
-     * 
+     *
      * @return the timeout in seconds
      */
     public synchronized int getTimeoutSeconds() {
@@ -76,7 +76,7 @@ public class CacheWordSettings extends Observable {
      * new timeout value. The default value can be changed by copying
      * res/values/cacheword.xml to your project and editing it. The value is
      * stored in SharedPreferences, so it will persist.
-     * 
+     *
      * @param seconds
      */
     public synchronized void setTimeoutSeconds(int seconds) {
@@ -94,7 +94,7 @@ public class CacheWordSettings extends Observable {
      * vibrate device or not. The default value can be changed by copying
      * res/values/cacheword.xml to your project and editing it. The value is
      * stored in SharedPreferences, so it will persist.
-     * 
+     *
      * @return true if vibration is allowed, false otherwise
      */
     public synchronized boolean getVibrateSetting() {
@@ -108,7 +108,7 @@ public class CacheWordSettings extends Observable {
      * vibrate device or not. The default value can be changed by copying
      * res/values/cacheword.xml to your project and editing it. The value is
      * stored in SharedPreferences, so it will persist.
-     * 
+     *
      * @param vibrate
      */
     public synchronized void setVibrateSetting(boolean vibrate) {
@@ -126,7 +126,7 @@ public class CacheWordSettings extends Observable {
      * default value can be changed by copying res/values/cacheword.xml to your
      * project and editing it. The value is stored in SharedPreferences, so it
      * will persist.
-     * 
+     *
      * @return true if the notification is enabled
      */
     public synchronized boolean getNotificationEnabled() {
@@ -142,7 +142,7 @@ public class CacheWordSettings extends Observable {
      * default value can be changed by copying res/values/cacheword.xml to your
      * project and editing it. The value is stored in SharedPreferences, so it
      * will persist.
-     * 
+     *
      * @param enabled
      */
     public synchronized void setEnableNotification(boolean enabled) {
@@ -159,7 +159,7 @@ public class CacheWordSettings extends Observable {
      * Sets the intent that is executed when the user taps the unlocked
      * notification. The default behavior is to lock the application. Passing
      * null will revert to the default behavior.
-     * 
+     *
      * @param intent the pending intent to execute
      */
     public synchronized void setNotificationIntent(PendingIntent intent) {
@@ -179,8 +179,8 @@ public class CacheWordSettings extends Observable {
     /**
      * The default intent is null, which causes the application to lock when the
      * user taps the notification.
-     * 
-     * @return
+     *
+     * @return instance of {@link PendingIntent}
      */
     public synchronized PendingIntent getNotificationIntent() {
         return mDefaultNotificationIntent;

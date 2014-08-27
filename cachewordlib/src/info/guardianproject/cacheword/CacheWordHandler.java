@@ -66,9 +66,9 @@ public class CacheWordHandler {
     }
 
     /**
-     * Initializes the CacheWordHandler with the default CacheWordSettings
+     * Initializes the CacheWordHandler with the default {@link CacheWordSettings}
      *
-     * @see CacheWordHandler(Context context, CacheWordSettings settings)
+     * @see #CacheWordHandler(Context context, CacheWordSettings settings)
      * @param context
      */
     public CacheWordHandler(Context context) {
