@@ -6,6 +6,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="libs"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="lib" path="/cachewordlib/libs/android-support-v4.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/cachewordhelpers"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/cachewordlib"/>
 	<classpathentry kind="output" path="bin/classes"/>
