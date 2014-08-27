@@ -35,8 +35,7 @@ public class SecretsManager {
     }
 
     private static void possiblyApplyPRNGFixes(Context ctx) {
-        if (!prngFixesApplied
-                && ctx.getResources().getBoolean(R.bool.cacheword_apply_android_securerandom_fixes)) {
+        if (!prngFixesApplied) {
             PRNGFixes.apply();
             prngFixesApplied = true;
         }

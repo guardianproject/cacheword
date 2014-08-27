@@ -16,6 +16,16 @@ public class CacheWordSettings extends Observable {
     private PendingIntent mDefaultNotificationIntent = null;
 
     /**
+     * Timeout: How long to wait before automatically locking and wiping the
+     * secrets after all your activities are no longer visible This is the
+     * default setting, and can be changed at runtime via a preference A value
+     * of 0 represents instant timeout A value < 0 represents no timeout (or
+     * infinite timeout)
+     */
+    private static final int DEFAULT_TIMEOUT_SECONDS = 300;
+    private static final boolean DEFAULT_VIBRATE = true;
+
+    /**
      * Creates a CacheWordSettings object with all the default settings
      *
      * @param context your app's context, used to read SharedPreferences
@@ -34,16 +44,13 @@ public class CacheWordSettings extends Observable {
 
         if (!prefs.contains(Constants.SHARED_PREFS_TIMEOUT_SECONDS)) {
             // timeout
-            int def_timeout = mContext.getResources().getInteger(
-                    R.integer.cacheword_timeout_seconds_default);
+            int def_timeout = mContext.getResources().getInteger(DEFAULT_TIMEOUT_SECONDS);
             ed.putInt(Constants.SHARED_PREFS_TIMEOUT_SECONDS, def_timeout);
         }
 
         if (!prefs.contains(Constants.SHARED_PREFS_VIBRATE)) {
             // vibrate setting
-            boolean def_vibrate = mContext.getResources().getBoolean(
-                    R.bool.cacheword_vibrate_default);
-            ed.putBoolean(Constants.SHARED_PREFS_VIBRATE, def_vibrate);
+            ed.putBoolean(Constants.SHARED_PREFS_VIBRATE, true);
         }
 
         if (!prefs.contains(Constants.SHARED_PREFS_USE_NOTIFICATION)) {
@@ -64,10 +71,8 @@ public class CacheWordSettings extends Observable {
      * @return the timeout in seconds
      */
     public synchronized int getTimeoutSeconds() {
-        int defTimeout = mContext.getResources().getInteger(
-                R.integer.cacheword_timeout_seconds_default);
         int timeout = mContext.getSharedPreferences(Constants.SHARED_PREFS, 0).getInt(
-                Constants.SHARED_PREFS_TIMEOUT_SECONDS, defTimeout);
+                Constants.SHARED_PREFS_TIMEOUT_SECONDS, DEFAULT_TIMEOUT_SECONDS);
         return timeout;
     }
 
@@ -90,17 +95,17 @@ public class CacheWordSettings extends Observable {
     }
 
     /**
-     * Retrieve whether the notification shown when CacheWord is unlocked should
-     * vibrate device or not. The default value can be changed by copying
-     * res/values/cacheword.xml to your project and editing it. The value is
-     * stored in SharedPreferences, so it will persist.
+     * Whether the notification shown when CacheWord is unlocked should vibrate
+     * device or not. The value is stored in SharedPreferences, so it will
+     * persist. Add the vibrate permission if you are not using
+     * {@code manifestmerger.enabled=true}:
+     * {@code <uses-permission android:name="android.permission.VIBRATE" />}
      *
      * @return true if vibration is allowed, false otherwise
      */
     public synchronized boolean getVibrateSetting() {
-        boolean defValue = mContext.getResources().getBoolean(R.bool.cacheword_vibrate_default);
         return mContext.getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(
-                Constants.SHARED_PREFS_VIBRATE, defValue);
+                Constants.SHARED_PREFS_VIBRATE, DEFAULT_VIBRATE);
     }
 
     /**
