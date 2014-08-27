@@ -1,0 +1,2 @@
+ The author disclaims all copyright. The 'cachwordhelpers' library is in the
+ public domain.  The author disclaims copyright to this source code.

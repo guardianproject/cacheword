@@ -6,5 +6,7 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cachewordhelpers"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cachewordlib"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
