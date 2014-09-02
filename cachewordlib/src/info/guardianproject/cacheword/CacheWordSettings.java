@@ -44,8 +44,8 @@ public class CacheWordSettings extends Observable {
 
         if (!prefs.contains(Constants.SHARED_PREFS_TIMEOUT_SECONDS)) {
             // timeout
-            int def_timeout = mContext.getResources().getInteger(DEFAULT_TIMEOUT_SECONDS);
-            ed.putInt(Constants.SHARED_PREFS_TIMEOUT_SECONDS, def_timeout);
+            //int def_timeout = mContext.getResources().getInteger(DEFAULT_TIMEOUT_SECONDS);
+            ed.putInt(Constants.SHARED_PREFS_TIMEOUT_SECONDS, DEFAULT_TIMEOUT_SECONDS);
         }
 
         if (!prefs.contains(Constants.SHARED_PREFS_VIBRATE)) {
