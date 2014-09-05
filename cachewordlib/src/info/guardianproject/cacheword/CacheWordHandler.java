@@ -2,6 +2,7 @@
 package info.guardianproject.cacheword;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -80,20 +81,21 @@ public class CacheWordHandler {
     }
 
     /**
-     * Initializes the CacheWordHandler with distinct Context and
-     * ICacheWordSubscriber objects. Uses default CacheWordSettings
+     * Initializes the {@code CacheWordHandler} with a distinct {@link Context}
+     * and {@link ICacheWordSubscriber} objects. Uses default CacheWordSettings
      */
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
         this(context, subscriber, null);
     }
 
     /**
-     * Initializes the CacheWordHandler. Use this form when your Context (e.g,
-     * the Activity) also implements the ICacheWordSubscriber interface. Context
-     * MUST impement ICacheWordSubscriber, else IllegalArgumentException will be
-     * thrown at runtime
+     * Initializes the CacheWordHandler. Use this form when your {@link Context}
+     * (e.g, the {@link Activity}) also implements the
+     * {@link ICacheWordSubscriber} interface. The {@code Context} instance
+     * passed in MUST implement {@link ICacheWordSubscriber}, or an
+     * {@link IllegalArgumentException} will be thrown at runtime
      *
-     * @param context must implement the ICacheWordSubscriber interface
+     * @param context must implement the {@link ICacheWordSubscriber} interface
      * @param settings the settings for CacheWord
      */
     public CacheWordHandler(Context context, CacheWordSettings settings) {
@@ -111,11 +113,11 @@ public class CacheWordHandler {
     }
 
     /**
-     * Initializes the CacheWordHandler with distinct Context and
-     * ICacheWordSubscriber objects
+     * Initializes the {@code CacheWordHandler} with distinct {@code Context}
+     * and {@link ICacheWordSubscriber} objects
      *
-     * @param context your application's or activity's context
-     * @param subscriber the object to notify of CW events
+     * @param context your {@link Application}'s or {@link Activity}'s context
+     * @param subscriber the object to notify of CacheWord events
      * @param settings the settings for CacheWord
      */
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber,
@@ -126,10 +128,10 @@ public class CacheWordHandler {
     }
 
     /**
-     * Connect to the CacheWord service, starting it if necessary. Once
-     * connected, the attached Context will begin receiving CacheWord events.
-     * This should be called in your {@link Activity#onResume} or somewhere else
-     * appropriate.
+     * Connect to {@link CacheWordService}, starting it if necessary. Once
+     * connected, the attached {@code Context} will begin receiving CacheWord
+     * events. This should be called in your {@link Activity#onResume} or
+     * somewhere else appropriate.
      */
     public synchronized void connectToService() {
         if (isCacheWordConnected())
@@ -151,9 +153,9 @@ public class CacheWordHandler {
     }
 
     /**
-     * Detach but don't disconnect from the CacheWord service. CacheWord events
-     * will continue to be received, but this client will not be considered when
-     * performing automatic timeouts.
+     * Detach but don't disconnect from {@link CacheWordService}. CacheWord
+     * events will continue to be received, but this client will not be
+     * considered when performing automatic timeouts.
      */
     public void detach() {
         if (mCacheWordService != null) {
@@ -223,8 +225,8 @@ public class CacheWordHandler {
     }
 
     /**
-     * Use the basic PassphraseSecrets implementation to derive encryption keys
-     * securely. Initializes cacheword if necessary.
+     * Use the basic {@link PassphraseSecrets} implementation to derive
+     * encryption keys securely. Initializes cacheword if necessary.
      *
      * @param passphrase
      * @throws GeneralSecurityException on invalid password
@@ -245,13 +247,14 @@ public class CacheWordHandler {
      * Changes the passphrase used to encrypt the derived encryption keys. Since
      * the derived encryption key stays the same, this can safely be called even
      * when the secrets are in use. Only works if you're using the
-     * PassphraseSecrets implementation. (i.e., Are you using setPassphrase() or
-     * setCachedSecrets()?)
+     * {@link PassphraseSecrets} implementation. (i.e., Are you using
+     * {@link #setPassphrase(char[])] or {
+     * @link #setCachedSecrets(ICachedSecrets)}?)
      *
      * @param current_secrets the current secrets you're using
      * @param new_passphrase the new passphrase to encrypt the old secrets with
      * @return null on error or current_secrets on success
-     * @throws IOException
+     * @throws {@link IOException}
      */
     public PassphraseSecrets changePassphrase(PassphraseSecrets current_secrets,
             char[] new_passphrase) throws IOException {
@@ -268,9 +271,9 @@ public class CacheWordHandler {
     }
 
     /**
-     * Clear the secrets from memory. This is only a request to CacheWord. The
-     * cache should not be considered wiped and locked until the onLockEvent is
-     * received.
+     * Request {@link CacheWordService} clear the secrets from memory. This is
+     * only a request! The cache should not be considered wiped and locked until
+     * the {@link ICacheWordSubscriber#onCacheWordLocked()} is received.
      */
     public void manuallyLock() {
         if (!isPrepared())
@@ -287,6 +290,11 @@ public class CacheWordHandler {
         return mCacheWordService.isLocked();
     }
 
+    /** Set the automatic lock timeout
+     *
+     * @param seconds time in seconds to wait before locking
+     * @throws IllegalStateException
+     */
     public void setTimeoutSeconds(int seconds) throws IllegalStateException {
         if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
