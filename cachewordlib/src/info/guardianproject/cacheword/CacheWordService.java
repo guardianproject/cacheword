@@ -210,8 +210,7 @@ public class CacheWordService extends Service implements Observer {
         Log.d(TAG, "starting timeout: " + milliseconds);
 
         if (mTimeoutIntent == null) {
-            Intent passExpiredIntent = CacheWordService
-                    .getBlankServiceIntent(getApplicationContext());
+            Intent passExpiredIntent = CacheWordService.getBlankServiceIntent(this);
             passExpiredIntent.setAction(Constants.INTENT_PASS_EXPIRED);
             mTimeoutIntent = PendingIntent.getService(getApplicationContext(), 0,
                     passExpiredIntent, 0);
@@ -284,14 +283,15 @@ public class CacheWordService extends Service implements Observer {
     }
 
     /**
-     * Create a blank intent to start the CachewordService Blank means only the
-     * Component field is set
-     * 
-     * @param applicationContext
+     * Create a blank intent to start an instance of {@link CacheWordService}.
+     * It is called "blank" because only the Component field is set.
+     *
+     * @param context
+     * @return an Intent used to send a message to {@link CacheWordService}
      */
-    static public Intent getBlankServiceIntent(Context applicationContext) {
+    static public Intent getBlankServiceIntent(Context context) {
         Intent i = new Intent();
-        i.setClassName(applicationContext, Constants.SERVICE_CLASS_NAME);
+        i.setClassName(context.getApplicationContext(), Constants.SERVICE_CLASS_NAME);
         return i;
     }
 

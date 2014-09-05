@@ -133,8 +133,7 @@ public class CacheWordHandler {
         if (isCacheWordConnected())
             return;
 
-        Intent cacheWordIntent = CacheWordService
-                .getBlankServiceIntent(mContext.getApplicationContext());
+        Intent cacheWordIntent = CacheWordService.getBlankServiceIntent(mContext);
         /*
          * We start AND bind the service starting - ensures the cacheword
          * service will outlive the activity binding - allows us to notify the
