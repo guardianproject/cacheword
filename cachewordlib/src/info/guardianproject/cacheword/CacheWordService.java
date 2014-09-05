@@ -49,7 +49,7 @@ public class CacheWordService extends Service implements Observer {
 
         Log.d(TAG, "onStart: with intent " + action);
 
-        if (action.equals(Constants.INTENT_PASS_EXPIRED)) {
+        if (action.equals(Constants.INTENT_LOCK_CACHEWORD)) {
             Log.d(TAG, "onStart: LOCK COMMAND received..locking");
             lock();
         }
@@ -208,7 +208,7 @@ public class CacheWordService extends Service implements Observer {
 
         if (mTimeoutIntent == null) {
             Intent passExpiredIntent = CacheWordService.getBlankServiceIntent(this);
-            passExpiredIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+            passExpiredIntent.setAction(Constants.INTENT_LOCK_CACHEWORD);
             mTimeoutIntent = PendingIntent.getService(getApplicationContext(), 0,
                     passExpiredIntent, 0);
         }

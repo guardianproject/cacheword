@@ -327,7 +327,7 @@ public class CacheWordHandler {
      */
     static public PendingIntent getPasswordLockPendingIntent(Context context) {
         Intent notificationIntent = CacheWordService.getBlankServiceIntent(context);
-        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+        notificationIntent.setAction(Constants.INTENT_LOCK_CACHEWORD);
         return PendingIntent.getService(context, 0, notificationIntent, 0);
     }
 

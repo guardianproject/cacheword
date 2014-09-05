@@ -7,7 +7,7 @@ public class Constants {
     public static final String SERVICE_CLASS_NAME = "info.guardianproject.cacheword.CacheWordService";
 
     // Intents
-    public static final String INTENT_PASS_EXPIRED = "info.guardianproject.cacheword.PASS_EXPIRED";
+    public static final String INTENT_LOCK_CACHEWORD = "info.guardianproject.cacheword.LOCK_CACHEWORD";
     public static final String INTENT_NEW_SECRETS = "info.guardianproject.cacheword.NEW_SECRETS";
 
     // Values
