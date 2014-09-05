@@ -5,12 +5,6 @@ import android.content.Context;
 import android.test.ServiceTestCase;
 import android.util.Log;
 
-import info.guardianproject.cacheword.CacheWordHandler;
-import info.guardianproject.cacheword.CacheWordService;
-import info.guardianproject.cacheword.ICacheWordSubscriber;
-import info.guardianproject.cacheword.SQLCipherOpenHelper;
-import info.guardianproject.cacheword.SecretsManager;
-
 import net.sqlcipher.Cursor;
 import net.sqlcipher.SQLException;
 import net.sqlcipher.database.SQLiteDatabase;
@@ -136,7 +130,7 @@ public class SQLCipherHelperTest extends ServiceTestCase<CacheWordService> {
                     e.printStackTrace();
                     fail("SQLite exception when creating db structure");
                 }
-                mHandler.manuallyLock();
+                mHandler.lock();
 
             } else {
                 Log.d(TAG, "onCacheWordOpened: reading data");

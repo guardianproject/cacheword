@@ -275,10 +275,10 @@ public class CacheWordHandler {
      * only a request! The cache should not be considered wiped and locked until
      * the {@link ICacheWordSubscriber#onCacheWordLocked()} is received.
      */
-    public void manuallyLock() {
+    public void lock() {
         if (!isPrepared())
             return;
-        mCacheWordService.manuallyLock();
+        mCacheWordService.lock();
     }
 
     /**

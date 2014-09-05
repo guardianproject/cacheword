@@ -160,7 +160,7 @@ public class CacheWordSampleActivity extends Activity implements
             builder.show();
         } else {
             // lock the secret message
-            mCacheWord.manuallyLock();
+            mCacheWord.lock();
         }
     }
 

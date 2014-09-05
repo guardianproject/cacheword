@@ -51,7 +51,7 @@ public class CacheWordService extends Service implements Observer {
 
         if (action.equals(Constants.INTENT_PASS_EXPIRED)) {
             Log.d(TAG, "onStart: LOCK COMMAND received..locking");
-            expirePassphrase();
+            lock();
         }
         return START_NOT_STICKY;
     }
@@ -126,8 +126,23 @@ public class CacheWordService extends Service implements Observer {
         return mSecrets == null;
     }
 
-    public void manuallyLock() {
-        expirePassphrase();
+    public void lock() {
+        Log.d(TAG, "lock");
+
+        synchronized (this) {
+            if (mSecrets != null) {
+                mSecrets.destroy();
+                mSecrets = null;
+            }
+        }
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
+
+        if (mIsForegrounded) {
+            stopForeground(true);
+            mIsForegrounded = false;
+        }
+        stopSelf();
     }
 
     public synchronized void attachSubscriber() {
@@ -164,25 +179,6 @@ public class CacheWordService extends Service implements Observer {
             LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
     }
 
-    private void expirePassphrase() {
-        Log.d(TAG, "expirePassphrase");
-
-        synchronized (this) {
-            if (mSecrets != null) {
-                mSecrets.destroy();
-                mSecrets = null;
-            }
-        }
-
-        LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
-
-        if (mIsForegrounded) {
-            stopForeground(true);
-            mIsForegrounded = false;
-        }
-        stopSelf();
-    }
-
     private void resetTimeout() {
         int timeoutSeconds = mSettings.getTimeoutSeconds();
         boolean timeoutEnabled = timeoutSeconds >= 0;
@@ -205,7 +201,7 @@ public class CacheWordService extends Service implements Observer {
     private void startTimeout(long milliseconds) {
         if (milliseconds <= 0) {
             Log.d(TAG, "immediate timeout");
-            expirePassphrase();
+            lock();
             return;
         }
         Log.d(TAG, "starting timeout: " + milliseconds);
