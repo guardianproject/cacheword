@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -203,7 +202,7 @@ public class CacheWordService extends Service {
         Log.d(TAG, "starting timeout: " + seconds);
 
         if (mTimeoutIntent == null) {
-            Intent passExpiredIntent = CacheWordService.getBlankServiceIntent(this);
+            Intent passExpiredIntent = CacheWordHandler.getBlankServiceIntent(this);
             passExpiredIntent.setAction(Constants.INTENT_LOCK_CACHEWORD);
             mTimeoutIntent = PendingIntent.getService(getApplicationContext(), 0,
                     passExpiredIntent, 0);
@@ -225,18 +224,5 @@ public class CacheWordService extends Service {
             Log.d("CacheWordBinder", "giving service");
             return CacheWordService.this;
         }
-    }
-
-    /**
-     * Create a blank intent to start an instance of {@link CacheWordService}.
-     * It is called "blank" because only the Component field is set.
-     *
-     * @param context
-     * @return an Intent used to send a message to {@link CacheWordService}
-     */
-    static public Intent getBlankServiceIntent(Context context) {
-        Intent i = new Intent();
-        i.setClassName(context.getApplicationContext(), Constants.SERVICE_CLASS_NAME);
-        return i;
     }
 }

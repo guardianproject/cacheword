@@ -152,7 +152,7 @@ public class CacheWordHandler {
         if (isCacheWordConnected())
             return;
 
-        Intent cacheWordIntent = CacheWordService.getBlankServiceIntent(mContext);
+        Intent cacheWordIntent = getBlankServiceIntent(mContext);
         /*
          * We start AND bind the service starting - ensures the cacheword
          * service will outlive the activity binding - allows us to notify the
@@ -342,6 +342,19 @@ public class CacheWordHandler {
     }
 
     /**
+     * Create a blank intent to start an instance of {@link CacheWordService}.
+     * It is called "blank" because only the Component field is set.
+     *
+     * @param context
+     * @return an Intent used to send a message to {@link CacheWordService}
+     */
+    static public Intent getBlankServiceIntent(Context context) {
+        Intent i = new Intent();
+        i.setClassName(context.getApplicationContext(), Constants.SERVICE_CLASS_NAME);
+        return i;
+    }
+
+    /**
      * Get a {@link PendingIntent} that will cause {@link CacheWordService} to
      * lock and wipe the passphrase from memory once it is sent.
      *
@@ -349,7 +362,7 @@ public class CacheWordHandler {
      * @return
      */
     static public PendingIntent getPasswordLockPendingIntent(Context context) {
-        Intent notificationIntent = CacheWordService.getBlankServiceIntent(context);
+        Intent notificationIntent = getBlankServiceIntent(context);
         notificationIntent.setAction(Constants.INTENT_LOCK_CACHEWORD);
         return PendingIntent.getService(context, 0, notificationIntent, 0);
     }
