@@ -201,13 +201,8 @@ public class CacheWordService extends Service {
         }
         Log.d(TAG, "starting timeout: " + seconds);
 
-        if (mTimeoutIntent == null) {
-            Intent passExpiredIntent = CacheWordHandler.getBlankServiceIntent(this);
-            passExpiredIntent.setAction(Constants.INTENT_LOCK_CACHEWORD);
-            mTimeoutIntent = PendingIntent.getService(getApplicationContext(), 0,
-                    passExpiredIntent, 0);
-        }
-
+        if (mTimeoutIntent == null)
+            mTimeoutIntent = CacheWordHandler.getPasswordLockPendingIntent(this);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME,
                 SystemClock.elapsedRealtime() + (seconds * 1000), mTimeoutIntent);
