@@ -30,8 +30,17 @@ public class CacheWordHandler {
     private Context mContext;
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
-    private CacheWordSettings mSettings;
     private Notification mNotification;
+    private int mTimeout;
+
+    /**
+     * Timeout: How long to wait before automatically locking and wiping the
+     * secrets after all your activities are no longer visible This is the
+     * default setting, and can be changed at runtime via a preference A value
+     * of 0 represents instant timeout A value < 0 represents no timeout (or
+     * infinite timeout)
+     */
+    static final int DEFAULT_TIMEOUT_SECONDS = 300;
 
     /**
      * Tracking service connection state is a bit of a mess. There are three
@@ -77,7 +86,7 @@ public class CacheWordHandler {
      * @param context
      */
     public CacheWordHandler(Context context) {
-        this(context, (ICacheWordSubscriber) context, null);
+        this(context, (ICacheWordSubscriber) context, DEFAULT_TIMEOUT_SECONDS);
     }
 
     /**
@@ -85,7 +94,7 @@ public class CacheWordHandler {
      * and {@link ICacheWordSubscriber} objects. Uses default CacheWordSettings
      */
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber) {
-        this(context, subscriber, null);
+        this(context, subscriber, DEFAULT_TIMEOUT_SECONDS);
     }
 
     /**
@@ -93,20 +102,23 @@ public class CacheWordHandler {
      * (e.g, the {@link Activity}) also implements the
      * {@link ICacheWordSubscriber} interface. The {@code Context} instance
      * passed in MUST implement {@link ICacheWordSubscriber}, or an
-     * {@link IllegalArgumentException} will be thrown at runtime
+     * {@link IllegalArgumentException} will be thrown at runtime.
+     * <p>
+     * Setting the {@code timeout} to 0 disables the automatic locking timeout,
+     * a negative value means use the default value.
      *
      * @param context must implement the {@link ICacheWordSubscriber} interface
-     * @param settings the settings for CacheWord
+     * @param timeout the time in seconds before CacheWord automatically locks
      */
-    public CacheWordHandler(Context context, CacheWordSettings settings) {
-
+    public CacheWordHandler(Context context, int timeout) {
         try {
             // shame we have to do this at runtime.
             // must ponder a way to enforce this relationship at compile time
             mSubscriber = (ICacheWordSubscriber) context;
             mContext = context;
-            mSettings = settings;
+            mTimeout = timeout;
         } catch (ClassCastException e) {
+            e.printStackTrace();
             throw new IllegalArgumentException(
                     "CacheWordHandler passed invalid Activity. Expects class that implements ICacheWordSubscriber");
         }
@@ -114,17 +126,20 @@ public class CacheWordHandler {
 
     /**
      * Initializes the {@code CacheWordHandler} with distinct {@code Context}
-     * and {@link ICacheWordSubscriber} objects
+     * and {@link ICacheWordSubscriber} objects.
+     * <p>
+     * Setting the {@code timeout} to 0 disables the automatic locking timeout,
+     * a negative value means use the default value.
      *
      * @param context your {@link Application}'s or {@link Activity}'s context
      * @param subscriber the object to notify of CacheWord events
-     * @param settings the settings for CacheWord
+     * @param timeout the time in seconds before CacheWord automatically locks
      */
     public CacheWordHandler(Context context, ICacheWordSubscriber subscriber,
-            CacheWordSettings settings) {
+            int timeout) {
         mContext = context;
         mSubscriber = subscriber;
-        mSettings = settings;
+        mTimeout = timeout;
     }
 
     /**
@@ -248,8 +263,8 @@ public class CacheWordHandler {
      * the derived encryption key stays the same, this can safely be called even
      * when the secrets are in use. Only works if you're using the
      * {@link PassphraseSecrets} implementation. (i.e., Are you using
-     * {@link #setPassphrase(char[])] or {
-     * @link #setCachedSecrets(ICachedSecrets)}?)
+     * {@link #setPassphrase(char[])} or
+     * {@link #setCachedSecrets(ICachedSecrets)})?
      *
      * @param current_secrets the current secrets you're using
      * @param new_passphrase the new passphrase to encrypt the old secrets with
@@ -290,21 +305,29 @@ public class CacheWordHandler {
         return mCacheWordService.isLocked();
     }
 
-    /** Set the automatic lock timeout
+    /**
+     * Set the automatic lock timeout for a running {@link CacheWordService}
      *
-     * @param seconds time in seconds to wait before locking
+     * @param seconds time in seconds to wait before locking, setting to 0
+     *            disables the timeout
      * @throws IllegalStateException
      */
-    public void setTimeoutSeconds(int seconds) throws IllegalStateException {
+    public void setTimeout(int seconds) throws IllegalStateException {
         if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        mCacheWordService.settings().setTimeoutSeconds(seconds);
+        mCacheWordService.setTimeout(seconds);
     }
 
-    public int getTimeoutSeconds() throws IllegalStateException {
+    /**
+     * get the automatic lock timeout from a running {@link CacheWordService}
+     *
+     * @return seconds time in seconds to wait before locking
+     * @throws IllegalStateException
+     */
+    public int getTimeout() throws IllegalStateException {
         if (!isCacheWordConnected())
             throw new IllegalStateException("CacheWord not connected");
-        return mCacheWordService.settings().getTimeoutSeconds();
+        return mCacheWordService.getTimeout();
     }
 
     /**
@@ -419,8 +442,7 @@ public class CacheWordHandler {
                         mCacheWordService = cwBinder.getService();
                         registerBroadcastReceiver();
                         mCacheWordService.attachSubscriber();
-                        if (mSettings != null)
-                            mCacheWordService.setSettings(mSettings);
+                        mCacheWordService.setTimeout(mTimeout);
                         mCacheWordService.setNotification(mNotification);
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
                         mBoundState = BindState.BIND_COMPLETED;

@@ -14,10 +14,7 @@ import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import java.util.Observable;
-import java.util.Observer;
-
-public class CacheWordService extends Service implements Observer {
+public class CacheWordService extends Service {
 
     private final static String TAG = "CacheWordService";
 
@@ -27,12 +24,11 @@ public class CacheWordService extends Service implements Observer {
 
     private Notification mNotification;
     private PendingIntent mTimeoutIntent;
+    private int mTimeout = CacheWordHandler.DEFAULT_TIMEOUT_SECONDS;
     private Intent mBroadcastIntent = new Intent(Constants.INTENT_NEW_SECRETS);
 
     private int mSubscriberCount = 0;
     private boolean mIsForegrounded = false;
-
-    private CacheWordSettings mSettings = null;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -60,8 +56,6 @@ public class CacheWordService extends Service implements Observer {
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
-        mSettings = new CacheWordSettings(this);
-        mSettings.addObserver(this);
     }
 
     @Override
@@ -114,12 +108,13 @@ public class CacheWordService extends Service implements Observer {
         handleNewSecrets(true);
     }
 
-    public CacheWordSettings settings() {
-        return mSettings;
+    public int getTimeout() {
+        return mTimeout;
     }
 
-    public void setSettings(CacheWordSettings settings) {
-        mSettings.updateWith(settings);
+    public void setTimeout(int timeout) {
+        mTimeout = timeout;
+        resetTimeout();
     }
 
     public synchronized boolean isLocked() {
@@ -180,14 +175,15 @@ public class CacheWordService extends Service implements Observer {
     }
 
     private void resetTimeout() {
-        int timeoutSeconds = mSettings.getTimeoutSeconds();
-        boolean timeoutEnabled = timeoutSeconds >= 0;
+        if (mTimeout < 0)
+            mTimeout = CacheWordHandler.DEFAULT_TIMEOUT_SECONDS;
+        boolean timeoutEnabled = (mTimeout > 0);
 
-        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", seconds=" + timeoutSeconds);
+        Log.d(TAG, "timeout enabled: " + timeoutEnabled + ", seconds=" + mTimeout);
         Log.d(TAG, "mSubscriberCount: " + mSubscriberCount);
 
         if (timeoutEnabled && mSubscriberCount == 0) {
-            startTimeout(timeoutSeconds * 1000);
+            startTimeout(mTimeout);
         } else {
             Log.d(TAG, "disabled timeout alarm");
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -196,15 +192,15 @@ public class CacheWordService extends Service implements Observer {
     }
 
     /**
-     * @param milliseconds timeout interval in milliseconds
+     * @param seconds timeout interval in seconds
      */
-    private void startTimeout(long milliseconds) {
-        if (milliseconds <= 0) {
+    private void startTimeout(long seconds) {
+        if (seconds <= 0) {
             Log.d(TAG, "immediate timeout");
             lock();
             return;
         }
-        Log.d(TAG, "starting timeout: " + milliseconds);
+        Log.d(TAG, "starting timeout: " + seconds);
 
         if (mTimeoutIntent == null) {
             Intent passExpiredIntent = CacheWordService.getBlankServiceIntent(this);
@@ -215,8 +211,7 @@ public class CacheWordService extends Service implements Observer {
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + milliseconds, mTimeoutIntent);
-
+                SystemClock.elapsedRealtime() + (seconds * 1000), mTimeoutIntent);
     }
 
     public void setNotification(Notification notification) {
@@ -243,15 +238,5 @@ public class CacheWordService extends Service implements Observer {
         Intent i = new Intent();
         i.setClassName(context.getApplicationContext(), Constants.SERVICE_CLASS_NAME);
         return i;
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        if (observable == mSettings) {
-            resetTimeout();
-            // update backgrounding & notification without alerting the
-            // subscribers
-            handleNewSecrets(false);
-        }
     }
 }
