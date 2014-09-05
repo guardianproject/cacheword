@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -26,6 +25,7 @@ public class CacheWordService extends Service implements Observer {
 
     private ICachedSecrets mSecrets = null;
 
+    private Notification mNotification;
     private PendingIntent mTimeoutIntent;
     private Intent mBroadcastIntent = new Intent(Constants.INTENT_NEW_SECRETS);
 
@@ -146,15 +146,19 @@ public class CacheWordService extends Service implements Observer {
     // ////////////////////////////////////
 
     private void handleNewSecrets(boolean notify) {
-
         if (!SecretsManager.isInitialized(this)) {
             return;
         }
-
-        if (shouldForeground())
-            goForeground();
-        else
-            goBackground();
+        if (mNotification != null) {
+            stopForeground(true);
+            startForeground(Constants.SERVICE_FOREGROUND_ID, mNotification);
+            mIsForegrounded = true;
+        } else {
+            if (mIsForegrounded) {
+                stopForeground(true);
+                mIsForegrounded = false;
+            }
+        }
         resetTimeout();
         if (notify)
             LocalBroadcastManager.getInstance(this).sendBroadcast(mBroadcastIntent);
@@ -175,9 +179,6 @@ public class CacheWordService extends Service implements Observer {
         if (mIsForegrounded) {
             stopForeground(true);
             mIsForegrounded = false;
-        } else {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            nm.cancel(Constants.SERVICE_BACKGROUND_ID);
         }
         stopSelf();
     }
@@ -222,55 +223,8 @@ public class CacheWordService extends Service implements Observer {
 
     }
 
-    private Notification buildNotification() {
-
-        NotificationCompat.Builder b = new NotificationCompat.Builder(this);
-        b.setSmallIcon(R.drawable.cacheword_notification_icon);
-        b.setContentTitle(getText(R.string.cacheword_notification_cached_title));
-        b.setContentText(getText(R.string.cacheword_notification_cached_message));
-        b.setTicker(getText(R.string.cacheword_notification_cached));
-        if (mSettings.getVibrateSetting())
-            b.setDefaults(Notification.DEFAULT_VIBRATE);
-        b.setWhen(System.currentTimeMillis());
-        b.setOngoing(true);
-
-        PendingIntent i = null;
-        if (mSettings.getNotificationIntent() != null) {
-            Log.d(TAG, "non-default NotificationItent found!");
-            i = mSettings.getNotificationIntent();
-        } else {
-            Intent notificationIntent = CacheWordService
-                    .getBlankServiceIntent(getApplicationContext());
-            Log.d(TAG, "using default NotificationItent (lock app)");
-            notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
-            i = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
-        }
-        b.setContentIntent(i);
-
-        return b.build();
-    }
-
-    private void goForeground() {
-        Log.d(TAG, "goForeground()");
-
-        stopForeground(true);
-        startForeground(Constants.SERVICE_FOREGROUND_ID, buildNotification());
-        mIsForegrounded = true;
-    }
-
-    private void goBackground() {
-        Log.d(TAG, "goBackground()");
-
-        if (mIsForegrounded) {
-            stopForeground(true);
-            mIsForegrounded = false;
-        }
-
-        if (mSettings.getNotificationEnabled()) {
-            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            nm.notify(Constants.SERVICE_BACKGROUND_ID, buildNotification());
-        }
-
+    public void setNotification(Notification notification) {
+        mNotification = notification;
     }
 
     public class CacheWordBinder extends Binder implements ICacheWordBinder {
@@ -293,11 +247,6 @@ public class CacheWordService extends Service implements Observer {
         Intent i = new Intent();
         i.setClassName(context.getApplicationContext(), Constants.SERVICE_CLASS_NAME);
         return i;
-    }
-
-    private boolean shouldForeground() {
-        return getSharedPreferences(Constants.SHARED_PREFS, 0).getBoolean(
-                Constants.SHARED_PREFS_FOREGROUND, false);
     }
 
     @Override

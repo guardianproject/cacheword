@@ -2,6 +2,7 @@
 package info.guardianproject.cacheword;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -29,6 +30,7 @@ public class CacheWordHandler {
     private CacheWordService mCacheWordService;
     private ICacheWordSubscriber mSubscriber;
     private CacheWordSettings mSettings;
+    private Notification mNotification;
 
     /**
      * Tracking service connection state is a bit of a mess. There are three
@@ -297,23 +299,28 @@ public class CacheWordHandler {
         return mCacheWordService.settings().getTimeoutSeconds();
     }
 
-    public void setVibrateSetting(boolean vibrate) throws IllegalStateException {
-        if (!isCacheWordConnected())
-            throw new IllegalStateException("CacheWord not connected");
-        mCacheWordService.settings().setVibrateSetting(vibrate);
+    /**
+     * Set the {@link Notification} used by {@link CacheWordService} when it
+     * runs as a foreground {@link Service}. If this is set to {@code null},
+     * then {@link CacheWordService} will run as a background {@link Service}.
+     *
+     * @param notification
+     */
+    public void setNotification(Notification notification) {
+        mNotification = notification;
     }
 
-    public boolean getVibrateSetting() throws IllegalStateException {
-        if (!isCacheWordConnected())
-            throw new IllegalStateException("CacheWord not connected");
-        return mCacheWordService.settings().getVibrateSetting();
-    }
-
-    public void setNotificationIntent(PendingIntent intent) {
-        if (!isCacheWordConnected())
-            throw new IllegalStateException("CacheWord not connected");
-
-        mCacheWordService.settings().setNotificationIntent(intent);
+    /**
+     * Get a {@link PendingIntent} that will cause {@link CacheWordService} to
+     * lock and wipe the passphrase from memory once it is sent.
+     *
+     * @param context
+     * @return
+     */
+    static public PendingIntent getPasswordLockPendingIntent(Context context) {
+        Intent notificationIntent = CacheWordService.getBlankServiceIntent(context);
+        notificationIntent.setAction(Constants.INTENT_PASS_EXPIRED);
+        return PendingIntent.getService(context, 0, notificationIntent, 0);
     }
 
     // / private helpers
@@ -406,6 +413,7 @@ public class CacheWordHandler {
                         mCacheWordService.attachSubscriber();
                         if (mSettings != null)
                             mCacheWordService.setSettings(mSettings);
+                        mCacheWordService.setNotification(mNotification);
                         mConnectionState = ServiceConnectionState.CONNECTION_ACTIVE;
                         mBoundState = BindState.BIND_COMPLETED;
                         checkCacheWordState();

@@ -6,8 +6,6 @@
         android:minSdkVersion="9"
         android:targetSdkVersion="20" />
 
-    <uses-permission android:name="android.permission.VIBRATE" />
-
     <application>
         <service
             android:name=".CacheWordService"

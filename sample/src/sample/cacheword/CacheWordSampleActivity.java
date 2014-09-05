@@ -3,8 +3,11 @@ package sample.cacheword;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -90,6 +93,7 @@ public class CacheWordSampleActivity extends Activity implements
         super.onStart();
         // Notify the CacheWordHandler
         mCacheWord.connectToService();
+        mCacheWord.setNotification(buildNotification(this));
     }
 
     @Override
@@ -100,7 +104,6 @@ public class CacheWordSampleActivity extends Activity implements
     }
 
     private void saveMessage(String contents) {
-
         // ensure we're unlocked
         if (mCacheWord.isLocked())
             return;
@@ -111,7 +114,6 @@ public class CacheWordSampleActivity extends Activity implements
     }
 
     private void buttonClicked() {
-
         // this button locks and unlocks the secret message
         if (mCacheWord.isLocked()) {
             // lets unlock!
@@ -197,8 +199,7 @@ public class CacheWordSampleActivity extends Activity implements
 
     @Override
     public void onCacheWordUninitialized() {
-        // if we're uninitialized, we want to initialize CacheWord with a new
-        // passphrase
+        // if uninitialized, initialize CacheWord with a new passphrase
         mStatusLabel.setText("Uninitialized");
         mSecretEdit.setEnabled(false);
 
@@ -227,7 +228,18 @@ public class CacheWordSampleActivity extends Activity implements
                 });
 
         builder.show();
-
     }
 
+    private Notification buildNotification(Context c) {
+        NotificationCompat.Builder b = new NotificationCompat.Builder(c);
+        b.setSmallIcon(R.drawable.ic_menu_key);
+        b.setContentTitle(c.getText(R.string.cacheword_notification_cached_title));
+        b.setContentText(c.getText(R.string.cacheword_notification_cached_message));
+        b.setTicker(c.getText(R.string.cacheword_notification_cached));
+        b.setDefaults(Notification.DEFAULT_VIBRATE);
+        b.setWhen(System.currentTimeMillis());
+        b.setOngoing(true);
+        b.setContentIntent(CacheWordHandler.getPasswordLockPendingIntent(c));
+        return b.build();
+    }
 }
