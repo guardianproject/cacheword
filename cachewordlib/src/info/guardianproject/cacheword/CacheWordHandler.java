@@ -1,6 +1,7 @@
 
 package info.guardianproject.cacheword;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -66,7 +67,8 @@ public class CacheWordHandler {
     }
 
     /**
-     * Initializes the CacheWordHandler with the default {@link CacheWordSettings}
+     * Initializes the CacheWordHandler with the default
+     * {@link CacheWordSettings}
      *
      * @see #CacheWordHandler(Context context, CacheWordSettings settings)
      * @param context
@@ -124,6 +126,8 @@ public class CacheWordHandler {
     /**
      * Connect to the CacheWord service, starting it if necessary. Once
      * connected, the attached Context will begin receiving CacheWord events.
+     * This should be called in your {@link Activity#onResume} or somewhere else
+     * appropriate.
      */
     public synchronized void connectToService() {
         if (isCacheWordConnected())
@@ -169,7 +173,7 @@ public class CacheWordHandler {
      * Disconnect from the CacheWord service. No further CacheWord events will
      * be received.
      */
-    public void disconnect() {
+    public void disconnectFromService() {
         synchronized (this) {
             mConnectionState = ServiceConnectionState.CONNECTION_CANCELED;
 
