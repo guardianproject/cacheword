@@ -18,7 +18,6 @@ import android.widget.TextView;
 import info.guardianproject.cacheword.CacheWordActivityHandler;
 import info.guardianproject.cacheword.ICacheWordSubscriber;
 import info.guardianproject.cacheword.PassphraseSecrets;
-import sample.cacheword.R.id;
 
 import java.security.GeneralSecurityException;
 
@@ -54,7 +53,7 @@ public class CacheWordSampleActivity extends Activity implements
         setContentView(R.layout.activity_cache_word_sample);
 
         mStatusLabel = (TextView) findViewById(R.id.statusLabel);
-        mLockButton = (Button) findViewById(id.lockButton);
+        mLockButton = (Button) findViewById(R.id.lockButton);
         mSecretEdit = (EditText) findViewById(R.id.secretEdit);
         mSecretEdit.setEnabled(false);
 
