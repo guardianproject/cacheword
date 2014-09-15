@@ -63,7 +63,7 @@ public class PassphraseSecretsImpl {
         SecretKeySpec x_passphraseKey = null;
 
         try {
-            ss.parse();
+            //ss.parse(); this is called in the SerializedSecretsV1 constructor, and is left over code from v0
 
             byte[] salt = ss.salt;
             byte[] iv = ss.iv;
