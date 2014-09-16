@@ -163,7 +163,7 @@ public class PassphraseSecrets implements ICachedSecrets {
         int pbkdf2_iter_count = calibrateKDF(ctx);
         SerializedSecretsV1 ss = crypto.encryptWithPassphrase(ctx, x_passphrase, x_plaintext,
                 pbkdf2_iter_count);
-        byte[] preparedSecret = ss.concatenate();
+        byte[] preparedSecret = ss.getBytes();
         boolean saved = SecretsManager.saveBytes(ctx, Constants.SHARED_PREFS_SECRETS,
                 preparedSecret);
 

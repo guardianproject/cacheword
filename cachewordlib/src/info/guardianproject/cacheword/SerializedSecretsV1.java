@@ -27,10 +27,6 @@ public class SerializedSecretsV1 {
 
     public SerializedSecretsV1(byte[] serialized) {
         this.serialized = serialized;
-        parse();
-    }
-
-    public void parse() {
         salt = new byte[Constants.PBKDF2_SALT_LEN_BYTES];
         iv = new byte[Constants.GCM_IV_LEN_BYTES];
         ciphertext = new byte[serialized.length - constants_length()];
@@ -43,7 +39,7 @@ public class SerializedSecretsV1 {
         bb.get(ciphertext);
     }
 
-    public byte[] concatenate() {
+    public byte[] getBytes() {
         serialized = new byte[constants_length() + ciphertext.length];
         ByteBuffer bb = ByteBuffer.wrap(serialized);
         bb.putInt(version);

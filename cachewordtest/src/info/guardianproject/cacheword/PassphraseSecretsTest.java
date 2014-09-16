@@ -138,7 +138,7 @@ public class PassphraseSecretsTest extends AndroidTestCase {
         SerializedSecretsV1 ss1 = loader.loadSecrets(decoded);
         assertEquals(100, ss1.pbkdf_iter_count);
 
-        SecretsManager.saveBytes(getContext(), Constants.SHARED_PREFS_SECRETS, ss1.concatenate());
+        SecretsManager.saveBytes(getContext(), Constants.SHARED_PREFS_SECRETS, ss1.getBytes());
         PassphraseSecrets fetched_secrets = null;
 
         try {
