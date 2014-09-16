@@ -23,7 +23,7 @@
   </target>
 
   <target name="-post-build" depends="-getgitdetails">
-    <property name="jar.dir" value="libs" />
+    <property name="jar.dir" value="." />
     <property name="jar.name" value="${jar.dir}/${ant.project.name}-${git.describe}-debug.jar" />
     <delete file="${jar.name}"/>
     <mkdir dir="${jar.dir}" />
@@ -46,17 +46,20 @@
         <property name="zip.name" value="${ant.project.name}-${git.describe}-debug.zip" />
       </then>
       <else>
-        <property name="zip.name" value="${ant.project.name}-${git.describe}.zip" />
+        <property name="release.jar.name" value="${jar.dir}/${ant.project.name}-${git.describe}.jar" />
         <signjar jar="${jar.name}"
                  keystore="${key.store}"
                  alias="${key.alias}"
                  storepass="${key.store.password}"
                  keypass="${key.store.password}"
-                 signedjar="${jar.dir}/${ant.project.name}-${git.describe}.jar"></signjar>
+                 signedjar="${release.jar.name}"/>
         <delete file="${jar.name}"/>
+        <exec executable="gpg" failonerror="true">
+          <arg value="--detach-sign" />
+          <arg value="${release.jar.name}" />
+        </exec>
       </else>
     </if>
-    <delete file="${zip.name}"/>
   </target>
 
 </project>
