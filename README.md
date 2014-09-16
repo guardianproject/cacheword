@@ -17,7 +17,7 @@ Broadly speaking this library assists developers with two related problems:
 CacheWord manages key derivation, verification, persistence, passphrase
 resetting, and caching secret key material in memory.
 
-*Features:*
+**Features:**
 
 * Strong key derivation (PBKDF2)
 * Secure secret storage (AES-256 GCM)
@@ -26,20 +26,36 @@ resetting, and caching secret key material in memory.
 * Manual clearing: the user can forcibly lock the application
 * Uses Android's Keystore on 4.x if available - *Not Yet Implemented*
 
-CacheWord requires at least SDK version 2.2 (API level 8)
+CacheWord requires at least SDK version 2.3.1 (API level 9)
+
+**Issues & Support**
+
+* Bug? Please report any issues at [our project issue tracker][issues], no
+account required!
+* Questions? Find us on [IRC or our mailing list](https://guardianproject.info/contact)
+
 
 # Table of Contents
 
-* [Setup](#setup)
-  * [Dependencies](#dependencies)
-* [Integration](#integration)
-  1. [Implementing ICacheWordSubscriber ](#1-implementing-icachewordsubscriber)
-  2. [Instantiate CacheWordHandler and propagate lifecycle Changes](#2-instantiate-cachewordhandler-and-propagate-lifecycle-changes)
-* [Common Usage Questions](#common-usage-questions)
-  * [How do I configure CacheWord?](#how-do-i-configure-cacheword)
-  * [How do I use CW with SQLCipher & IOCipher?](#how-do-i-use-cw-with-sqlcipher--iocipher)
-  * [What are these cached secrets?](#what-are-these-cached-secrets)
-  * [How does CacheWord work with background services?](#how-does-cacheword-work-with-background-services)
+- [CacheWord](#user-content-cacheword)
+- [Table of Contents](#user-content-table-of-contents)
+- [Setup](#user-content-setup)
+	- [Dependencies](#user-content-dependencies)
+- [Integration](#user-content-integration)
+	- [Implementing ICacheWordSubscriber](#user-content-implementing-icachewordsubscriber)
+	- [Instantiate CacheWordHandler and propagate lifecycle Changes](#user-content-instantiate-cachewordhandler-and-propagate-lifecycle-changes)
+	- [Activity's and CacheWordActivityHandler](#user-content-activitys-and-cachewordactivityhandler)
+- [Common Usage Questions](#user-content-common-usage-questions)
+	- [How do I configure CacheWord?](#user-content-how-do-i-configure-cacheword)
+	- [How do I use CW with SQLCipher & IOCipher?](#user-content-how-do-i-use-cw-with-sqlcipher--iocipher)
+	- [What Are These Cached Secrets?](#user-content-what-are-these-cached-secrets)
+	- [How does CacheWord work with background services?](#user-content-how-does-cacheword-work-with-background-services)
+- [Security Design Notes](#user-content-security-design-notes)
+	- [Threat Model](#user-content-threat-model)
+	- [Key Derivation and Encryption Key Generation](#user-content-key-derivation-and-encryption-key-generation)
+	- [Managing Key Material Securely in Memory](#user-content-managing-key-material-securely-in-memory)
+	- [Official Authorities On The Use of String](#user-content-official-authorities-on-the-use-of-string)
+
 
 # Setup
 
@@ -88,6 +104,7 @@ to use this.
 Download the [SQLCipher for Android v3.0.2 release][sqlcipher] and copy the `libs/`
 and `assets/` dir into your Android project dir.
 
+
 # Integration
 
 A CacheWordSubscriber is any component in your application interested in the
@@ -109,7 +126,7 @@ For each of these interested components you *must* implement two things
 **TIP**: Activities should implement `CacheWordActivityHandler` and propagate
 the lifecycle methods `onPause` and `onResume` instead of calling [dis]connect().
 
-### 1. Implementing `ICacheWordSubscriber`
+## Implementing `ICacheWordSubscriber`
 
 The `ICacheWordSubscriber` interface consists of three event methods.
 
@@ -185,7 +202,7 @@ public class MyActivity extends Activity implements ICacheWordSubscriber
 
 ```
 
-### 2. Instantiate CacheWordHandler and propagate lifecycle Changes
+## Instantiate CacheWordHandler and propagate lifecycle Changes
 
 `CacheWordHandler` is the class instantiated by any object interested in
 receiving CacheWord events. It does the heavy lifting of starting, connecting,
@@ -223,7 +240,7 @@ class YourClass implements ICacheWordSubscriber
 ```
 
 
-### Activity's and CacheWordActivityHandler
+## Activity's and CacheWordActivityHandler
 
 Most of the time it is `Activity` classes that need to instantiate
 `CacheWordHandler`, so for this use case there is a convenient class called
@@ -261,7 +278,7 @@ class YourActivity extends Activity implements ICacheWordSubscriber
 
 # Common Usage Questions
 
-### How do I configure CacheWord?
+## How do I configure CacheWord?
 
 Configuration is entirely optional as sane defaults are provided for every
 option.
@@ -284,7 +301,7 @@ Configurable options are:
 * Vibration on successful unlock
 * PBKDF2 Calibration settings and minimum iteration count
 
-### How do I use CW with SQLCipher & IOCipher?
+## How do I use CW with SQLCipher & IOCipher?
 
 If you use SQLCipher for encrypted database storage you should use CacheWord's
 `SQLCipherOpenHelper`. See the [NoteCipher application][notecipher] for an
@@ -294,7 +311,7 @@ Likewise if you use IOCipher for encrypted file storage you should use CacheWord
 
 TODO: make example of IOCipherHelper
 
-### What Are These Cached Secrets?
+## What Are These Cached Secrets?
 
 The sensitive data that is cached by CacheWord can be specified by the user as
 a class implementing `ICachedSecrets`.
@@ -306,7 +323,7 @@ used by other libraries like [SQLCipher][sqlcipher] or [IOCipher][iocipher]
 In this case the user's password is used to encrypt (after being hashed of
 course) the generated encryption key, and is never written to disk.
 
-### How does CacheWord work with background services?
+## How does CacheWord work with background services?
 
 Many apps will perform operations in the background that require access to
 sensitive data, even though the user may not be actively using the app. These
@@ -349,26 +366,131 @@ words, the background service won't prevent the lock timeout from happening if
 it is still running. Your service should properly handle Lock events, even if
 it is in the middle of a running operation.
 
-# Issues & Support
 
-Bug? Please report any issues at [our project issue tracker][issues], no
-account required!
-
-Question? Find us on IRC or our mailing list.
-
-* IRC: #guardianproject @ freenode
-* Mailing List: [guardian-dev](https://lists.mayfirst.org/mailman/listinfo/guardian-dev)
-
-# Library Development
-
-See [HACKING.md](HACKING.md)
 
 # Security Design Notes
 
-See [SECURITY.md](SECURITY.md)
+The goal of CacheWord is to provide easy and secure "secrets" protection for
+Android developers. By "secrets" we mean sensitive key material such as
+passwords and encryption keys. We specifically exclude sensitive application
+data (such as the data encrypted by said keys) from secrets we aim to protect.
+
+## Threat Model
+
+CacheWord assumes three distinct adversaries.
+
+1. **The Developer**
+
+  If the developer has malicious intentions, everything we do is bust. Instead,
+  we aim to mitigate weaknesses posed by a careless or ignorant developer.
+  
+  Tactics:
+  * Hide all crypto decisions
+  * Use secure defaults
+  * Provide support classes for commonly used libraries that consume secret key material (e.g., SQLCipher)
+
+2. **The User**
+
+  Once again the if user is intentionally trying to disclose secret key material,
+  it is unlikely we can stop her. We do not think this is a common case however.
+  Most users will unintentionally harm their security due to usability issues.
+  
+  For example, typing a password with *sufficient* entropy on a smartphone's soft
+  keyboard is a severe pain in the ass for all but the most proficient of tween
+  txtrs. Even this speedy group will grow weary when their phone prompts them for
+  the password every time they pull it out of their pocket. Unsurprisingly, users
+  choose short, low entropy passwords.
+  
+  Users often reuse passwords, so the protection of their password should be
+  considered more important than an application specific encryption key.
+  
+  Tactics:
+  * Sane cache timeouts
+  * Password hashing using a strong KDF (PBKDF2, and hopefully scrypt soon)
+  * Adaptive KDF iterations
+
+3. **The Bad Guys**
+
+  The Bad Guys consist of a number of potential adversaries, such as forensic analysts,
+  cops or border agents with [plug-n-pwn data suckers][cellibrite], and malware.
+  
+  Their common capability in our case is access to our application's binary,
+  memory and disk. They probably have root access too. Strictly speaking, given
+  an attacker with sufficient patient and skill, our secrets will become theirs.
+  
+  That said, we strive to make key recovery from memory as difficult as possible.
+  
+  When it comes to non-memory based attacks, such as brute force attacks on our
+  persisted data, we employ strong authenticated encryption and reasonable KDF
+  parameters.
+  
+  Tactics:
+  * Aggressive zeroizing
+  * Using native memory (non-VM) when possible to void the GC (?)
+  * Never store the password in any form on disk (even a hash)
+
+
+## Key Derivation and Encryption Key Generation
+
+The sensitive data that is cached by CacheWord can be specified by the developer as
+a class implementing ICachedSecrets.
+
+The default implementation of this class (PassphraseSecrets) attempts to
+provide for most use cases. It generates a 256 bit encryption key that can be
+used by other libraries like SQLCipher or IOCipher.
+
+To initialize the secret we do the following:
+
+1. Run the password through PBKDF2 with a random 16 byte salt
+2. Generate a random 256 bit AES key with a random 96 bit IV
+3. Use the derived key to encrypt the generated key in GCM mode
+4. Write the ciphertext, iv, salt, and a version tag to disk ([SharedPreferences][sharedprefs])
+
+Password verification and decryption of the AES key follows the same procedure:
+
+1. Read the ciphertext, iv, salt, and version tag from disk
+2. Run the password through PBKDF2 with the salt
+3. Attempt to decrypt the ciphertext with the derived key and read iv
+
+If the GCM operation succeeds, the password is verified and the encryption key
+can be read. If the operation fails, either the password is incorrect or the
+ciphertext has been modified.
+
+TODO number of PBKDF iterations
+
+## Managing Key Material Securely in Memory
+
+TODO: write some bits about secrets in memory
+
+## Official Authorities On The Use of `String`
+
+The [Java Cryptography Architecture guide][java-crypto-arch] states,
+
+> It would seem logical to collect and store the password in an object of type
+> java.lang.String. However, here's the caveat: Objects of type String are
+> immutable, i.e., there are no methods defined that allow you to change
+> (overwrite) or zero out the contents of a String after usage. This feature
+> makes String objects unsuitable for storing security sensitive information such
+> as user passwords. You should always collect and store security sensitive
+> information in a char array instead.
+
+Yet, the [Secure Coding Guidelines for the Java Programming Language][java-secure-coding] counters,
+
+> [...]Some transient data may be kept in mutable data structures, such as char
+> arrays, and cleared immediately after use. Clearing data structures **has reduced
+> effectiveness** on typical Java runtime systems *as objects are moved in memory
+> transparently to the programmer.*
+
+**Conclusion:** In Java, even char[] arrays aren't a good storage primitive.
+
+
 
 [notecipher]: https://github.com/guardianproject/notecipher/
 [sqlcipher]: https://www.zetetic.net/sqlcipher/open-source
 [iocipher]: https://guardianproject.info/code/IOCipher
 [issues]: https://dev.guardianproject.info/projects/cacheword/issues/new
 [libguide]: http://developer.android.com/guide/developing/projects/projects-cmdline.html#ReferencingLibraryProject
+[sharedprefs]: https://developer.android.com/guide/topics/data/data-storage.html#pref
+[java-crypto-arch]: http://docs.oracle.com/javase/6/docs/technotes/guides/security/crypto/CryptoSpec.html#PBEEx
+[java-secure-coding]: http://www.oracle.com/technetwork/java/seccodeguide-139067.html#2
+[cellibrite]: http://www.cellebrite.com
