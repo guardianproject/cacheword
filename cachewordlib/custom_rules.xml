@@ -25,6 +25,7 @@
   <target name="-post-build" depends="-getgitdetails">
     <property name="jar.dir" value="." />
     <property name="jar.name" value="${jar.dir}/${ant.project.name}-${git.describe}-debug.jar" />
+    <property file="${sdk.dir}/tools/source.properties" />
     <delete file="${jar.name}"/>
     <mkdir dir="${jar.dir}" />
     <jar destfile="${jar.name}"
@@ -36,6 +37,8 @@
         <attribute name="Implementation-URL" value="https://dev.guardianproject.info/projects/cacheword"/>
         <attribute name="Implementation-Version" value="${git.describe}"/>
         <attribute name="Git-Revision" value="${git.revision}"/>
+        <attribute name="Android-SDK-Release" value="${Pkg.Revision}"/>
+        <attribute name="Android-SDK-Host-OS" value="${Archive.HostOs}"/>
       </manifest>
     </jar>
     <condition property="build.is.debug" value="true" else="false">
