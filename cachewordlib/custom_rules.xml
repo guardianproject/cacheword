@@ -41,27 +41,19 @@
         <attribute name="Android-SDK-Host-OS" value="${Archive.HostOs}"/>
       </manifest>
     </jar>
-    <condition property="build.is.debug" value="true" else="false">
+    <condition property="build.is.release" value="false" else="true">
       <equals arg1="${build.target}" arg2="debug" />
     </condition>
-    <if condition="${build.is.debug}">
+    <if condition="${build.is.release}">
       <then>
-        <property name="zip.name" value="${ant.project.name}-${git.describe}-debug.zip" />
-      </then>
-      <else>
         <property name="release.jar.name" value="${jar.dir}/${ant.project.name}-${git.describe}.jar" />
-        <signjar jar="${jar.name}"
-                 keystore="${key.store}"
-                 alias="${key.alias}"
-                 storepass="${key.store.password}"
-                 keypass="${key.store.password}"
-                 signedjar="${release.jar.name}"/>
-        <delete file="${jar.name}"/>
+        <delete file="${release.jar.name}.sig"/>
+        <move file="${jar.name}" tofile="${release.jar.name}"/>
         <exec executable="gpg" failonerror="true">
           <arg value="--detach-sign" />
           <arg value="${release.jar.name}" />
         </exec>
-      </else>
+      </then>
     </if>
   </target>
 
