@@ -49,7 +49,7 @@
         <property name="release.jar.name" value="${jar.dir}/${ant.project.name}-${git.describe}.jar" />
         <delete file="${release.jar.name}.sig"/>
         <move file="${jar.name}" tofile="${release.jar.name}"/>
-        <exec executable="gpg" failonerror="true">
+        <exec executable="gpg" failonerror="false">
           <arg value="--detach-sign" />
           <arg value="${release.jar.name}" />
         </exec>
