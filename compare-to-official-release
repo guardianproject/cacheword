@@ -31,6 +31,7 @@ sha256sum "$sourcedir1/$jar1" | cut -d ' ' -f 1 > sha256sum
 # strip the full path to the zip for the comparison
 unzip -l "$sourcedir1/$jar1" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir1/unzip-l.txt
 unzip -lv "$sourcedir1/$jar1" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir1/unzip-lv.txt
+zipinfo -lv "$sourcedir1/$jar1" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir1/zipinfo-lv.txt
 hexdump -C "$sourcedir1/$jar1" > $dir1/xxd
 
 mkdir -p $dir2
@@ -42,6 +43,7 @@ sha256sum "$sourcedir2/$jar2" | cut -d ' ' -f 1 > sha256sum
 # strip the full path to the zip for the comparison
 unzip -l "$sourcedir2/$jar2" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir2/unzip-l.txt
 unzip -lv "$sourcedir2/$jar2" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir2/unzip-lv.txt
+zipinfo -lv "$sourcedir2/$jar2" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir2/zipinfo-lv.txt
 hexdump -C "$sourcedir2/$jar2" > $dir2/xxd
 
 if which meld > /dev/null; then
