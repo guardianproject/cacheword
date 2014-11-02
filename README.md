@@ -44,7 +44,6 @@ account required!
 - [Integration](#user-content-integration)
 	- [Implementing ICacheWordSubscriber](#user-content-implementing-icachewordsubscriber)
 	- [Instantiate CacheWordHandler and propagate lifecycle Changes](#user-content-instantiate-cachewordhandler-and-propagate-lifecycle-changes)
-	- [Activity's and CacheWordActivityHandler](#user-content-activitys-and-cachewordactivityhandler)
 - [Common Usage Questions](#user-content-common-usage-questions)
 	- [How do I configure CacheWord?](#user-content-how-do-i-configure-cacheword)
 	- [How do I use CW with SQLCipher & IOCipher?](#user-content-how-do-i-use-cw-with-sqlcipher--iocipher)
@@ -122,9 +121,6 @@ For each of these interested components you *must* implement two things
 
 1. Implement the `ICacheWordSubscriber` interface
 2. Instantiate a `CacheWordHandler` to assist the component
-
-**TIP**: Activities should implement `CacheWordActivityHandler` and propagate
-the lifecycle methods `onPause` and `onResume` instead of calling [dis]connect().
 
 ## Implementing `ICacheWordSubscriber`
 
@@ -239,42 +235,6 @@ class YourClass implements ICacheWordSubscriber
 }
 ```
 
-
-## Activity's and CacheWordActivityHandler
-
-Most of the time it is `Activity` classes that need to instantiate
-`CacheWordHandler`, so for this use case there is a convenient class called
-`CacheWordActivityHandler`. Instead of calling `connectToService` and
-`disconnect()`, you simply need to propagate the Android lifecycle changes
-`onPause()` and `onResume()`.
-
-```java
-class YourActivity extends Activity implements ICacheWordSubscriber
-{
-        ...
-        private CacheWordActivityHandler mCacheWord;
-        ...
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            ...
-            mCacheWord = new CacheWordActivityHandler(this);
-            ...
-        }
-
-        @Override
-        protected void onResume() {
-            super.onStart();
-            mCacheWord.onResume();
-        }
-
-        @Override
-        protected void onPause() {
-            super.onPause();
-            mCacheWord.onPause();
-        }
-        ...
-}
-```
 
 # Common Usage Questions
 
