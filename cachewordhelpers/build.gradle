@@ -24,3 +24,5 @@ dependencies {
     compile project(':cachewordlib')
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
+
+apply from: "${project.rootDir}/gradle/maven-push.gradle"
