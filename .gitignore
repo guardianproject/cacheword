@@ -22,3 +22,9 @@ proguard-project.txt
 
 # Local configuration file (sdk path, etc)
 local.properties
+
+# gradle products
+.gradle/
+gradlew
+gradlew.bat
+gradle/
