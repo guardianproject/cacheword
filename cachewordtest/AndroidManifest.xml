@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="9"
-        android:targetSdkVersion="20" />
+        android:targetSdkVersion="22" />
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
