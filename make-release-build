@@ -25,8 +25,8 @@ TIMESTAMP=`printf '@%(%Y-%m-%d %H:%M:%S)T x0.05' \
 git reset --hard
 git clean -fdx
 
+./setup-ant
 cd cachewordlib
-android update lib-project --path .
 
 if [ -e ~/.android/ant.properties ]; then
     cp ~/.android/ant.properties .
