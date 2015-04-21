@@ -12,11 +12,12 @@ if [ -z $ANDROID_HOME ]; then
     fi
 fi
 
-$ANDROID_HOME/tools/android update lib-project --path cachewordlib
-$ANDROID_HOME/tools/android update lib-project --path cachewordhelpers
+# fetch target from project.properties
+eval `grep '^target=' cachewordlib/project.properties`
+
+$ANDROID_HOME/tools/android update lib-project --path cachewordlib --target $target
+$ANDROID_HOME/tools/android update lib-project --path cachewordhelpers --target $target
 $ANDROID_HOME/tools/android update test-project --path cachewordtest --main ../cachewordlib
 
 
-# fetch target from project.properties
-eval `grep '^target=' sample/project.properties`
 $ANDROID_HOME/tools/android update project --path sample --subprojects --target $target
