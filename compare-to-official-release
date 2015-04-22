@@ -51,6 +51,7 @@ for DIFF in meld opendiff xxdiff; do
     if which $DIFF > /dev/null; then
         $DIFF $dir1 $dir2
         success=true
+        break
     fi
 done
 
