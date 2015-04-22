@@ -46,12 +46,17 @@ unzip -lv "$sourcedir2/$jar2" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir2/unzip
 zipinfo -lv "$sourcedir2/$jar2" | sed 's,^\(Archive:\s\s*\)/.*/,\1,' > $dir2/zipinfo-lv.txt
 hexdump -C "$sourcedir2/$jar2" > $dir2/xxd
 
-if which meld > /dev/null; then
-    meld $dir1 $dir2
-elif which opendiff > /dev/null; then
-    opendiff $dir1 $dir2
-else
-    echo "ERROR: meld or opendiff required for the comparison!"
+success=false
+for DIFF in meld opendiff xxdiff; do
+    if which $DIFF > /dev/null; then
+        $DIFF $dir1 $dir2
+        success=true
+    fi
+done
+
+if [ "$success" = false ]; then
+    echo "ERROR: a merge tool is required for the comparison!"
+    echo "Supported merge tools are: meld, opendiff and xxdiff."
 fi
 
 rm -rf $tmpdir/
