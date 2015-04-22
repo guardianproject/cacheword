@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'witness'
 
 android {
     compileSdkVersion 22
@@ -27,6 +28,12 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:22.0.0'
+}
+
+dependencyVerification {
+    verify = [
+            'com.android.support:support-v4:355a11466727e8ba00e239416aec55ac3cd3fb4ffc9d20c4a33373085c050bd1',
+    ]
 }
 
 apply from: "${project.rootDir}/gradle/maven-push.gradle"
