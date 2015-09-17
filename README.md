@@ -62,7 +62,7 @@ account required!
 
 CacheWord now is distributed as a pure JAR file.  You can add it using gradle:
 
-    compile 'info.guardianproject.cacheword:cacheword:0.1'
+    compile 'info.guardianproject.cacheword:cachewordlib:0.1'
 
 
 **(Eclipse) Import into your workspace**
