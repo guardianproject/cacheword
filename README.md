@@ -213,7 +213,7 @@ and communicating with the `CacheWordService`. Each object that wants to be awar
 of CacheWord events should instantiate its own `CacheWordHandler`.
 
 It is your object's responsibility to call
-`CacheWordHandler.connectToService()` and `CacheWordHandler.disconnect()` when
+`CacheWordHandler.connectToService()` and `CacheWordHandler.disconnectFromService()` when
 your object wants to register and unregister from event notifications.
 
 Disconnecting is important, because CacheWord maintains a list of connected
