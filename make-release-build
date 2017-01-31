@@ -16,9 +16,6 @@ projectroot=`pwd`
 
 # standardize timezone to reduce build differences
 export TZ=UTC
-# run the clock at 5% speed, ant requires a moving clock
-TIMESTAMP=`printf '@%(%Y-%m-%d %H:%M:%S)T x0.05' \
-    $(git log -n1 --format=format:%at)`
 
 git reset --hard
 git clean -fdx
@@ -28,8 +25,6 @@ cd cachewordlib
 
 if [ -e ~/.android/ant.properties ]; then
     cp ~/.android/ant.properties .
-    faketime -f "$TIMESTAMP" ant release
-else
-    echo "skipping release ant.properties, making debug build"
-    faketime -f "$TIMESTAMP" ant debug
 fi
+
+ant release
