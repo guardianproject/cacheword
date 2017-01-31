@@ -2,35 +2,14 @@ buildscript {
     repositories {
         jcenter()
     }
-
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.1.3'
+        classpath files('gradle/libs/gradle-witness.jar')
     }
 }
 
-apply plugin: 'com.android.library'
-
-dependencies {
-    compile 'com.android.support:support-v4:22.0.0'
-}
-
-android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
-
-    defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 22
-    }
-
-    sourceSets.main {
-        manifest.srcFile 'cachewordlib/AndroidManifest.xml'
-        java.srcDirs = ['cachewordlib/src']
-        resources.srcDirs = ['cachewordlib/src']
-        aidl.srcDirs = ['cachewordlib/src']
-        renderscript.srcDirs = ['cachewordlib/src']
-        res.srcDirs = ['cachewordlib/res']
-        assets.srcDirs = ['cachewordlib/assets']
+allprojects {
+    repositories {
+        jcenter()
     }
 }
-
