@@ -7,13 +7,11 @@ if [ -z $WORKSPACE ]; then
     export WORKSPACE=`pwd`
 fi
 
-if [ -z $ANDROID_HOME ]; then
-    if [ -e ~/.android/bashrc ]; then
-        . ~/.android/bashrc
-    else
-        echo "ANDROID_HOME must be set!"
-        exit
-    fi
+if [ -e ~/.android/bashrc-ant-build ]; then
+    . ~/.android/bashrc-ant-build
+elif [ -z $ANDROID_HOME ]; then
+    echo "ANDROID_HOME must be set!"
+    exit
 fi
 
 export TZ=UTC
