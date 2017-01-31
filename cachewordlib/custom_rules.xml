@@ -86,6 +86,7 @@
       <else>
         <delete file="${jar.name}.sig"/>
         <exec executable="gpg" failonerror="false">
+          <arg value="--armor" />
           <arg value="--detach-sign" />
           <arg value="${jar.name}" />
         </exec>
