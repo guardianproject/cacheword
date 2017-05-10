@@ -187,7 +187,9 @@ public class CacheWordService extends Service {
             Log.d(TAG, "disabled timeout alarm");
             if (mTimeoutIntent != null) {
                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                alarmManager.cancel(mTimeoutIntent);
+                if(mTimeoutIntent != null){
+                    alarmManager.cancel(mTimeoutIntent);
+                }
             }
         }
     }
